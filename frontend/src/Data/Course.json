@@ -1,0 +1,182 @@
+[
+  {
+    "id": 1,
+    "name": "Data Structures",
+    "code": "CS101",
+    "department": "Computer Science",
+    "credits": 4,
+    "semester": 2,
+    "teacherId": 1
+  },
+  {
+    "id": 2,
+    "name": "Algorithms",
+    "code": "CS201",
+    "department": "Computer Science",
+    "credits": 4,
+    "semester": 3,
+    "teacherId": 1
+  },
+  {
+    "id": 3,
+    "name": "Calculus",
+    "code": "MA101",
+    "department": "Mathematics",
+    "credits": 3,
+    "semester": 1,
+    "teacherId": 2
+  },
+  {
+    "id": 4,
+    "name": "Linear Algebra",
+    "code": "MA201",
+    "department": "Mathematics",
+    "credits": 3,
+    "semester": 2,
+    "teacherId": 2
+  },
+  {
+    "id": 5,
+    "name": "Quantum Mechanics",
+    "code": "PH301",
+    "department": "Physics",
+    "credits": 4,
+    "semester": 5,
+    "teacherId": 3
+  },
+  {
+    "id": 6,
+    "name": "Electrodynamics",
+    "code": "PH401",
+    "department": "Physics",
+    "credits": 4,
+    "semester": 6,
+    "teacherId": 3
+  },
+  {
+    "id": 7,
+    "name": "Organic Chemistry",
+    "code": "CH201",
+    "department": "Chemistry",
+    "credits": 3,
+    "semester": 3,
+    "teacherId": 4
+  },
+  {
+    "id": 8,
+    "name": "Physical Chemistry",
+    "code": "CH301",
+    "department": "Chemistry",
+    "credits": 3,
+    "semester": 4,
+    "teacherId": 4
+  },
+  {
+    "id": 9,
+    "name": "English Literature",
+    "code": "EN101",
+    "department": "English",
+    "credits": 2,
+    "semester": 1,
+    "teacherId": 5
+  },
+  {
+    "id": 10,
+    "name": "Creative Writing",
+    "code": "EN202",
+    "department": "English",
+    "credits": 2,
+    "semester": 2,
+    "teacherId": 5
+  },
+  {
+    "id": 11,
+    "name": "Microeconomics",
+    "code": "EC101",
+    "department": "Economics",
+    "credits": 3,
+    "semester": 1,
+    "teacherId": 6
+  },
+  {
+    "id": 12,
+    "name": "Macroeconomics",
+    "code": "EC201",
+    "department": "Economics",
+    "credits": 3,
+    "semester": 2,
+    "teacherId": 6
+  },
+  {
+    "id": 13,
+    "name": "World History",
+    "code": "HS101",
+    "department": "History",
+    "credits": 3,
+    "semester": 1,
+    "teacherId": 7
+  },
+  {
+    "id": 14,
+    "name": "Indian History",
+    "code": "HS201",
+    "department": "History",
+    "credits": 3,
+    "semester": 2,
+    "teacherId": 7
+  },
+  {
+    "id": 15,
+    "name": "Political Theory",
+    "code": "PS101",
+    "department": "Political Science",
+    "credits": 3,
+    "semester": 1,
+    "teacherId": 8
+  },
+  {
+    "id": 16,
+    "name": "International Relations",
+    "code": "PS202",
+    "department": "Political Science",
+    "credits": 3,
+    "semester": 3,
+    "teacherId": 8
+  },
+  {
+    "id": 17,
+    "name": "Cognitive Psychology",
+    "code": "PSY101",
+    "department": "Psychology",
+    "credits": 3,
+    "semester": 1,
+    "teacherId": 9
+  },
+  {
+    "id": 18,
+    "name": "Social Psychology",
+    "code": "PSY201",
+    "department": "Psychology",
+    "credits": 3,
+    "semester": 2,
+    "teacherId": 9
+  },
+  {
+    "id": 19,
+    "name": "Sociological Theory",
+    "code": "SOC101",
+    "department": "Sociology",
+    "credits": 2,
+    "semester": 1,
+    "teacherId": 10
+  },
+  {
+    "id": 20,
+    "name": "Indian Society",
+    "code": "SOC201",
+    "department": "Sociology",
+    "credits": 2,
+    "semester": 2,
+    "teacherId": 10
+  }
+]

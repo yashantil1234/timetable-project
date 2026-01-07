@@ -1,0 +1,64 @@
+[
+  { "id": "t1", "name": "Dr. Upasna Lakhina", 
+  "email": "upasna.lakhina@example.com", 
+  "employee_id": "EMP001", 
+  "department": "Computer Science", 
+  "phone": "+91-9550105157", 
+  "subjects_taught": ["Data Structures", "Algorithms"], "max_hours_per_week": 20, 
+  "created_date": "2023-10-26T10:00:00Z" },
+  
+  { "id": "t2", 
+  "name": "Dr. Rajendranath Chatterjee", 
+  "email": "michael.c@example.com", 
+  "employee_id": "EMP002", 
+  "department": "AIML", 
+  "phone": "+91-5647738345", 
+  "subjects_taught": ["Calculus", "Linear Algebra"], 
+  "max_hours_per_week": 18, 
+  "created_date": "2023-10-26T10:05:00Z" 
+ },
+ {
+    "id": "t3",
+    "name": "Dr. Priya Nair",
+    "employee_id": "EMP003",
+    "department": "Cyber Security",
+    "email": "priya.nair@college.edu",
+    "phone": "+91-9765432109",
+    "courses": ["Computer Networking", "COA"],
+    "room": "E-201",
+    "created_date": "2023-10-26T10:05:00Z"
+  },
+  {
+    "id": "t4",
+    "name": "Dr. Anil Kumar",
+    "employee_id": "EMP004",
+    "department": "Mathematics",
+    "email": "anil.kumar@college.edu",
+    "phone": "+91-9876543210",
+    "courses": ["Calculus", "Linear Algebra"],
+    "room": "M-101",
+    "created_date": "2023-10-26T10:05:00Z"
+  },
+  {
+    "id": "t5",
+    "name": "Dr. Suman Rao",
+    "employee_id": "EMP005",
+    "department": "Computer Science",
+    "email": "suman.rao@college.edu",
+    "phone": "+91-9988776655",
+    "courses": ["Data Structures", "Algorithms"],
+    "room": "C-102",
+    "created_date": "2023-10-26T10:05:00Z"
+  },
+  {
+    "id": "t6",
+    "name": "Dr. Meera Iyer",
+    "employee_id": "EMP006",
+    "department": "Cyber Security",
+    "email": "meera.iyer@college.edu",
+    "phone": "+91-8765432109",
+    "courses": ["Cyber Security Basics"],
+    "room": "E-102",
+    "created_date": "2023-10-26T10:05:00Z"
+  }
+]

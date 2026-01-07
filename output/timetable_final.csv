@@ -1,0 +1,17 @@
+course,section,faculty,room,day,slot,year,semester
+Data Structures,A,Dr. John Smith,Lab-202,Wed,03,2,1
+Data Structures,A,Dr. John Smith,Lab-202,Thu,09,2,1
+Data Structures,A,Dr. John Smith,Lab-202,Thu,11,2,1
+Data Structures,A,Dr. John Smith,Lab-202,Thu,01,2,1
+Data Structures,B,Dr. John Smith,Lab-202,Tue,03,2,1
+Data Structures,B,Dr. John Smith,Lab-202,Wed,09,2,1
+Data Structures,B,Dr. John Smith,Lab-202,Wed,11,2,1
+Data Structures,B,Dr. John Smith,Lab-202,Wed,01,2,1
+Algorithms,A,Dr. John Smith,Lab-202,Mon,03,2,2
+Algorithms,A,Dr. John Smith,Lab-202,Tue,09,2,2
+Algorithms,A,Dr. John Smith,Lab-202,Tue,11,2,2
+Algorithms,A,Dr. John Smith,Lab-202,Tue,01,2,2
+Algorithms,B,Dr. John Smith,Lab-202,Mon,09,2,2
+Algorithms,B,Dr. John Smith,Lab-202,Mon,11,2,2
+Algorithms,B,Dr. John Smith,Lab-202,Mon,01,2,2
+Algorithms,B,Dr. John Smith,Lab-202,Fri,03,2,2

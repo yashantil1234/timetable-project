@@ -1,0 +1,18 @@
+[
+  { "id": 1, "name": "E-101", "capacity": 60, "type": "Classroom" },
+  { "id": 2, "name": "E-204", "capacity": 50, "type": "Classroom" },
+  { "id": 3, "name": "D-110", "capacity": 40, "type": "Lab" },
+  { "id": 4, "name": "E-305", "capacity": 70, "type": "Classroom" },
+  { "id": 5, "name": "E-201", "capacity": 45, "type": "Seminar Room" },
+  { "id": 6, "name": "E-202", "capacity": 60, "type": "Classroom" },
+  { "id": 7, "name": "E-207", "capacity": 55, "type": "Classroom" },
+  { "id": 8, "name": "E-109", "capacity": 50, "type": "Classroom" },
+  { "id": 9, "name": "E-302", "capacity": 35, "type": "Lab" },
+  { "id": 10, "name": "E-108", "capacity": 65, "type": "Classroom" },
+  { "id": 11, "name": "E-115", "capacity": 30, "type": "Seminar Room" },
+  { "id": 12, "name": "E-303", "capacity": 80, "type": "Lab" },
+  { "id": 13, "name": "E-301", "capacity": 75, "type": "Lab" },
+  { "id": 14, "name": "D-210", "capacity": 70, "type": "Classroom" },
+  { "id": 15, "name": "G-504", "capacity": 40, "type": "Lab" }
+ 
+]

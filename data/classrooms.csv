@@ -1,0 +1,6 @@
+room_id,capacity,resources,current_status
+1,50,"Projector, AC",free
+2,40,Whiteboard,free
+3,30,"Computers, AC",free
+4,60,Smart Board,free
+5,25,Lab Equipment,free

@@ -1,0 +1,17 @@
+course,section,year,faculty,room,day,slot,department,credits,type
+Data Structures,A,2,Dr. John Smith,Lab-202,Wed,03,Computer Science,4,theory
+Data Structures,A,2,Dr. John Smith,Lab-202,Thu,09,Computer Science,4,theory
+Data Structures,A,2,Dr. John Smith,Lab-202,Thu,11,Computer Science,4,theory
+Data Structures,A,2,Dr. John Smith,Lab-202,Thu,01,Computer Science,4,theory
+Data Structures,B,2,Dr. John Smith,Lab-202,Tue,03,Computer Science,4,theory
+Data Structures,B,2,Dr. John Smith,Lab-202,Wed,09,Computer Science,4,theory
+Data Structures,B,2,Dr. John Smith,Lab-202,Wed,11,Computer Science,4,theory
+Data Structures,B,2,Dr. John Smith,Lab-202,Wed,01,Computer Science,4,theory
+Algorithms,A,2,Dr. John Smith,Lab-202,Mon,03,Computer Science,4,theory
+Algorithms,A,2,Dr. John Smith,Lab-202,Tue,09,Computer Science,4,theory
+Algorithms,A,2,Dr. John Smith,Lab-202,Tue,11,Computer Science,4,theory
+Algorithms,A,2,Dr. John Smith,Lab-202,Tue,01,Computer Science,4,theory
+Algorithms,B,2,Dr. John Smith,Lab-202,Mon,09,Computer Science,4,theory
+Algorithms,B,2,Dr. John Smith,Lab-202,Mon,11,Computer Science,4,theory
+Algorithms,B,2,Dr. John Smith,Lab-202,Mon,01,Computer Science,4,theory
+Algorithms,B,2,Dr. John Smith,Lab-202,Fri,03,Computer Science,4,theory

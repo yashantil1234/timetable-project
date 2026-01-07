@@ -1,0 +1,9 @@
+name,type,credits,year,semester,dept_name,dept_id,faculty_name
+Data Structures,theory,4,2,1,Computer Science,1,Dr. John Smith
+Algorithms,theory,4,2,2,Computer Science,1,Dr. John Smith
+Database Systems,theory,3,3,1,Computer Science,1,Prof. Sarah Johnson
+Computer Networks,theory,3,3,2,Computer Science,1,Prof. Sarah Johnson
+Calculus I,theory,4,1,1,Mathematics,2,Dr. Michael Brown
+Linear Algebra,theory,3,1,2,Mathematics,2,Dr. Michael Brown
+Physics I,theory,4,1,1,Physics,3,Prof. Emily Davis
+Digital Electronics,theory,3,2,1,Electronics,4,Dr. Robert Wilson

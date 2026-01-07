@@ -1,0 +1,5 @@
+id,dept_name,sections,faculty
+1,Computer Science,"A, B, A, B","Dr. John Smith, Prof. Sarah Johnson"
+2,Mathematics,,"Dr. Michael Brown, t, r"
+3,Physics,,Prof. Emily Davis
+4,Electronics,,Dr. Robert Wilson

@@ -1,0 +1,49 @@
+[
+  { "id": "s1", 
+  "name": "Data Structures", 
+  "code": "CS201", 
+  "credits": 4, 
+  "department": "Computer Science", 
+  "hours_per_week": 4, 
+  "semester": "3", 
+  "type": "Theory" },
+  
+  { "id": "s2", 
+  "name": "Calculus I", 
+  "code": "MATH101", 
+  "credits": 4, 
+  "department": "Mathematics", 
+  "hours_per_week": 4, 
+  "semester": "1", 
+  "type": "Theory"},
+  {
+    "id": "s3",
+    "name": "Computer Networking",
+    "code": "CS202",
+    "credits": 4,
+    "department": "Computer Science",
+    "hours_per_week": 4,
+    "semester": "3",
+    "type": "Theory"
+  },
+  {
+    "id": "s4",
+    "name": "Cyber Security Basics",
+    "code": "CS303",
+    "credits": 3,
+    "department": "Cyber Security",
+    "hours_per_week": 3,
+    "semester": "5",
+    "type": "Theory"
+  },
+  {
+    "id": "s5",
+    "name": "COA",
+    "code": "CS204",
+    "credits": 4,
+    "department": "Computer Science",
+    "hours_per_week": 4,
+    "semester": "3",
+    "type": "Theory"
+  }
+]
