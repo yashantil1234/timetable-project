@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Course } from "../../api";
+import api from "../../services/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, BookOpen, Search, Filter } from "lucide-react";
 
 import CourseForm from "../../components/courses/CourseForm";
@@ -23,16 +24,16 @@ export default function Courses() {
 
   const loadCourses = async () => {
     setIsLoading(true);
-    const data = await Course.list("-created_date");
+    const data = await api.getCoursesLegacy();
     setCourses(data);
     setIsLoading(false);
   };
 
   const handleSubmit = async (courseData) => {
     if (editingCourse) {
-      await Course.update(editingCourse.id, courseData);
+      await api.updateCourse(editingCourse.id, courseData);
     } else {
-      await Course.create(courseData);
+      await api.addCourse(courseData);
     }
     setShowForm(false);
     setEditingCourse(null);
@@ -93,7 +94,7 @@ export default function Courses() {
                   onChange={(e) => setFilterDepartment(e.target.value)}
                   className="border border-gray-300 rounded-lg px-3 py-2 bg-white"
                 >
-                  <option value="all">All Departments</option>
+                  <option key="all" value="all">All Departments</option>
                   {departments.map(dept => (
                     <option key={dept} value={dept}>{dept}</option>
                   ))}

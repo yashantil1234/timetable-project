@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Course, Teacher, Room } from "../../api";
+import { Course, Teacher, Room } from "../../services/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Clock } from "lucide-react";

@@ -3,11 +3,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import  Course  from "../../api";
-import  Teacher  from "../../api";
-import  Subject  from "../../api";
-import  Room  from "../../api";
-import  TimeSlot  from "../../api";
+import api from "../../services/api";
+import timeSlotsData from "../../Data/timeslots.json";
 import { Calendar, Clock, MapPin, User } from "lucide-react";
 
 const dayColors = {
@@ -26,12 +23,16 @@ export default function RecentClasses({ classes, isLoading }) {
     const enriched = await Promise.all(
       classes.map(async (classItem) => {
         try {
-          const [course, teacher, room, timeSlot] = await Promise.all([
-            Course.list().then(courses => courses.find(c => c.id === classItem.course_id)),
-            Teacher.list().then(teachers => teachers.find(t => t.id === classItem.teacher_id)),
-            Room.list().then(rooms => rooms.find(r => r.id === classItem.room_id)),
-            TimeSlot.list().then(slots => slots.find(s => s.id === classItem.timeslot_id))
+          const [courses, teachers, rooms] = await Promise.all([
+            api.getCourses(),
+            api.getFaculty(),
+            api.getRooms()
           ]);
+
+          const course = courses.find(c => c.id === classItem.course_id);
+          const teacher = teachers.find(t => t.id === classItem.teacher_id);
+          const room = rooms.find(r => r.id === classItem.room_id);
+          const timeSlot = timeSlotsData.find(s => s.id === classItem.timeslot_id);
 
           return {
             ...classItem,

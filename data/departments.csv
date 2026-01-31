@@ -1,5 +1,5 @@
-id,dept_name
-1,Computer Science
-2,Mathematics
-3,Physics
-4,Electronics
+id,dept_name,sections,faculty
+1,Computer Science,"A, B, A, B",
+2,Mathematics,,
+3,Physics,,
+4,Electronics,,

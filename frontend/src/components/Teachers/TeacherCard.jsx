@@ -18,7 +18,7 @@ const departmentColors = {
 };
 
 export default function TeacherCard({ teacher, onEdit }) {
-  const departmentColor = departmentColors[teacher.department] || "bg-gray-100 text-gray-800";
+  const departmentColor = departmentColors[teacher.dept_name] || "bg-gray-100 text-gray-800";
 
   return (
     <Card className="group hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:scale-105">
@@ -28,7 +28,7 @@ export default function TeacherCard({ teacher, onEdit }) {
             <CardTitle className="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors">
               {teacher.name}
             </CardTitle>
-            <p className="text-sm font-medium text-green-600">{teacher.employee_id}</p>
+            <p className="text-sm font-medium text-green-600">ID: {teacher.id}</p>
           </div>
           <Button
             variant="ghost"
@@ -43,47 +43,25 @@ export default function TeacherCard({ teacher, onEdit }) {
       <CardContent>
         <div className="space-y-3">
           <Badge className={`${departmentColor} border-0`}>
-            {teacher.department}
+            {teacher.dept_name}
           </Badge>
 
           <div className="space-y-2 text-sm">
-            <div className="flex items-center gap-2 text-gray-600">
-              <Mail className="w-4 h-4" />
-              <span className="truncate">{teacher.email}</span>
-            </div>
-            {teacher.phone && (
+            {teacher.email && (
               <div className="flex items-center gap-2 text-gray-600">
-                <Phone className="w-4 h-4" />
-                <span>{teacher.phone}</span>
+                <Mail className="w-4 h-4" />
+                <span className="truncate">{teacher.email}</span>
               </div>
             )}
             <div className="flex items-center gap-2 text-gray-600">
               <Clock className="w-4 h-4" />
-              <span>{teacher.max_hours_per_week || 20}h/week max</span>
+              <span>{teacher.max_hours || 12}h/week max</span>
             </div>
           </div>
 
-          {teacher.specialization && teacher.specialization.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-gray-500 uppercase">Specializations:</p>
-              <div className="flex flex-wrap gap-1">
-                {teacher.specialization.slice(0, 3).map((spec, index) => (
-                  <Badge key={index} variant="outline" className="text-xs bg-gray-50">
-                    {spec}
-                  </Badge>
-                ))}
-                {teacher.specialization.length > 3 && (
-                  <Badge variant="outline" className="text-xs bg-gray-50">
-                    +{teacher.specialization.length - 3}
-                  </Badge>
-                )}
-              </div>
-            </div>
-          )}
-
           <div className="pt-2 border-t border-gray-100">
             <div className="flex items-center justify-between text-xs text-gray-500">
-              <span>Added {new Date(teacher.created_date).toLocaleDateString()}</span>
+              <span>Faculty Member</span>
               <div className="flex items-center gap-1">
                 <Users className="w-3 h-3" />
                 <span>Faculty</span>

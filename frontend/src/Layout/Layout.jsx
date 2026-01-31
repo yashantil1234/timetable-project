@@ -3,15 +3,16 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "../utils/navigation";
 
 
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  Users, 
-  MapPin, 
-  Clock, 
+import {
+  LayoutDashboard,
+  BookOpen,
+  Users,
+  MapPin,
+  Clock,
   Calendar,
   GraduationCap,
-  Settings
+  Settings,
+  LogOut
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,6 +28,12 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navigationItems = [
   {
@@ -61,7 +68,7 @@ const navigationItems = [
   // },
 ];
 
-export default function Layout({ children }) {
+export default function Layout({ children, onLogout }) {
   const location = useLocation();
 
   return (
@@ -112,15 +119,28 @@ export default function Layout({ children }) {
           </SidebarContent>
 
           <SidebarFooter className="border-t border-blue-100/60 p-4">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">A</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 text-sm truncate">Admin User</p>
-                <p className="text-xs text-blue-600 truncate">Administrator</p>
-              </div>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 cursor-pointer hover:bg-gradient-to-r hover:from-blue-100 hover:to-indigo-100 transition-colors duration-200">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">A</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-sm truncate">Admin User</p>
+                    <p className="text-xs text-blue-600 truncate">Administrator</p>
+                  </div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem
+                  onClick={onLogout}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarFooter>
         </Sidebar>
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { TimeSlot, Teacher, Subject, Room } from "../../api";
+import api from "../../services/api";
+import timeSlotsData from "../../Data/timeslots.json";
 import { Button } from "@/components/ui/button";
 import { Plus, Calendar, Clock } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,32 +32,34 @@ export default function Timetable() {
 
   const checkConflicts = useCallback(() => {
     const conflictList = [];
-    
+
     timeSlots.forEach((slot, index) => {
       timeSlots.slice(index + 1).forEach(otherSlot => {
         if (slot.day === otherSlot.day &&
-            slot.start_time === otherSlot.start_time &&
-            slot.end_time === otherSlot.end_time) {
-          
-          if (slot.teacher_id === otherSlot.teacher_id) {
+            slot.start === otherSlot.start &&
+            slot.end === otherSlot.end) {
+
+          if (slot.teacher_id && otherSlot.teacher_id && slot.teacher_id === otherSlot.teacher_id) {
+            const timeStr = slot.start && slot.end ? `${slot.start}-${slot.end}` : 'undefined-undefined';
             conflictList.push({
               type: 'teacher',
-              message: `Teacher conflict on ${slot.day} ${slot.start_time}-${slot.end_time}`,
+              message: `Teacher conflict on ${slot.day || 'Unknown'} ${timeStr}`,
               slots: [slot, otherSlot]
             });
           }
-          
-          if (slot.room_id === otherSlot.room_id) {
+
+          if (slot.room_id && otherSlot.room_id && slot.room_id === otherSlot.room_id) {
+            const timeStr = slot.start && slot.end ? `${slot.start}-${slot.end}` : 'undefined-undefined';
             conflictList.push({
               type: 'room',
-              message: `Room conflict on ${slot.day} ${slot.start_time}-${slot.end_time}`,
+              message: `Room conflict on ${slot.day || 'Unknown'} ${timeStr}`,
               slots: [slot, otherSlot]
             });
           }
         }
       });
     });
-    
+
     setConflicts(conflictList);
   }, [timeSlots]);
 
@@ -67,16 +70,14 @@ export default function Timetable() {
   const loadTimetableData = async () => {
     setIsLoading(true);
     try {
-      const [slotsData, teachersData, subjectsData, roomsData] = await Promise.all([
-        TimeSlot.list(),
-        Teacher.list(),
-        Subject.list(),
-        Room.list()
+      const [teachersData, roomsData] = await Promise.all([
+        api.getFacultyLegacy(),
+        api.getRoomsLegacy()
       ]);
 
-      setTimeSlots(slotsData);
+      setTimeSlots(timeSlotsData);
       setTeachers(teachersData);
-      setSubjects(subjectsData);
+      setSubjects([]); // No subjects API method, set empty for now
       setRooms(roomsData);
     } catch (error) {
       console.error("Error loading timetable data:", error);
@@ -85,14 +86,11 @@ export default function Timetable() {
   };
 
   const handleSubmit = async (slotData) => {
-    if (editingSlot) {
-      await TimeSlot.update(editingSlot.id, slotData);
-    } else {
-      await TimeSlot.create(slotData);
-    }
+    // Note: Timeslots are static data, so create/update operations are not supported
+    // This functionality would need to be implemented in the backend API
+    console.warn("Timeslot create/update functionality not implemented");
     setShowForm(false);
     setEditingSlot(null);
-    loadTimetableData();
   };
 
   const handleEdit = (slot) => {

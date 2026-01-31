@@ -13,16 +13,11 @@ const departments = [
 
 export default function TeacherForm({ teacher, onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
-    name: teacher?.name || "",
-    employee_id: teacher?.employee_id || "",
-    department: teacher?.department || "",
+    faculty_name: teacher?.name || "",
+    dept_name: teacher?.dept_name || "",
     email: teacher?.email || "",
-    phone: teacher?.phone || "",
-    specialization: teacher?.specialization || [],
-    max_hours_per_week: teacher?.max_hours_per_week || 20
+    max_hours: teacher?.max_hours || 12
   });
-
-  const [newSpecialization, setNewSpecialization] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -33,23 +28,6 @@ export default function TeacherForm({ teacher, onSubmit, onCancel }) {
     setFormData(prev => ({
       ...prev,
       [field]: value
-    }));
-  };
-
-  const addSpecialization = () => {
-    if (newSpecialization.trim() && !formData.specialization.includes(newSpecialization.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        specialization: [...prev.specialization, newSpecialization.trim()]
-      }));
-      setNewSpecialization("");
-    }
-  };
-
-  const removeSpecialization = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      specialization: prev.specialization.filter((_, i) => i !== index)
     }));
   };
 
@@ -65,54 +43,31 @@ export default function TeacherForm({ teacher, onSubmit, onCancel }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name *</Label>
+              <Label htmlFor="faculty_name">Faculty Name *</Label>
               <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
+                id="faculty_name"
+                value={formData.faculty_name}
+                onChange={(e) => handleChange('faculty_name', e.target.value)}
                 placeholder="e.g., Dr. John Smith"
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="employee_id">Employee ID *</Label>
-              <Input
-                id="employee_id"
-                value={formData.employee_id}
-                onChange={(e) => handleChange('employee_id', e.target.value)}
-                placeholder="e.g., EMP001"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleChange('email', e.target.value)}
                 placeholder="john.smith@college.edu"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
-              <Input
-                id="phone"
-                value={formData.phone}
-                onChange={(e) => handleChange('phone', e.target.value)}
-                placeholder="+1 (555) 123-4567"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="department">Department *</Label>
-              <Select value={formData.department} onValueChange={(value) => handleChange('department', value)}>
+              <Label htmlFor="dept_name">Department *</Label>
+              <Select value={formData.dept_name} onValueChange={(value) => handleChange('dept_name', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select department" />
                 </SelectTrigger>
@@ -130,46 +85,10 @@ export default function TeacherForm({ teacher, onSubmit, onCancel }) {
                 type="number"
                 min="1"
                 max="40"
-                value={formData.max_hours_per_week}
-                onChange={(e) => handleChange('max_hours_per_week', parseInt(e.target.value))}
+                value={formData.max_hours}
+                onChange={(e) => handleChange('max_hours', parseInt(e.target.value) || 12)}
               />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Specializations</Label>
-            <div className="flex gap-2">
-              <Input
-                value={newSpecialization}
-                onChange={(e) => setNewSpecialization(e.target.value)}
-                placeholder="Add specialization"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addSpecialization();
-                  }
-                }}
-              />
-              <Button type="button" onClick={addSpecialization} variant="outline">
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-            {formData.specialization.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {formData.specialization.map((spec, index) => (
-                  <div key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center gap-2">
-                    <span>{spec}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeSpecialization(index)}
-                      className="hover:text-blue-600"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

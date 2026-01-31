@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Course, Teacher, Room, Class, TimeSlot } from "../../api";
+import { useNavigate } from "react-router-dom";
+import ApiService from "../../services/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ import TodaySchedule from "../../components/Dashboard/todaySchedule";
 
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     courses: 0,
     teachers: 0,
@@ -35,34 +37,44 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Check if user is authenticated
+    const token = localStorage.getItem('token');
+    const user = ApiService.getCurrentUser();
+
+    if (!user || !token) {
+      navigate('/login');
+      return;
+    }
+
     loadDashboardData();
-  }, []);
+  }, [navigate]);
 
   const loadDashboardData = async () => {
     setIsLoading(true);
     try {
-      const [courses, teachers, rooms, classes, timeSlots] = await Promise.all([
-        Course.list(),
-        Teacher.list(),
-        Room.list(), 
-        Class.list('-created_date', 10),
-        TimeSlot.list()
+      // Use public endpoints for basic stats (works for all users)
+      const [courses, teachers, rooms, timeSlots] = await Promise.all([
+        ApiService.getCoursesLegacy(),
+        ApiService.getFacultyLegacy(),
+        ApiService.getRoomsLegacy(),
+        ApiService.getTimetable() // This will get classes/timetable data
       ]);
 
       setStats({
-        courses: courses.length,
-        teachers: teachers.length,
-        rooms: rooms.length,
-        classes: classes.length,
-        timeSlots: timeSlots.length
+        courses: courses ? courses.length : 0,
+        teachers: teachers ? teachers.length : 0,
+        rooms: rooms ? rooms.length : 0,
+        classes: timeSlots ? timeSlots.length : 0,
+        timeSlots: timeSlots ? timeSlots.length : 0
       });
 
-      setRecentClasses(classes);
+      // For recent classes, we'll use the timetable data
+      setRecentClasses(timeSlots || []);
     } catch (error) {
       console.error("Error loading dashboard data:", error);
     }
     setIsLoading(false);
-    
+
   };
     const currentDay = new Date().toLocaleDateString("en-US", { weekday: "long" });
     const currentTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -100,6 +112,7 @@ export default function Dashboard() {
             icon={BookOpen}
             color="blue"
             isLoading={isLoading}
+            onClick={() => navigate('/courses')}
           />
           <StatCard
             title="Teachers"
@@ -107,6 +120,7 @@ export default function Dashboard() {
             icon={Users}
             color="green"
             isLoading={isLoading}
+            onClick={() => navigate('/faculty')}
           />
           <StatCard
             title="Rooms"
@@ -114,6 +128,7 @@ export default function Dashboard() {
             icon={MapPin}
             color="purple"
             isLoading={isLoading}
+            onClick={() => navigate('/rooms')}
           />
           <StatCard
             title="Active Classes"
@@ -121,14 +136,16 @@ export default function Dashboard() {
             icon={Calendar}
             color="orange"
             isLoading={isLoading}
+            onClick={() => navigate('/timetable')}
           />
-          {/* <StatCard
+          {<StatCard
             title="Time Slots"
             value={stats.timeSlots}
             icon={Clock}
             color="pink"
             isLoading={isLoading}
-          /> */}
+            onClick={() => navigate('/timetable')}
+          /> }
         </div>
 
         {/* Main Content Grid */}
@@ -153,4 +170,3 @@ export default function Dashboard() {
     </div>
   );
 }
-

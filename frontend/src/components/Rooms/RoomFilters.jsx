@@ -19,14 +19,14 @@ export default function RoomFilters({
           <SelectTrigger className="w-36 bg-white/80 backdrop-blur-sm border-blue-200">
             <SelectValue placeholder="Type" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            {ROOM_TYPES.map((type) => (
-              <SelectItem key={type} value={type}>
-                {type}
-              </SelectItem>
-            ))}
-          </SelectContent>
+        <SelectContent>
+          <SelectItem value="all">All Types</SelectItem>
+          {ROOM_TYPES.map((type, index) => (
+            <SelectItem key={`${type}-${index}`} value={type}>
+              {type}
+            </SelectItem>
+          ))}
+        </SelectContent>
         </Select>
       </div>
       
@@ -36,8 +36,8 @@ export default function RoomFilters({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Buildings</SelectItem>
-          {buildings.map((building) => (
-            <SelectItem key={building} value={building}>
+          {buildings.map((building, index) => (
+            <SelectItem key={`${building}-${index}`} value={building}>
               {building}
             </SelectItem>
           ))}

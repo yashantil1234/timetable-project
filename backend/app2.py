@@ -16,9 +16,8 @@ from flask_mail import Mail, Message
 
 # ---------- FLASK SETUP ----------
 app = Flask(__name__)
-CORS(app)
 app.url_map.strict_slashes = False
-CORS(app, origins=["http://localhost:5173"])
+CORS(app, origins=["http://localhost:5173", "http://localhost:5174"], supports_credentials=True, methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"], allow_headers=["Content-Type", "Authorization", "x-access-token"])
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 db_path = os.path.join(BASE_DIR, "timetable_enhanced.db")
@@ -79,7 +78,6 @@ class Faculty(db.Model):
     faculty_name = db.Column(db.String(100), nullable=False)
     max_hours = db.Column(db.Integer, default=12)
     dept_id = db.Column(db.Integer, db.ForeignKey("departments.id"))
-    email= db.Column(db.String(100), nullable=False, unique=True)
 class Section(db.Model):
     __tablename__ = "sections"
     id = db.Column(db.Integer, primary_key=True)
@@ -107,6 +105,8 @@ class Course(db.Model):
     fixed_day = db.Column(db.String(20), nullable=True)
     fixed_slot = db.Column(db.String(20), nullable=True)
     fixed_room_id = db.Column(db.Integer, db.ForeignKey("classrooms.room_id"), nullable=True)
+
+    faculty = db.relationship("Faculty", backref="courses", lazy=True)
 class Classroom(db.Model):
     __tablename__ = "classrooms"
     room_id = db.Column(db.Integer, primary_key=True)
@@ -144,8 +144,8 @@ class Timetable(db.Model):
     faculty_id = db.Column(db.Integer, db.ForeignKey("faculty.faculty_id"))
     room_id = db.Column(db.Integer, db.ForeignKey("classrooms.room_id"))
     day = db.Column(db.String(20))
-    slot = db.Column(db.String(20))
-    
+    start_time = db.Column(db.String(20))
+
     course = db.relationship("Course")
     faculty = db.relationship("Faculty")
     room = db.relationship("Classroom")
@@ -163,7 +163,7 @@ class SwapRequest(db.Model):
     
     # The new time they are proposing
     proposed_day = db.Column(db.String(20), nullable=False)
-    proposed_slot = db.Column(db.String(20), nullable=False)
+    proposed_start_time = db.Column(db.String(20), nullable=False)
     
     # The current state of the request
     status = db.Column(db.String(20), nullable=False, default='pending') # pending, approved, rejected
@@ -174,15 +174,15 @@ class SwapRequest(db.Model):
     # Define relationships for easy data access
     requesting_faculty = db.relationship("Faculty", foreign_keys=[requesting_faculty_id])
     original_timetable_entry = db.relationship("Timetable", foreign_keys=[original_timetable_id])
-   # --- NEW DATABASE MODEL ---
+# --- NEW DATABASE MODEL ---
 class FacultyUnavailability(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     faculty_id = db.Column(db.Integer, db.ForeignKey("faculty.faculty_id"), nullable=False)
     day = db.Column(db.String(20), nullable=False)
-    slot = db.Column(db.String(20), nullable=False)
-    
+    start_time = db.Column(db.String(20), nullable=False)
+
     faculty = db.relationship("Faculty", backref="unavailabilities")
-    __table_args__ = (db.UniqueConstraint('faculty_id', 'day', 'slot', name='_unique_faculty_unavailability'),)
+    __table_args__ = (db.UniqueConstraint('faculty_id', 'day', 'start_time', name='_unique_faculty_unavailability'),)
 
 # Leave Request System Model
 class LeaveRequest(db.Model):
@@ -222,6 +222,15 @@ def _extract_token_from_request():
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        # Allow OPTIONS requests for CORS preflight without authentication
+        if request.method == "OPTIONS":
+            response = make_response()
+            response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
+            response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,x-access-token")
+            response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+            response.headers.add("Access-Control-Allow-Credentials", "true")
+            return response
+
         token =  _extract_token_from_request()
         if not token:
             return jsonify({"error": "Token missing"}), 401
@@ -233,11 +242,20 @@ def token_required(f):
         except Exception as e:
             return jsonify({"error": "Token invalid", "details": str(e)}), 401
         return f(current_user, *args, **kwargs)
-    return decorated # here 
+    return decorated
 
 def admin_required(f):
     @wraps(f)
     def wrapper(current_user, *args, **kwargs):
+        # Allow OPTIONS requests for CORS preflight without authentication
+        if request.method == "OPTIONS":
+            response = make_response()
+            response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
+            response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,x-access-token")
+            response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+            response.headers.add("Access-Control-Allow-Credentials", "true")
+            return response
+
         if current_user.role != "admin":
             return jsonify({"error": "Admin only"}), 403
         return f(current_user, *args, **kwargs)
@@ -285,7 +303,9 @@ def export_csvs():
         if faculty:
             faculty_df = pd.DataFrame([{
                 "faculty_name": f.faculty_name, "max_hours": f.max_hours,
-                "dept_name": f.department.dept_name,"email":faculty.email,"faculty_id":f.faculty_id
+                "dept_name": f.department.dept_name if f.department else "",
+                "email": f.email or "",
+                "faculty_id": f.faculty_id
             } for f in faculty])
             faculty_df.to_csv("data/faculty.csv", index=False)
         
@@ -315,10 +335,7 @@ def export_csvs():
             timetable_df = pd.DataFrame([{
                 "course": t.course.name, "section": t.section.name, "year": t.section.year,
                 "faculty": t.faculty.faculty_name, "room": t.room.name,
-                "day": t.day, "slot": t.slot, "department": t.course.department.dept_name,
-                "credits": t.course.credits, "type": t.course.type
-            } for t in timetable])
-            timetable_df.to_csv("data/enhanced_timetable.csv", index=False)
+                "day": t.day, "start_time": t.start_time, "department": t.course.department.dept_name,} for t in timetable])
         
         # Room occupancy log
         occupancies = RoomOccupancy.query.order_by(RoomOccupancy.timestamp.desc()).limit(1000).all()
@@ -350,11 +367,14 @@ def create_sample_data():
     """Create sample data if database is empty"""
     if Department.query.count() == 0:
         # Add sample departments
-        sample_depts = ["Computer Science", "Mathematics", "Physics", "Electronics"]
+        sample_depts = [
+            "Computer Science", "Mathematics", "Physics", "Chemistry",
+            "Biology", "English", "History", "Business", "Engineering", "Psychology", "Electronics"
+        ]
         for dept_name in sample_depts:
             db.session.add(Department(dept_name=dept_name))
         db.session.commit()
-        
+
         # Add sample sections
         cs_dept = Department.query.filter_by(dept_name="Computer Science").first()
         if cs_dept:
@@ -367,7 +387,7 @@ def create_sample_data():
             for section_data in sections:
                 db.session.add(Section(**section_data))
             db.session.commit()
-        
+
         # Add sample rooms
         sample_rooms = [
             {"name": "Room-101", "capacity": 50, "resources": "Projector, AC"},
@@ -379,7 +399,7 @@ def create_sample_data():
         for room_data in sample_rooms:
             db.session.add(Classroom(**room_data))
         db.session.commit()
-        
+
         # Add sample course allocations
         if cs_dept:
             sample_allocations = [
@@ -391,20 +411,35 @@ def create_sample_data():
             for allocation in sample_allocations:
                 db.session.add(CourseAllocation(**allocation))
             db.session.commit()
-        
-        # Add sample users
-        sample_users = [
-            {"username": "teacher1", "role": "teacher", "full_name": "John Doe", "email": "john@example.com", "dept_id": cs_dept.id},
-            {"username": "student1", "role": "student", "full_name": "Alice Smith", "email": "alice@example.com", "dept_id": cs_dept.id, "year": 1, "section_id": Section.query.filter_by(name="A", year=1, dept_id=cs_dept.id).first().id if Section.query.filter_by(name="A", year=1, dept_id=cs_dept.id).first() else None},
-            {"username": "admin", "role": "admin", "full_name": "Administrator", "email": "admin@example.com"}
+
+        # Add sample faculty
+        sample_faculty = [
+            {"faculty_name": "John Doe", "max_hours": 12, "dept_id": cs_dept.id, "email": "john@example.com"},
+            {"faculty_name": "Jane Smith", "max_hours": 10, "dept_id": cs_dept.id, "email": "jane@example.com"}
         ]
-        for user_data in sample_users:
-            if not User.query.filter_by(username=user_data["username"]).first():
-                user = User(**user_data)
-                user.set_password("password123")
-                db.session.add(user)
+        for faculty_data in sample_faculty:
+            if not Faculty.query.filter_by(faculty_name=faculty_data["faculty_name"]).first():
+                db.session.add(Faculty(**faculty_data))
         db.session.commit()
-        
+
+    # Always create sample users if they don't exist
+    if User.query.count() == 0:
+        # Get Computer Science department for users
+        cs_dept = Department.query.filter_by(dept_name="Computer Science").first()
+        if cs_dept:
+            # Add sample users
+            sample_users = [
+                {"username": "teacher1", "role": "teacher", "full_name": "Dr. John Smith", "email": "john@example.com", "dept_id": cs_dept.id},
+                {"username": "student1", "role": "student", "full_name": "Alice Smith", "email": "alice@example.com", "dept_id": cs_dept.id, "year": 1, "section_id": Section.query.filter_by(name="A", year=1, dept_id=cs_dept.id).first().id if Section.query.filter_by(name="A", year=1, dept_id=cs_dept.id).first() else None},
+                {"username": "admin", "role": "admin", "full_name": "Administrator", "email": "admin@example.com"}
+            ]
+            for user_data in sample_users:
+                if not User.query.filter_by(username=user_data["username"]).first():
+                    user = User(**user_data)
+                    user.set_password("password123")
+                    db.session.add(user)
+            db.session.commit()
+
         print("Sample data created with users, sections, and room occupancy tracking.")
 def send_email(subject, recipients, body, attachment_path=None):
     with app.app_context():
@@ -450,7 +485,7 @@ def generate_timetable_internal():
 
     # --- Fetch all unavailability records into an efficient lookup set ---
     unavailable_slots = {
-        (u.faculty_id, f"{u.day}_{u.slot}")
+        (u.faculty_id, f"{u.day}_{u.start_time}")
         for u in FacultyUnavailability.query.all()
     }
 
@@ -593,7 +628,7 @@ def generate_timetable_internal():
                                 faculty_id=c.faculty_id,
                                 room_id=room_id,
                                 day=slot.split("_")[0],
-                                slot=slot.split("_")[1]
+                                start_time=slot.split("_")[1]
                             )
                             timetable_entries.append(entry)
                             timetable_data.append({
@@ -602,7 +637,7 @@ def generate_timetable_internal():
                                 "faculty": faculty_dict[c.faculty_id].faculty_name if c.faculty_id else "N/A",
                                 "room": room_dict[room_id].name,
                                 "day": entry.day,
-                                "slot": entry.slot,
+                                "start_time": entry.start_time,
                                 "year": c.year,
                                 "semester": c.semester
                             })
@@ -695,7 +730,7 @@ def admin_faculty(current_user):
                 faculty_name=data["faculty_name"].strip(),
                 max_hours=data.get("max_hours", 12),
                 dept_id=dept.id,
-                email=data["email"].strip()
+                email=data.get("email", "").strip() if data.get("email") else None
             )
             db.session.add(faculty)
             db.session.commit()
@@ -1105,9 +1140,9 @@ def bad_request(error):
     return jsonify({"error": "Bad request"}), 400
 
 # ---------- AUTH ROUTES ----------
-@app.route("/register", methods=["GET", "POST", "OPTIONS"])
+@app.route("/api/register", methods=["GET", "POST", "OPTIONS"])
 def register():
-    if request.method != "POST":
+    if request.method != "post":
         return jsonify({"message": "Use POST with JSON: username, password, role (student/teacher/admin), optional dept_id/year/section_id"}), 200
     data = request.json
     username = data.get("username")
@@ -1115,7 +1150,7 @@ def register():
     role = data.get("role")
     dept_id = data.get("dept_id")
     year = data.get("year")
-    section_id = data.get("section_id")
+    # section_id = data.get("section_id")
 
     if not username or not password or role not in ["student", "teacher", "admin"]:
         return jsonify({"error": "Invalid data"}), 400
@@ -1128,7 +1163,7 @@ def register():
         "role": role,
         "dept_id": dept_id,
         "year": year,
-        "section_id": section_id
+        # "section_id": section_id
     }
     user = User(**user_data)
     user.set_password(password)
@@ -1139,10 +1174,19 @@ def register():
 
 # (Removed outdated commented duplicate register implementation)
 
-@app.route("/login", methods=["GET", "POST", "OPTIONS"])
+@app.route("/api/login", methods=["GET", "POST", "OPTIONS"])
 def login():
+    # Handle OPTIONS preflight request
+    if request.method == "OPTIONS":
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,x-access-token")
+        response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+        response.headers.add("Access-Control-Allow-Credentials", "true")
+        return response
+
     try:
-        if request.method != "POST":
+        if request.method != "post":
             return jsonify({"message": "Use POST with JSON: username, password"}), 200
         data = request.json
         username = data.get("username")
@@ -1169,7 +1213,7 @@ def login():
 # -----------------------
 # ADMIN LOGIN ROUTE
 # -----------------------
-@app.route("/admin/login", methods=["GET", "POST", "OPTIONS"])
+@app.route("/api/admin/login", methods=["GET", "POST", "OPTIONS"])
 def admin_login():
     try:
         if request.method != "POST":
@@ -1298,23 +1342,36 @@ def get_rooms_status(current_user):
 def teacher_timetable(current_user):
     if current_user.role != "teacher":
         return jsonify({"error": "Unauthorized - Teachers only"}), 403
-    
+
     try:
-        # Find faculty record for this user
+        # Find faculty record for this user - try exact match first, then partial match
         faculty = Faculty.query.filter_by(faculty_name=current_user.full_name, dept_id=current_user.dept_id).first()
         if not faculty:
-            return jsonify({"error": "Faculty record not found"}), 404
-        
+            # Try to find by partial name match (e.g., "John Doe" matches "Dr. John Smith")
+            faculty = Faculty.query.filter(
+                Faculty.faculty_name.contains(current_user.full_name.split()[-1]),  # Match last name
+                Faculty.dept_id == current_user.dept_id
+            ).first()
+        if not faculty:
+            # Create a faculty record if none exists
+            faculty = Faculty(
+                faculty_name=current_user.full_name,
+                max_hours=12,
+                dept_id=current_user.dept_id
+            )
+            db.session.add(faculty)
+            db.session.commit()
+
         timetable_entries = Timetable.query.filter_by(faculty_id=faculty.faculty_id).all()
         result = [{
             "course": e.course.name,
             "section": f"{e.section.name} (Year {e.section.year})",
             "room": e.room.name,
             "day": e.day,
-            "slot": e.slot,
+            "start_time": e.start_time,
             "department": e.course.department.dept_name
         } for e in timetable_entries]
-        
+
         return jsonify({
             "timetable": result,
             "teacher_name": current_user.full_name,
@@ -1339,7 +1396,7 @@ def student_timetable(current_user):
             "faculty": e.faculty.faculty_name,
             "room": e.room.name,
             "day": e.day,
-            "slot": e.slot,
+            "start_time": e.start_time,
             "type": e.course.type,
             "credits": e.course.credits
         } for e in timetable_entries]
@@ -1370,7 +1427,7 @@ def manage_faculty_unavailability(current_user, faculty_id):
             slots = FacultyUnavailability.query.filter_by(faculty_id=faculty.faculty_id).all()
             # Return the list of slots as JSON
             return jsonify([
-                {"id": s.id, "day": s.day, "slot": s.slot} for s in slots
+                {"id": s.id, "day": s.day, "start_time": s.start_time} for s in slots
             ])
         except Exception as e:
             return jsonify({"error": f"Failed to fetch unavailable slots: {str(e)}"}), 500
@@ -1379,17 +1436,17 @@ def manage_faculty_unavailability(current_user, faculty_id):
         try:
             data = request.json
             # Validate that the request body contains the required fields
-            if not data or not data.get("day") or not data.get("slot"):
-                return jsonify({"error": "Day and slot are required"}), 400
+            if not data or not data.get("day") or not data.get("start_time"):
+                return jsonify({"error": "Day and start_time are required"}), 400
 
             day = data["day"]
-            slot = data["slot"]
+            start_time = data["start_time"]
 
-            # Prevent duplicate entries for the same faculty, day, and slot
+            # Prevent duplicate entries for the same faculty, day, and start_time
             existing = FacultyUnavailability.query.filter_by(
                 faculty_id=faculty.faculty_id,
                 day=day,
-                slot=slot
+                start_time=start_time
             ).first()
             if existing:
                 return jsonify({"error": "This unavailability slot already exists for this faculty."}), 400
@@ -1398,15 +1455,15 @@ def manage_faculty_unavailability(current_user, faculty_id):
             new_slot = FacultyUnavailability(
                 faculty_id=faculty.faculty_id,
                 day=day,
-                slot=slot
+                start_time=start_time
             )
             db.session.add(new_slot)
             db.session.commit()
-            
+
             # Return a success message and the data for the new slot
             return jsonify({
                 "message": f"Unavailability added for {faculty.faculty_name}",
-                "slot": {"id": new_slot.id, "day": new_slot.day, "slot": new_slot.slot}
+                "slot": {"id": new_slot.id, "day": new_slot.day, "start_time": new_slot.start_time}
             }), 201
         except Exception as e:
             db.session.rollback()
@@ -1878,7 +1935,7 @@ def generate_timetable():
                 "faculty": t.faculty.faculty_name,
                 "room": t.room.name,
                 "day": t.day,
-                "slot": t.slot,
+                "start_time": t.start_time,
                 "department": t.course.department.dept_name,
                 "year": t.section.year,
                 "credits": t.course.credits
@@ -1890,31 +1947,39 @@ def generate_timetable():
 
 @app.route("/get_timetable", methods=["GET", "OPTIONS"])
 def get_timetable():
+    if request.method == "OPTIONS":
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,x-access-token")
+        response.headers.add("Access-Control-Allow-Methods", "GET,OPTIONS")
+        response.headers.add("Access-Control-Allow-Credentials", "true")
+        return response
+
     try:
         dept_name = request.args.get("dept_name")
         year = request.args.get("year")
         section_name = request.args.get("section")
-        
+
         query = Timetable.query
-        
+
         # Apply filters
         if dept_name or year or section_name:
             timetable = []
             for t in Timetable.query.all():
                 include = True
-                
+
                 if dept_name and t.course.department.dept_name != dept_name:
                     include = False
                 if year and t.section.year != int(year):
                     include = False
                 if section_name and t.section.name != section_name:
                     include = False
-                    
+
                 if include:
                     timetable.append(t)
         else:
             timetable = Timetable.query.all()
-        
+
         result = []
         for t in timetable:
             result.append({
@@ -1924,28 +1989,28 @@ def get_timetable():
                 "faculty": t.faculty.faculty_name,
                 "room": t.room.name,
                 "day": t.day,
-                "slot": t.slot,
+                "start_time": t.start_time,
                 "department": t.course.department.dept_name,
                 "year": t.section.year,
                 "credits": t.course.credits,
                 "type": t.course.type
             })
-            
+
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 # ---------- HELPER FUNCTION FOR SWAP CONFLICTS (NEW) ----------
 
-def check_for_conflict(timetable_entry_to_move, new_day, new_slot):
+def check_for_conflict(timetable_entry_to_move, new_day, new_start_time):
     """
-    Checks if moving a timetable entry to a new day/slot would cause a conflict.
+    Checks if moving a timetable entry to a new day/start_time would cause a conflict.
     Returns an error message string if a conflict exists, otherwise returns None.
     """
     # 1. Check for Faculty Conflict: Is the teacher already busy at the new time?
     faculty_conflict = Timetable.query.filter(
         Timetable.faculty_id == timetable_entry_to_move.faculty_id,
         Timetable.day == new_day,
-        Timetable.slot == new_slot,
+        Timetable.start_time == new_start_time,
         Timetable.timetable_id != timetable_entry_to_move.timetable_id # Exclude the entry we are moving
     ).first()
     if faculty_conflict:
@@ -1955,7 +2020,7 @@ def check_for_conflict(timetable_entry_to_move, new_day, new_slot):
     section_conflict = Timetable.query.filter(
         Timetable.section_id == timetable_entry_to_move.section_id,
         Timetable.day == new_day,
-        Timetable.slot == new_slot,
+        Timetable.start_time == new_start_time,
         Timetable.timetable_id != timetable_entry_to_move.timetable_id
     ).first()
     if section_conflict:
@@ -1965,12 +2030,12 @@ def check_for_conflict(timetable_entry_to_move, new_day, new_slot):
     room_conflict = Timetable.query.filter(
         Timetable.room_id == timetable_entry_to_move.room_id,
         Timetable.day == new_day,
-        Timetable.slot == new_slot,
+        Timetable.start_time == new_start_time,
         Timetable.timetable_id != timetable_entry_to_move.timetable_id
     ).first()
     if room_conflict:
         return f"Room '{timetable_entry_to_move.room.name}' is already booked at that time."
-        
+
     return None # No conflicts found
 
 
@@ -1981,16 +2046,29 @@ def check_for_conflict(timetable_entry_to_move, new_day, new_slot):
 @teacher_required
 def teacher_swap_requests(current_user):
     # Find the faculty record linked to the logged-in teacher user
-    faculty = Faculty.query.filter_by(faculty_name=current_user.full_name).first() # Assumes full_name matches faculty_name
+    faculty = Faculty.query.filter_by(faculty_name=current_user.full_name, dept_id=current_user.dept_id).first()
     if not faculty:
-        return jsonify({"error": "Faculty record for the current user not found."}), 404
+        # Try to find by partial name match
+        faculty = Faculty.query.filter(
+            Faculty.faculty_name.contains(current_user.full_name.split()[-1]),
+            Faculty.dept_id == current_user.dept_id
+        ).first()
+    if not faculty:
+        # Create a faculty record if none exists
+        faculty = Faculty(
+            faculty_name=current_user.full_name,
+            max_hours=12,
+            dept_id=current_user.dept_id
+        )
+        db.session.add(faculty)
+        db.session.commit()
 
     if request.method == "POST":
         data = request.json
-        required = ["original_timetable_id", "proposed_day", "proposed_slot", "reason"]
+        required = ["original_timetable_id", "proposed_day", "proposed_start_time", "reason"]
         if not all(key in data for key in required):
             return jsonify({"error": f"Missing required fields: {', '.join(required)}"}), 400
-        
+
         # Verify the teacher owns the class they are trying to move
         timetable_entry = Timetable.query.get(data['original_timetable_id'])
         if not timetable_entry or timetable_entry.faculty_id != faculty.faculty_id:
@@ -2000,7 +2078,7 @@ def teacher_swap_requests(current_user):
             requesting_faculty_id=faculty.faculty_id,
             original_timetable_id=data['original_timetable_id'],
             proposed_day=data['proposed_day'],
-            proposed_slot=data['proposed_slot'],
+            proposed_start_time=data['proposed_start_time'],
             reason=data['reason']
         )
         db.session.add(new_request)
@@ -2013,9 +2091,9 @@ def teacher_swap_requests(current_user):
             "id": r.id,
             "course_name": r.original_timetable_entry.course.name,
             "original_day": r.original_timetable_entry.day,
-            "original_slot": r.original_timetable_entry.slot,
+            "original_start_time": r.original_timetable_entry.start_time,
             "proposed_day": r.proposed_day,
-            "proposed_slot": r.proposed_slot,
+            "proposed_start_time": r.proposed_start_time,
             "status": r.status,
             "reason": r.reason,
             "created_at": r.created_at.isoformat()
@@ -2035,9 +2113,9 @@ def admin_get_swap_requests(current_user):
         "course_name": r.original_timetable_entry.course.name,
         "section_name": r.original_timetable_entry.section.name,
         "original_day": r.original_timetable_entry.day,
-        "original_slot": r.original_timetable_entry.slot,
+        "original_start_time": r.original_timetable_entry.start_time,
         "proposed_day": r.proposed_day,
-        "proposed_slot": r.proposed_slot,
+        "proposed_start_time": r.proposed_start_time,
         "status": r.status,
         "reason": r.reason,
         "created_at": r.created_at.isoformat()
@@ -2055,7 +2133,7 @@ def admin_approve_swap(current_user, request_id):
     timetable_entry = swap_request.original_timetable_entry
     
     # Check for conflicts before approving
-    conflict_reason = check_for_conflict(timetable_entry, swap_request.proposed_day, swap_request.proposed_slot)
+    conflict_reason = check_for_conflict(timetable_entry, swap_request.proposed_day, swap_request.proposed_start_time)
     if conflict_reason:
         return jsonify({"error": f"Approval failed. Conflict found: {conflict_reason}"}), 409 # 409 Conflict
 
@@ -2757,7 +2835,7 @@ def get_user_timetable_chatbot(current_user):
                 if day not in schedule:
                     schedule[day] = []
                 schedule[day].append({
-                    "time": f"{entry.slot}:00",
+                    "time": f"{entry.start_time}:00",
                     "course": entry.course.name,
                     "room": entry.room.name,
                     "faculty": entry.faculty.faculty_name,
@@ -2808,7 +2886,7 @@ def get_user_timetable_chatbot(current_user):
             
             response = f"👨‍🏫 **Your Teaching Schedule** ({len(entries)} classes)\n\n"
             for entry in entries:
-                response += f"🕐 **{entry.day} {entry.slot}:00**\n"
+                response += f"🕐 **{entry.day} {entry.start_time}:00**\n"
                 response += f"📚 {entry.course.name} ({entry.course.course_code})\n"
                 response += f"👥 Section {entry.section.name}, Year {entry.section.year}\n"
                 response += f"📍 {entry.room.name}\n\n"
@@ -2879,13 +2957,13 @@ def get_next_class_chatbot(current_user):
         current_day_idx = days_order.index(current_day) if current_day in days_order else 0
         
         # Look for classes today after current time
-        today_classes = [e for e in entries if e.day == current_day and int(e.slot) > current_hour]
+        today_classes = [e for e in entries if e.day == current_day and int(e.start_time) > current_hour]
         if today_classes:
-            next_class = min(today_classes, key=lambda x: int(x.slot))
-            time_diff = int(next_class.slot) - current_hour
+            next_class = min(today_classes, key=lambda x: int(x.start_time))
+            time_diff = int(next_class.start_time) - current_hour
             response = f"⏰ **Your Next Class:**\n\n"
             response += f"📚 **{next_class.course.name}** ({next_class.course.course_code})\n"
-            response += f"🕐 **{next_class.slot}:00** (in {time_diff} hour(s))\n"
+            response += f"🕐 **{next_class.start_time}:00** (in {time_diff} hour(s))\n"
             response += f"📍 **{next_class.room.name}**\n"
             response += f"👨‍🏫 **{next_class.faculty.faculty_name}**"
             
@@ -2902,10 +2980,10 @@ def get_next_class_chatbot(current_user):
             day = days_order[day_idx]
             day_classes = [e for e in entries if e.day == day]
             if day_classes:
-                next_class = min(day_classes, key=lambda x: int(x.slot))
+                next_class = min(day_classes, key=lambda x: int(x.start_time))
                 response = f"⏰ **Your Next Class:**\n\n"
                 response += f"📚 **{next_class.course.name}** ({next_class.course.course_code})\n"
-                response += f"📅 **{day} at {next_class.slot}:00**\n"
+                response += f"📅 **{day} at {next_class.start_time}:00**\n"
                 response += f"📍 **{next_class.room.name}**\n"
                 response += f"👨‍🏫 **{next_class.faculty.faculty_name}**"
                 
@@ -2957,7 +3035,7 @@ def get_free_rooms_chatbot(current_user):
         
         # Find occupied rooms
         occupied_rooms = db.session.query(Timetable.room_id)\
-            .filter_by(day=current_day, slot=current_slot)\
+            .filter_by(day=current_day, start_time=current_slot)\
             .distinct().all()
         occupied_room_ids = [room[0] for room in occupied_rooms]
         
@@ -3216,7 +3294,7 @@ def get_swap_requests_chatbot(current_user):
         for req in requests:
             status_emoji = {"pending": "⏳", "approved": "✅", "rejected": "❌", "cancelled": "🚫"}.get(req.status, "❓")
             response += f"{status_emoji} **{req.requester.faculty_name} ↔️ {req.requested.faculty_name}**\n"
-            response += f"   📅 {req.requester_date} {req.requester_slot} ↔️ {req.requested_date} {req.requested_slot}\n"
+            response += f"   📅 {req.requester_date} {req.requester_start_time} ↔️ {req.requested_date} {req.requested_start_time}\n"
             response += f"   🏷️ Status: {req.status.title()}\n\n"
         
         return jsonify({

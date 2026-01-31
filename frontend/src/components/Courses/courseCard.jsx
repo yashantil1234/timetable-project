@@ -18,7 +18,7 @@ const departmentColors = {
 };
 
 export default function CourseCard({ course, onEdit }) {
-  const departmentColor = departmentColors[course.department] || "bg-gray-100 text-gray-800";
+  const departmentColor = departmentColors[course.dept_name] || "bg-gray-100 text-gray-800";
 
   return (
     <Card className="group hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:scale-105">
@@ -28,7 +28,7 @@ export default function CourseCard({ course, onEdit }) {
             <CardTitle className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
               {course.name}
             </CardTitle>
-            <p className="text-sm font-medium text-blue-600">{course.code}</p>
+            <p className="text-sm font-medium text-blue-600">{course.type}</p>
           </div>
           <Button
             variant="ghost"
@@ -44,10 +44,10 @@ export default function CourseCard({ course, onEdit }) {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <Badge className={`${departmentColor} border-0`}>
-              {course.department}
+              {course.dept_name}
             </Badge>
             <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-              {course.semester}
+              Semester {course.semester}
             </Badge>
           </div>
 
@@ -58,15 +58,8 @@ export default function CourseCard({ course, onEdit }) {
             </div>
           </div>
 
-          {course.description && (
-            <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-              {course.description}
-            </p>
-          )}
-
           <div className="pt-2 border-t border-gray-100">
             <div className="flex items-center justify-between text-xs text-gray-500">
-              <span>Created {new Date(course.created_date).toLocaleDateString()}</span>
               <div className="flex items-center gap-1">
                 <BookOpen className="w-3 h-3" />
                 <span>Course</span>

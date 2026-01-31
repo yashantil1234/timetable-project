@@ -1,6 +1,9 @@
-room_id,capacity,resources,current_status
-1,50,"Projector, AC",free
-2,40,Whiteboard,free
-3,30,"Computers, AC",free
-4,60,Smart Board,free
-5,25,Lab Equipment,free
+room_id,name,capacity,resources,current_status
+1,Room-101,50,"Projector, AC",free
+2,Room-102,40,Whiteboard,free
+3,Lab-201,30,"Computers, AC",free
+4,Room-103,60,Smart Board,free
+5,Lab-202,25,Lab Equipment,free
+6,w-121,30,,free
+7,e-121,30,,free
+8,classss-222,30,,free

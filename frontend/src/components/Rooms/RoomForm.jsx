@@ -11,23 +11,38 @@ import { X, Save } from "lucide-react";
 const ROOM_TYPES = ["Classroom", "Laboratory", "Auditorium", "Seminar Room", "Computer Lab"];
 
 export default function RoomForm({ room, onSubmit, onCancel }) {
+  // Parse room name into building and number for editing
+  const parseRoomName = (name) => {
+    if (!name) return { building: '', number: '' };
+    const parts = name.split('-');
+    if (parts.length >= 2) {
+      const number = parts.pop();
+      const building = parts.join('-');
+      return { building, number };
+    }
+    return { building: '', number: name };
+  };
+
+  const parsedName = room?.name ? parseRoomName(room.name) : { building: '', number: '' };
+
   const [formData, setFormData] = useState({
-    number: room?.number || '',
-    building: room?.building || '',
+    number: parsedName.number || room?.number || '',
+    building: parsedName.building || room?.building || '',
     capacity: room?.capacity || 30,
     type: room?.type || 'Classroom',
     floor: room?.floor || 1,
-    facilities: room?.facilities?.join(', ') || '',
+    facilities: room?.facilities?.join(', ') || room?.resources || '',
     is_active: room?.is_active !== false
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const submitData = {
-      ...formData,
-      facilities: formData.facilities 
-        ? formData.facilities.split(',').map(s => s.trim()).filter(s => s)
-        : []
+      name: `${formData.building}-${formData.number}`,
+      capacity: formData.capacity,
+      resources: formData.facilities
+        ? formData.facilities.split(',').map(s => s.trim()).filter(s => s).join(', ')
+        : ''
     };
     onSubmit(submitData);
   };

@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Course, Teacher, Room } from "../../api";
+import api from "../../services/api";
+import timeSlotsData from "../../Data/timeslots.json";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Clock } from "lucide-react";

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,21 +6,38 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BookOpen, Save, X } from "lucide-react";
+import api from "../../services/api";
 
 const departments = [
-  "Computer Science", "Mathematics", "Physics", "Chemistry", 
+  "Computer Science", "Mathematics", "Physics", "Chemistry",
   "Biology", "English", "History", "Business", "Engineering", "Psychology"
 ];
 
 export default function CourseForm({ course, onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
     name: course?.name || "",
-    code: course?.code || "",
-    department: course?.department || "",
+    type: course?.type || "",
+    dept_name: course?.dept_name || "",
+    faculty_id: course?.faculty_id || "",
+    year: course?.year || 1,
+    semester: course?.semester || 1,
     credits: course?.credits || 3,
-    semester: course?.semester || "",
-    description: course?.description || ""
+    hours_per_week: course?.hours_per_week || 4
   });
+
+  const [faculty, setFaculty] = useState([]);
+
+  useEffect(() => {
+    const loadFaculty = async () => {
+      try {
+        const data = await api.getFaculty();
+        setFaculty(data);
+      } catch (error) {
+        console.error("Error loading faculty:", error);
+      }
+    };
+    loadFaculty();
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -56,21 +73,21 @@ export default function CourseForm({ course, onSubmit, onCancel }) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="code">Course Code *</Label>
+              <Label htmlFor="type">Course Type *</Label>
               <Input
-                id="code"
-                value={formData.code}
-                onChange={(e) => handleChange('code', e.target.value)}
-                placeholder="e.g., CS101"
+                id="type"
+                value={formData.type}
+                onChange={(e) => handleChange('type', e.target.value)}
+                placeholder="e.g., Theory, Lab, Practical"
                 required
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="department">Department *</Label>
-              <Select value={formData.department} onValueChange={(value) => handleChange('department', value)}>
+              <Label htmlFor="dept_name">Department *</Label>
+              <Select value={formData.dept_name} onValueChange={(value) => handleChange('dept_name', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select department" />
                 </SelectTrigger>
@@ -81,6 +98,22 @@ export default function CourseForm({ course, onSubmit, onCancel }) {
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="faculty_id">Faculty *</Label>
+              <Select value={formData.faculty_id.toString()} onValueChange={(value) => handleChange('faculty_id', parseInt(value))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select faculty" />
+                </SelectTrigger>
+                <SelectContent>
+                  {faculty.map(f => (
+                    <SelectItem key={f.id} value={f.id.toString()}>{f.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label htmlFor="credits">Credits *</Label>
               <Select value={formData.credits.toString()} onValueChange={(value) => handleChange('credits', parseInt(value))}>
@@ -95,30 +128,47 @@ export default function CourseForm({ course, onSubmit, onCancel }) {
               </Select>
             </div>
             <div className="space-y-2">
+              <Label htmlFor="hours_per_week">Hours/Week *</Label>
+              <Select value={formData.hours_per_week.toString()} onValueChange={(value) => handleChange('hours_per_week', parseInt(value))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1,2,3,4,5,6,7,8].map(hour => (
+                    <SelectItem key={hour} value={hour.toString()}>{hour}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="year">Year *</Label>
+              <Select value={formData.year.toString()} onValueChange={(value) => handleChange('year', parseInt(value))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select year" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
+                  <SelectItem value="3">3</SelectItem>
+                  <SelectItem value="4">4</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="semester">Semester *</Label>
-              <Select value={formData.semester} onValueChange={(value) => handleChange('semester', value)}>
+              <Select value={formData.semester.toString()} onValueChange={(value) => handleChange('semester', parseInt(value))}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select semester" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Fall">Fall</SelectItem>
-                  <SelectItem value="Spring">Spring</SelectItem>
-                  <SelectItem value="Summer">Summer</SelectItem>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleChange('description', e.target.value)}
-              placeholder="Course description..."
-              rows={3}
-            />
-          </div>
+
 
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={onCancel}>

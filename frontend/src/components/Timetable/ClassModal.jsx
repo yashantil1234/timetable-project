@@ -7,7 +7,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Course, Teacher, Room, TimeSlot } from "../../api";
+import api from "../../services/api";
+import timeSlotsData from "../../Data/timeslots.json";
 import { Calendar, Clock, MapPin, User, BookOpen, Users } from "lucide-react";
 
 export default function ClassModal({ classItem, onClose }) {
@@ -24,13 +25,17 @@ export default function ClassModal({ classItem, onClose }) {
         console.warn("classItem is undefined, cannot load details.");
         return;
       }
-      
-      const [course, teacher, room, timeSlot] = await Promise.all([
-        Course.list().then(courses => courses.find(c => c.id === classItem.course_id)),
-        Teacher.list().then(teachers => teachers.find(t => t.id === classItem.teacher_id)),
-        Room.list().then(rooms => rooms.find(r => r.id === classItem.room_id)),
-        TimeSlot.list().then(slots => slots.find(s => s.id === classItem.timeslot_id))
+
+      const [courses, teachers, rooms] = await Promise.all([
+        api.getCourses(),
+        api.getFaculty(),
+        api.getRooms()
       ]);
+
+      const course = courses.find(c => c.id === classItem.course_id);
+      const teacher = teachers.find(t => t.id === classItem.teacher_id);
+      const room = rooms.find(r => r.id === classItem.room_id);
+      const timeSlot = timeSlotsData.find(s => s.id === classItem.timeslot_id);
 
       setDetails({ course, teacher, room, timeSlot });
     } catch (error) {
