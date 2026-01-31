@@ -46,13 +46,17 @@ export default function Courses() {
   };
 
   const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.code.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment = filterDepartment === "all" || course.department === filterDepartment;
+    const courseName = (course.name || '').toLowerCase();
+    const courseCode = (course.code || '').toLowerCase();
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = courseName.includes(searchLower) || courseCode.includes(searchLower);
+    
+    const courseDept = course.dept_name || course.department || '';
+    const matchesDepartment = filterDepartment === "all" || courseDept === filterDepartment;
     return matchesSearch && matchesDepartment;
   });
 
-  const departments = [...new Set(courses.map(c => c.department))];
+  const departments = [...new Set(courses.map(c => c.dept_name || c.department).filter(Boolean))];
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -94,9 +98,9 @@ export default function Courses() {
                   onChange={(e) => setFilterDepartment(e.target.value)}
                   className="border border-gray-300 rounded-lg px-3 py-2 bg-white"
                 >
-                  <option key="all" value="all">All Departments</option>
-                  {departments.map(dept => (
-                    <option key={dept} value={dept}>{dept}</option>
+                  <option value="all">All Departments</option>
+                  {departments.map((dept, index) => (
+                    <option key={`dept-${dept}-${index}`} value={dept}>{dept}</option>
                   ))}
                 </select>
               </div>
@@ -142,9 +146,9 @@ export default function Courses() {
               </p>
             </div>
           ) : (
-            filteredCourses.map((course) => (
+            filteredCourses.map((course, index) => (
               <CourseCard
-                key={course.id}
+                key={course.id || course.course_id || `course-${index}`}
                 course={course}
                 onEdit={handleEdit}
               />

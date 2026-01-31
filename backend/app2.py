@@ -1215,6 +1215,15 @@ def login():
 # -----------------------
 @app.route("/api/admin/login", methods=["GET", "POST", "OPTIONS"])
 def admin_login():
+    # Handle OPTIONS preflight request
+    if request.method == "OPTIONS":
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,x-access-token")
+        response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+        response.headers.add("Access-Control-Allow-Credentials", "true")
+        return response
+
     try:
         if request.method != "POST":
             return jsonify({"message": "Use POST with JSON: username, password (admin credentials)"}), 200
