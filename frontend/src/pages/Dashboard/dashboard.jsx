@@ -6,10 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 // import { createPageUrl } from "@/utils";
-import { 
-  BookOpen, 
-  Users, 
-  MapPin, 
+import {
+  BookOpen,
+  Users,
+  MapPin,
   Calendar,
   Plus,
   Clock,
@@ -18,10 +18,11 @@ import {
 } from "lucide-react";
 
 import StatCard from "../../components/Dashboard/statCard";
-import RecentClasses from "../../components/Dashboard/recentClasses";
 import WeeklyOverview from "../../components/Dashboard/weeklyOverview";
 import QuickActions from "../../components/Dashboard/quickActions";
-import TodaySchedule from "../../components/Dashboard/todaySchedule";
+import RecentSwapRequests from "../../components/Dashboard/recentSwapRequests";
+import RecentLeaveRequests from "../../components/Dashboard/recentLeaveRequests";
+import UserManagement from "../../components/Dashboard/UserManagement";
 
 
 export default function Dashboard() {
@@ -33,7 +34,8 @@ export default function Dashboard() {
     classes: 0,
     timeSlots: 0
   });
-  const [recentClasses, setRecentClasses] = useState([]);
+  const [swapRequests, setSwapRequests] = useState([]);
+  const [leaveRequests, setLeaveRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -53,11 +55,13 @@ export default function Dashboard() {
     setIsLoading(true);
     try {
       // Use public endpoints for basic stats (works for all users)
-      const [courses, teachers, rooms, timeSlots] = await Promise.all([
+      const [courses, teachers, rooms, timeSlots, swaps, leaves] = await Promise.all([
         ApiService.getCoursesLegacy(),
         ApiService.getFacultyLegacy(),
         ApiService.getRoomsLegacy(),
-        ApiService.getTimetable() // This will get classes/timetable data
+        ApiService.getTimetable(), // This will get classes/timetable data
+        ApiService.getAdminSwapRequests('pending'),
+        ApiService.getAdminLeaveRequests('pending')
       ]);
 
       setStats({
@@ -68,20 +72,19 @@ export default function Dashboard() {
         timeSlots: timeSlots ? timeSlots.length : 0
       });
 
-      // For recent classes, we'll use the timetable data
-      setRecentClasses(timeSlots || []);
+      setSwapRequests(swaps || []);
+      setLeaveRequests(leaves || []);
     } catch (error) {
       console.error("Error loading dashboard data:", error);
     }
     setIsLoading(false);
 
   };
-    const currentDay = new Date().toLocaleDateString("en-US", { weekday: "long" });
-    const currentTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const currentDay = new Date().toLocaleDateString("en-US", { weekday: "long" });
+  const currentTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-  
-  const todayDateString = new Date().toISOString().split('T')[0];
-  const todayClasses = recentClasses.filter(cls => cls.date && cls.date.startsWith(todayDateString));
+
+
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -145,26 +148,27 @@ export default function Dashboard() {
             color="pink"
             isLoading={isLoading}
             onClick={() => navigate('/timetable')}
-          /> }
+          />}
         </div>
 
         {/* Main Content Grid */}
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <TodaySchedule 
-              todayClasses={todayClasses}
-              isLoading={isLoading}
-              currentTime={currentTime}
-            />
-          </div>
-          <div className="lg:col-span-2">
-            <RecentClasses classes={recentClasses} isLoading={isLoading} />
+            <div className="grid md:grid-cols-2 gap-8">
+              <RecentSwapRequests requests={swapRequests} isLoading={isLoading} onUpdate={loadDashboardData} />
+              <RecentLeaveRequests requests={leaveRequests} isLoading={isLoading} onUpdate={loadDashboardData} />
+            </div>
           </div>
 
           {/* Weekly Overview */}
           <div>
             <WeeklyOverview />
           </div>
+        </div>
+
+        {/* User Management */}
+        <div className="mt-8">
+          <UserManagement />
         </div>
       </div>
     </div>

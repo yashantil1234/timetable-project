@@ -24,11 +24,13 @@ def generate_timetable_internal():
     if not courses or not faculty or not rooms or not sections:
         return {"error": "Need courses, faculty, rooms, and sections to generate timetable"}
 
-    time_slots = ["Mon_09", "Mon_11", "Mon_01", "Mon_03",
-                  "Tue_09", "Tue_11", "Tue_01", "Tue_03",
-                  "Wed_09", "Wed_11", "Wed_01", "Wed_03",
-                  "Thu_09", "Thu_11", "Thu_01", "Thu_03",
-                  "Fri_09", "Fri_11", "Fri_01", "Fri_03"]
+    time_slots = [
+        "Mon_09", "Mon_10", "Mon_11", "Mon_01", "Mon_02", "Mon_03", "Mon_04",
+        "Tue_09", "Tue_10", "Tue_11", "Tue_01", "Tue_02", "Tue_03", "Tue_04",
+        "Wed_09", "Wed_10", "Wed_11", "Wed_01", "Wed_02", "Wed_03", "Wed_04",
+        "Thu_09", "Thu_10", "Thu_11", "Thu_01", "Thu_02", "Thu_03", "Thu_04",
+        "Fri_09", "Fri_10", "Fri_11", "Fri_01", "Fri_02", "Fri_03", "Fri_04"
+    ]
 
     model = cp_model.CpModel()
     assignments = {}
@@ -175,13 +177,25 @@ def generate_timetable_internal():
                     section.id in assignments[c.course_id]):
                     for (slot, room_id), var in assignments[c.course_id][section.id].items():
                         if solver.Value(var) == 1:
+                            day_map = {
+                                "Mon": "Monday", "Tue": "Tuesday", "Wed": "Wednesday",
+                                "Thu": "Thursday", "Fri": "Friday", "Sat": "Saturday"
+                            }
+                            time_map = {
+                                "09": "09:00", "10": "10:00", "11": "11:00", "12": "12:00",
+                                "01": "01:00", "02": "02:00", "03": "03:00", "04": "04:00"
+                            }
+                            
+                            raw_day = slot.split("_")[0]
+                            raw_time = slot.split("_")[1]
+                            
                             entry = Timetable(
                                 course_id=c.course_id,
                                 section_id=section.id,
                                 faculty_id=c.faculty_id,
                                 room_id=room_id,
-                                day=slot.split("_")[0],
-                                start_time=slot.split("_")[1]
+                                day=day_map.get(raw_day, raw_day),
+                                start_time=time_map.get(raw_time, raw_time)
                             )
                             timetable_entries.append(entry)
                             timetable_data.append({

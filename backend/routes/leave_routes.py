@@ -21,7 +21,7 @@ def submit_leave_request(current_user):
         if not all(field in data for field in required_fields):
             return jsonify({"error": "Missing required fields: leave_type, start_date, end_date, reason"}), 400
         
-        valid_types = ["sick", "vacation", "personal", "emergency", "medical", "family"]
+        valid_types = ["sick", "vacation", "personal", "emergency", "medical", "family", "Casual Leave", "casual"]
         if data["leave_type"] not in valid_types:
             return jsonify({"error": f"Invalid leave type. Must be one of: {', '.join(valid_types)}"}), 400
         
@@ -80,6 +80,10 @@ def get_my_leave_requests(current_user):
             query = query.filter_by(status=status_filter)
         
         requests = query.order_by(LeaveRequest.created_at.desc()).all()
+        
+        with open("debug_api_log.txt", "a") as f:
+            f.write(f"GET /leave/my-requests: User={current_user.full_name} (ID {current_user.id})\n")
+            f.write(f"Found {len(requests)} leave requests.\n")
         
         return jsonify([{
             "id": req.id,

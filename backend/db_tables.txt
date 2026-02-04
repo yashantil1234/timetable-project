@@ -1,0 +1,14 @@
+departments
+classrooms
+faculty
+sections
+course_allocations
+users
+courses
+room_occupancy
+swap_requests
+leave_requests
+chatbot_conversations
+system_announcements
+timetable
+faculty_unavailability

@@ -14,20 +14,31 @@ export default function Teachers() {
   const [editingTeacher, setEditingTeacher] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("all");
+  const [departments, setDepartments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadTeachers();
+    loadData();
   }, []);
 
-  const loadTeachers = async () => {
+  const loadData = async () => {
     try {
+      console.log('[Teachers] Starting to load data...');
       setIsLoading(true);
-      const data = await api.getFaculty();
-      setTeachers(data);
+      const [teachersData, departmentsData] = await Promise.all([
+        api.getFaculty(),
+        api.getDepartments()
+      ]);
+      console.log('[Teachers] Received teachersData:', teachersData);
+      console.log('[Teachers] Received departmentsData:', departmentsData);
+      console.log('[Teachers] Number of teachers:', teachersData?.length || 0);
+      setTeachers(teachersData);
+      setDepartments(departmentsData);
       setIsLoading(false);
+      console.log('[Teachers] Data loading complete, isLoading set to false');
     } catch (error) {
-      console.error('Error loading teachers:', error);
+      console.error('[Teachers] Error loading data:', error);
+      console.error('[Teachers] Error details:', error.message, error.stack);
       setTeachers([]);
       setIsLoading(false);
     }
@@ -36,17 +47,15 @@ export default function Teachers() {
   const handleSubmit = async (teacherData) => {
     try {
       if (editingTeacher) {
-        // Note: api.js doesn't have an update method for faculty, so this might need to be added
-        // For now, we'll skip the update functionality
-        console.warn("Update functionality not implemented in API");
-        alert("Update functionality not implemented yet");
+        await api.updateFaculty(editingTeacher.id, teacherData);
+        alert("Teacher updated successfully!");
       } else {
         await api.addFaculty(teacherData);
         alert("Teacher added successfully!");
       }
       setShowForm(false);
       setEditingTeacher(null);
-      loadTeachers();
+      loadData();
     } catch (error) {
       console.error('Error submitting teacher:', error);
       alert(`Error: ${error.message || 'Failed to save teacher'}`);
@@ -60,12 +69,13 @@ export default function Teachers() {
 
   const filteredTeachers = teachers.filter(teacher => {
     const matchesSearch = teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         teacher.email?.toLowerCase().includes(searchTerm.toLowerCase());
+      teacher.email?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDepartment = filterDepartment === "all" || teacher.dept_name === filterDepartment;
     return matchesSearch && matchesDepartment;
   });
 
-  const departments = [...new Set(teachers.map(t => t.dept_name))];
+  console.log('[Teachers] Filtering - Total teachers:', teachers.length, 'Filtered:', filteredTeachers.length, 'isLoading:', isLoading);
+
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -78,7 +88,7 @@ export default function Teachers() {
             </h1>
             <p className="text-gray-600 mt-1">Manage faculty members and their information</p>
           </div>
-          <Button 
+          <Button
             onClick={() => setShowForm(true)}
             className="gap-2 bg-green-600 hover:bg-green-700 shadow-lg hover:scale-105 transition-all duration-300"
           >
@@ -109,7 +119,7 @@ export default function Teachers() {
                 >
                   <option value="all">All Departments</option>
                   {departments.map(dept => (
-                    <option key={dept} value={dept}>{dept}</option>
+                    <option key={dept.id} value={dept.dept_name}>{dept.dept_name}</option>
                   ))}
                 </select>
               </div>
@@ -121,6 +131,7 @@ export default function Teachers() {
         {showForm && (
           <TeacherForm
             teacher={editingTeacher}
+            departments={departments}
             onSubmit={handleSubmit}
             onCancel={() => {
               setShowForm(false);

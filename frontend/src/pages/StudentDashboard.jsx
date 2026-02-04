@@ -3,6 +3,7 @@ import ApiService from "../services/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Calendar,
@@ -43,6 +44,7 @@ export default function StudentDashboard({ onLogout }) {
     rollNumber: "",
     phone: ""
   });
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   useEffect(() => {
     loadStudentData();
@@ -78,16 +80,25 @@ export default function StudentDashboard({ onLogout }) {
         attendance: courseStats.attendancePercentage
       });
 
-      // Extract student info from context or API
-      const user = ApiService.getCurrentUser();
+      // Load student profile
+      const profile = await ApiService.getStudentProfile();
       setStudentInfo({
-        name: user.full_name || "Student User",
-        email: user.email || "student@college.edu",
-        department: user.department || "Computer Science",
-        year: "2nd Year",
-        semester: "Current Semester",
-        rollNumber: user.user_id || "CS21001",
-        phone: "+91 9876543210"
+        name: profile.full_name || "Student User",
+        email: profile.email || "student@college.edu",
+        department: profile.department || "Unknown Department",
+        year: profile.year ? `${profile.year}th Year` : "Unknown Year",
+        semester: profile.semester || "Current Semester",
+        rollNumber: profile.roll_number || profile.username,
+        phone: profile.phone || "N/A"
+      });
+
+      setStats({
+        totalCourses: courseStats.totalCourses,
+        totalClasses: courseStats.totalClasses,
+        attendedClasses: courseStats.attendedClasses,
+        upcomingClasses: todayClasses.length,
+        cgpa: 8.5, // This is still hardcoded as we didn't add CGPA yet, but attendance is real now
+        attendance: profile.attendance || courseStats.attendancePercentage
       });
 
     } catch (error) {
@@ -174,7 +185,7 @@ export default function StudentDashboard({ onLogout }) {
             <Button variant="ghost" size="sm">
               <Bell className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" onClick={() => setShowProfileModal(true)}>
               <Settings className="w-4 h-4" />
             </Button>
             <Button variant="outline" size="sm" onClick={onLogout}>
@@ -258,6 +269,12 @@ export default function StudentDashboard({ onLogout }) {
             <AnnouncementsCard />
           </div>
         </div>
+
+        <ProfileModal
+          isOpen={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          student={studentInfo}
+        />
       </div>
     </div>
   );
@@ -524,10 +541,7 @@ function ProfileSummary({ student }) {
           </div>
         </div>
 
-        <Button variant="outline" className="w-full mt-4">
-          <Settings className="w-4 h-4 mr-2" />
-          Edit Profile
-        </Button>
+        {/* Removed Edit Profile button for now as it's not implemented */}
       </CardContent>
     </Card>
   );
@@ -589,3 +603,50 @@ function AnnouncementsCard() {
     </Card>
   );
 }
+const ProfileModal = ({ isOpen, onClose, student }) => {
+  if (!isOpen) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>My Profile</DialogTitle>
+          <DialogDescription>
+            View your personal and academic information.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="flex flex-col items-center justify-center mb-4">
+            <div className="h-24 w-24 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mb-2 border-4 border-white shadow-lg">
+              <User className="w-12 h-12" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900">{student.name}</h3>
+            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">{student.department}</span>
+          </div>
+
+          <div className="space-y-3">
+            <div className="grid grid-cols-3 items-center gap-4">
+              <span className="text-sm font-medium text-gray-500">Roll Number</span>
+              <span className="col-span-2 text-sm font-semibold text-gray-900">{student.rollNumber}</span>
+            </div>
+            <div className="grid grid-cols-3 items-center gap-4">
+              <span className="text-sm font-medium text-gray-500">Year & Sem</span>
+              <span className="col-span-2 text-sm text-gray-900">{student.year}, {student.semester}</span>
+            </div>
+            <div className="grid grid-cols-3 items-center gap-4">
+              <span className="text-sm font-medium text-gray-500">Email</span>
+              <span className="col-span-2 text-sm text-gray-900">{student.email}</span>
+            </div>
+            <div className="grid grid-cols-3 items-center gap-4">
+              <span className="text-sm font-medium text-gray-500">Phone</span>
+              <span className="col-span-2 text-sm text-gray-900">{student.phone}</span>
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button onClick={onClose}>Close</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};

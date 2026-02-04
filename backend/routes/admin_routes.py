@@ -7,8 +7,10 @@ from flask import Blueprint, request, jsonify, make_response
 from extensions import db
 from models import (
     Department, Faculty, Course, Classroom, Section, User,
-    FacultyUnavailability, SwapRequest, LeaveRequest, SystemAnnouncement
+    FacultyUnavailability, SwapRequest, LeaveRequest, SystemAnnouncement,
+    Timetable
 )
+from services.scheduler_service import generate_timetable_internal
 from utils.decorators import token_required, admin_required
 from utils.export_utils import export_csvs
 
@@ -24,6 +26,27 @@ def handle_options():
         response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH')
         response.headers.add('Access-Control-Max-Age', '3600')
         return response
+
+
+@admin_bp.route("/users", methods=["GET"])
+@token_required
+@admin_required
+def admin_get_users(current_user):
+    """Get all registered users"""
+    try:
+        users = User.query.order_by(User.id.desc()).all()
+        return jsonify([{
+            "id": u.id,
+            "username": u.username,
+            "full_name": u.full_name,
+            "email": u.email,
+            "role": u.role,
+            "department": u.department.dept_name if u.department else None,
+            "dept_id": u.dept_id,
+            "is_active": u.is_active
+        } for u in users])
+    except Exception as e:
+        return jsonify({"error": f"Failed to fetch users: {str(e)}"}), 500
 
 
 @admin_bp.route("/departments", methods=["GET", "POST", "OPTIONS"])
@@ -66,7 +89,9 @@ def admin_faculty(current_user):
                     "id": f.faculty_id,
                     "name": f.faculty_name,
                     "dept_name": f.department.dept_name if f.department else None,
-                    "max_hours": f.max_hours
+                    "max_hours": f.max_hours,
+                    "email": f.email,
+                    "subject": f.subject
                 } for f in faculty
             ])
         except Exception as e:
@@ -85,7 +110,8 @@ def admin_faculty(current_user):
                 faculty_name=data["faculty_name"].strip(),
                 max_hours=data.get("max_hours", 12),
                 dept_id=dept.id,
-                email=data.get("email", "").strip() if data.get("email") else None
+                email=data.get("email", "").strip() if data.get("email") else None,
+                subject=data.get("subject", "").strip() if data.get("subject") else None
             )
             db.session.add(faculty)
             db.session.commit()
@@ -94,6 +120,121 @@ def admin_faculty(current_user):
         except Exception as e:
             db.session.rollback()
             return jsonify({"error": f"Failed to add faculty: {str(e)}"}), 500
+
+
+
+@admin_bp.route("/faculty/<int:faculty_id>", methods=["PUT", "DELETE", "OPTIONS"])
+@token_required
+@admin_required
+def admin_manage_faculty(current_user, faculty_id):
+    faculty = Faculty.query.get(faculty_id)
+    if not faculty:
+        return jsonify({"error": "Faculty not found"}), 404
+
+    if request.method == "PUT":
+        try:
+            data = request.json
+            if not data:
+                return jsonify({"error": "No data provided"}), 400
+
+            if 'faculty_name' in data:
+                faculty.faculty_name = data['faculty_name'].strip()
+            if 'email' in data:
+                faculty.email = data['email'].strip()
+            if 'max_hours' in data:
+                faculty.max_hours = data['max_hours']
+            if 'subject' in data:
+                faculty.subject = data['subject'].strip()
+            
+            if 'dept_name' in data:
+                dept = Department.query.filter_by(dept_name=data['dept_name']).first()
+                if not dept:
+                    return jsonify({"error": "Department not found"}), 404
+                faculty.dept_id = dept.id
+
+            db.session.commit()
+            export_csvs()
+            return jsonify({"message": f"Faculty member {faculty.faculty_name} updated successfully"}), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": f"Failed to update faculty: {str(e)}"}), 500
+
+    elif request.method == "DELETE":
+        try:
+            db.session.delete(faculty)
+            db.session.commit()
+            export_csvs()
+            return jsonify({"message": "Faculty member deleted successfully"}), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": f"Failed to delete faculty: {str(e)}"}), 500
+
+
+@admin_bp.route("/students", methods=["GET", "POST", "OPTIONS"])
+@token_required
+@admin_required
+def admin_students(current_user):
+    if request.method == "GET":
+        try:
+            students = User.query.filter_by(role='student').all()
+            return jsonify([
+                {
+                    "id": s.id,
+                    "username": s.username,
+                    "full_name": s.full_name,
+                    "email": s.email,
+                    "dept_name": s.department.dept_name if s.department else None,
+                    "year": s.year,
+                    "section_name": s.section.name if s.section else None
+                } for s in students
+            ])
+        except Exception as e:
+            return jsonify({"error": f"Failed to fetch students: {str(e)}"}), 500
+    else:
+        try:
+            data = request.json
+            required_fields = ["username", "full_name", "dept_name", "year", "password"]
+            if not all(data.get(field) for field in required_fields):
+                return jsonify({"error": "Username, full name, department, year, and password are required"}), 400
+            
+            # Check if username already exists
+            if User.query.filter_by(username=data["username"].strip()).first():
+                return jsonify({"error": "Username already exists"}), 400
+            
+            # Find department
+            dept = Department.query.filter_by(dept_name=data["dept_name"]).first()
+            if not dept:
+                return jsonify({"error": "Department not found"}), 404
+            
+            # Find section if provided
+            section_id = None
+            if data.get("section_name"):
+                section = Section.query.filter_by(
+                    name=data["section_name"],
+                    year=data["year"],
+                    dept_id=dept.id
+                ).first()
+                if section:
+                    section_id = section.id
+            
+            # Create student user
+            student = User(
+                username=data["username"].strip(),
+                full_name=data["full_name"].strip(),
+                email=data.get("email", "").strip() if data.get("email") else None,
+                role='student',
+                dept_id=dept.id,
+                year=data["year"],
+                section_id=section_id
+            )
+            student.set_password(data["password"])
+            db.session.add(student)
+            db.session.commit()
+            export_csvs()
+            return jsonify({"message": "Student added successfully!", "student_id": student.id}), 201
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": f"Failed to add student: {str(e)}"}), 500
 
 
 @admin_bp.route("/courses", methods=["GET", "POST", "OPTIONS"])
@@ -203,6 +344,70 @@ def admin_courses(current_user):
             db.session.rollback()
             return jsonify({"error": f"Failed to create course: {str(e)}"}), 500
 
+
+@admin_bp.route("/courses/<int:course_id>", methods=["PUT", "DELETE", "OPTIONS"])
+@token_required
+@admin_required
+def admin_manage_course(current_user, course_id):
+    course = Course.query.get(course_id)
+    if not course:
+        return jsonify({"error": "Course not found"}), 404
+
+    if request.method == "PUT":
+        try:
+            data = request.json or {}
+            
+            # Update fields if provided
+            if 'name' in data:
+                course.name = data['name'].strip()
+            if 'type' in data:
+                course.type = data['type'].strip()
+            if 'credits' in data:
+                course.credits = data['credits']
+            if 'hours_per_week' in data:
+                course.hours_per_week = data['hours_per_week']
+            
+            if 'dept_name' in data:
+                dept = Department.query.filter_by(dept_name=data['dept_name']).first()
+                if dept:
+                    course.dept_id = dept.id
+            
+            if 'faculty_id' in data:
+                course.faculty_id = data['faculty_id'] # Can be None
+                
+            if 'year' in data:
+                course.year = data['year']
+            if 'semester' in data:
+                course.semester = data['semester']
+                
+            # Handle fixed slot updates
+            if 'is_fixed' in data:
+                course.is_fixed = data['is_fixed']
+                if course.is_fixed:
+                    course.fixed_day = data.get('fixed_day')
+                    course.fixed_slot = data.get('fixed_slot')
+                    course.fixed_room_id = data.get('fixed_room_id')
+                else:
+                    course.fixed_day = None
+                    course.fixed_slot = None
+                    course.fixed_room_id = None
+
+            db.session.commit()
+            export_csvs()
+            return jsonify({"message": f"Course {course.name} updated successfully."}), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": f"Failed to update course: {str(e)}"}), 500
+
+    elif request.method == "DELETE":
+        try:
+            db.session.delete(course)
+            db.session.commit()
+            export_csvs()
+            return jsonify({"message": "Course deleted successfully."}), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": f"Failed to delete course: {str(e)}"}), 500
 
 @admin_bp.route("/rooms", methods=["GET", "POST", "OPTIONS"])
 @token_required
@@ -323,46 +528,6 @@ def admin_sections(current_user):
         except Exception as e:
             db.session.rollback()
             return jsonify({"error": f"Failed to add section: {str(e)}"}), 500
-
-
-@admin_bp.route("/students", methods=["GET", "POST", "OPTIONS"])
-@token_required
-@admin_required
-def admin_students(current_user):
-    if request.method == "GET":
-        try:
-            students = User.query.filter_by(role='student').all()
-            result = [{
-                "id": s.id,
-                "username": s.username,
-                "dept_name": s.department.dept_name if s.department else None,
-                "year": s.year,
-                "section_name": s.section.name if s.section else None
-            } for s in students]
-            return jsonify(result), 200
-        except Exception as e:
-            return jsonify({"error": f"Failed to fetch students: {str(e)}"}), 500
-    else:
-        try:
-            data = request.json or {}
-            username = (data.get("username") or "").strip()
-            password = data.get("password")
-            dept_id = data.get("dept_id")
-            year = data.get("year")
-            section_id = data.get("section_id")
-            if not all([username, password, dept_id, year, section_id]):
-                return jsonify({"error": "Username, password, dept_id, year, and section_id are required"}), 400
-            if User.query.filter_by(username=username).first():
-                return jsonify({"error": "Username already exists"}), 400
-            user = User(username=username, role="student", dept_id=dept_id, year=year, section_id=section_id)
-            user.set_password(password)
-            db.session.add(user)
-            db.session.commit()
-            export_csvs()
-            return jsonify({"message": "Student created successfully", "student_id": user.id}), 201
-        except Exception as e:
-            db.session.rollback()
-            return jsonify({"error": f"Failed to create student: {str(e)}"}), 500
 
 
 @admin_bp.route("/students/<int:student_id>", methods=["GET", "PUT", "DELETE", "OPTIONS"])
@@ -739,3 +904,110 @@ def admin_bulk_leave_action(current_user):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Failed to perform bulk action: {str(e)}"}), 500
+
+@admin_bp.route("/generate_timetable", methods=["GET", "POST", "OPTIONS"])
+@token_required
+@admin_required
+def generate_timetable(current_user):
+    if request.method != "POST":
+        return jsonify({"message": "Use POST (no body) to generate timetable"}), 200
+    
+    try:
+        result = generate_timetable_internal()
+        if "error" in result:
+            return jsonify(result), 400
+            
+        timetable = Timetable.query.all()
+        result_data = []
+        
+        for t in timetable:
+            result_data.append({
+                "course": t.course.name,
+                "section": f"{t.section.name} (Year {t.section.year})",
+                "faculty": t.faculty.faculty_name if t.faculty else "N/A",
+                "room": t.room.name,
+                "day": t.day,
+                "start_time": t.start_time,
+                "department": t.course.department.dept_name,
+                "year": t.section.year,
+                "credits": t.course.credits
+            })
+            
+        return jsonify({
+            "message": "Timetable generated successfully!",
+            "stats": result.get("stats"),
+            "timetable": result_data
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@admin_bp.route("/users/register", methods=["POST", "OPTIONS"])
+@token_required
+@admin_required
+def admin_register_user(current_user):
+    try:
+        data = request.json or {}
+        role = data.get("role")
+        username = data.get("username")
+        password = data.get("password")
+        
+        if not role or not username or not password:
+            return jsonify({"error": "Username, password and role are required"}), 400
+            
+        if User.query.filter_by(username=username).first():
+            return jsonify({"error": "Username already exists"}), 400
+            
+        user = User(
+            username=username,
+            role=role,
+            full_name=data.get("full_name"),
+            email=data.get("email"),
+            phone=data.get("phone")
+        )
+        user.set_password(password)
+        
+        dept_name = data.get("dept_name")
+        department = None
+        if dept_name:
+            department = Department.query.filter_by(dept_name=dept_name).first()
+            if not department:
+                return jsonify({"error": "Department not found"}), 404
+            user.dept_id = department.id
+            
+        if role == "student":
+            user.year = data.get("year")
+            user.roll_number = data.get("roll_number")
+            section_name = data.get("section_name")
+            
+            if user.year and section_name and department:
+                section = Section.query.filter_by(
+                    name=section_name, 
+                    year=user.year, 
+                    dept_id=department.id
+                ).first()
+                if section:
+                    user.section_id = section.id
+        
+        elif role == "teacher":
+            # Check if faculty entry exists or create it
+            if department and user.full_name:
+                faculty = Faculty.query.filter_by(faculty_name=user.full_name, dept_id=department.id).first()
+                if not faculty:
+                    faculty = Faculty(
+                        faculty_name=user.full_name,
+                        dept_id=department.id,
+                        email=user.email,
+                        max_hours=12 # Default
+                    )
+                    db.session.add(faculty)
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        return jsonify({"message": f"{role.capitalize()} registered successfully", "user_id": user.id}), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to register user: {str(e)}"}), 500
+

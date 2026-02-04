@@ -1,202 +1,298 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../../services/api";
-import timeSlotsData from "../../Data/timeslots.json";
 import { Button } from "@/components/ui/button";
-import { Plus, Calendar, Clock } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ClassModal from "../../components/Timetable/ClassModal";
-import ScheduleForm from "../../components/Timetable/ScheduleForm";
-import TimetableGrid from "../../components/timetable/TimetableGrid";
-import ConflictChecker from "../../components/Timetable/ConflictChecker";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import DayView from "../../components/Timetable/DayView";
-
+import { Card, CardContent } from "@/components/ui/card";
+import { Sparkles, Calendar, Filter, Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Timetable() {
-  const [timeSlots, setTimeSlots] = useState([]);
-  const [teachers, setTeachers] = useState([]);
-  const [subjects, setSubjects] = useState([]);
-  const [rooms, setRooms] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [editingSlot, setEditingSlot] = useState(null);
-  const [selectedSemester, setSelectedSemester] = useState("1");
-  const [conflicts, setConflicts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [classes, setClasses] = useState([]);
-  const [selectedDay, setSelectedDay] = useState(new Date().toLocaleDateString('en-US', { weekday: 'long' }));
-  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const [timetable, setTimetable] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [sections, setSections] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [filterDept, setFilterDept] = useState("all");
+  const [filterYear, setFilterYear] = useState("all");
+  const [filterSection, setFilterSection] = useState("all");
+
+  const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const TIMES = ["09:00", "10:00", "11:00", "12:00", "01:00", "02:00", "03:00", "04:00"];
+
+  const areFiltersComplete = filterDept !== "all" && filterYear !== "all" && filterSection !== "all";
 
   useEffect(() => {
-    loadTimetableData();
+    loadMetadata();
   }, []);
 
-  const checkConflicts = useCallback(() => {
-    const conflictList = [];
-
-    timeSlots.forEach((slot, index) => {
-      timeSlots.slice(index + 1).forEach(otherSlot => {
-        if (slot.day === otherSlot.day &&
-            slot.start === otherSlot.start &&
-            slot.end === otherSlot.end) {
-
-          if (slot.teacher_id && otherSlot.teacher_id && slot.teacher_id === otherSlot.teacher_id) {
-            const timeStr = slot.start && slot.end ? `${slot.start}-${slot.end}` : 'undefined-undefined';
-            conflictList.push({
-              type: 'teacher',
-              message: `Teacher conflict on ${slot.day || 'Unknown'} ${timeStr}`,
-              slots: [slot, otherSlot]
-            });
-          }
-
-          if (slot.room_id && otherSlot.room_id && slot.room_id === otherSlot.room_id) {
-            const timeStr = slot.start && slot.end ? `${slot.start}-${slot.end}` : 'undefined-undefined';
-            conflictList.push({
-              type: 'room',
-              message: `Room conflict on ${slot.day || 'Unknown'} ${timeStr}`,
-              slots: [slot, otherSlot]
-            });
-          }
-        }
-      });
-    });
-
-    setConflicts(conflictList);
-  }, [timeSlots]);
-
   useEffect(() => {
-    checkConflicts();
-  }, [checkConflicts]);
+    loadTimetable();
+  }, [filterDept, filterYear, filterSection]);
 
-  const loadTimetableData = async () => {
-    setIsLoading(true);
+  const loadMetadata = async () => {
     try {
-      const [teachersData, roomsData] = await Promise.all([
-        api.getFacultyLegacy(),
-        api.getRoomsLegacy()
+      const [deptsData, sectionsData] = await Promise.all([
+        api.getDepartments(),
+        api.getSections()
       ]);
-
-      setTimeSlots(timeSlotsData);
-      setTeachers(teachersData);
-      setSubjects([]); // No subjects API method, set empty for now
-      setRooms(roomsData);
+      setDepartments(deptsData);
+      setSections(sectionsData);
     } catch (error) {
-      console.error("Error loading timetable data:", error);
+      console.error('Error loading metadata:', error);
     }
-    setIsLoading(false);
   };
 
-  const handleSubmit = async (slotData) => {
-    // Note: Timeslots are static data, so create/update operations are not supported
-    // This functionality would need to be implemented in the backend API
-    console.warn("Timeslot create/update functionality not implemented");
-    setShowForm(false);
-    setEditingSlot(null);
+  const loadTimetable = async () => {
+    if (!areFiltersComplete) {
+      setTimetable([]);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const filters = {
+        dept_name: filterDept,
+        year: filterYear,
+        section: filterSection
+      };
+
+      const timetableData = await api.getTimetable(filters);
+      setTimetable(timetableData || []);
+    } catch (error) {
+      console.error('Error loading timetable:', error);
+      setTimetable([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleEdit = (slot) => {
-    setEditingSlot(slot);
-    setShowForm(true);
+  const handleGenerate = async () => {
+    if (!window.confirm("Generate new timetable? This will replace the existing timetable.")) {
+      return;
+    }
+
+    try {
+      setIsGenerating(true);
+      const result = await api.generateTimetable();
+      alert(result.message || "Timetable generated successfully!");
+      if (areFiltersComplete) {
+        loadTimetable(); // Reload to show new timetable if filters are ready
+      }
+    } catch (error) {
+      console.error('Error generating timetable:', error);
+      alert(`Error: ${error.message || 'Failed to generate timetable'}`);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
-  const filteredSlots = timeSlots.filter(slot => slot.semester === selectedSemester);
+  const getClassForSlot = (day, time) => {
+    return timetable.find(entry => {
+      // Clean up inputs to ensure robust matching
+      const entryDay = entry.day?.trim();
+      const entryTime = entry.start_time?.trim();
+      const targetDay = day.trim();
+      const targetTime = time.trim();
+
+      return entryDay === targetDay && entryTime === targetTime;
+    });
+  };
+
+  const filteredDepartments = filterDept === "all"
+    ? departments
+    : departments.filter(d => d.dept_name === filterDept);
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div className="min-h-screen p-6 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-800 to-indigo-800 bg-clip-text text-transparent mb-2">
-              Timetable
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Timetable Management
             </h1>
-            <p className="text-lg text-gray-600">Schedule and manage class timetables</p>
+            <p className="text-gray-600 mt-1">Generate and view class timetables</p>
           </div>
-          <div className="flex gap-3 items-center">
-            <Select value={selectedSemester} onValueChange={setSelectedSemester}>
-              <SelectTrigger className="w-[150px] bg-white border border-gray-300">
-                <SelectValue placeholder="Select Semester" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">Semester 1</SelectItem>
-                <SelectItem value="2">Semester 2</SelectItem>
-                <SelectItem value="3">Semester 3</SelectItem>
-                <SelectItem value="4">Semester 4</SelectItem>
-                <SelectItem value="5">Semester 5</SelectItem>
-                <SelectItem value="6">Semester 6</SelectItem>
-                <SelectItem value="7">Semester 7</SelectItem>
-                <SelectItem value="8">Semester 8</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button 
-              onClick={() => setShowForm(true)}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Add Schedule
-            </Button>
-          </div>
+          <Button
+            onClick={handleGenerate}
+            disabled={isGenerating}
+            className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:scale-105 transition-all duration-300"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4" />
+                Generate Timetable
+              </>
+            )}
+          </Button>
         </div>
 
-        <Tabs defaultValue="grid" className="mb-6 ">
-          <TabsList className="bg-white/80 backdrop-blur-sm border border-blue-200 w-full max-w-md grid-cols-2 mx-auto rounded-full p-1 shadow-sm flex justify-around">
-            <TabsTrigger value="grid" className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              Grid View
-            </TabsTrigger>
-            <TabsTrigger value="conflicts">Conflicts</TabsTrigger>
-            <TabsTrigger value="daily">
-              <Clock className="w-4 h-4" />
-              Daily View
-              </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="grid" className="space-y-6">
-            <TimetableGrid
-              timeSlots={filteredSlots}
-              teachers={teachers}
-              subjects={subjects}
-              rooms={rooms}
-              onEdit={handleEdit}
-              isLoading={isLoading}
-            />
-
-            {showForm && (
-              <ScheduleForm
-                slot={editingSlot}
-                teachers={teachers}
-                subjects={subjects}
-                rooms={rooms}
-                onSubmit={handleSubmit}
-                onCancel={() => {
-                  setShowForm(false);
-                  setEditingSlot(null);
+        {/* Filters */}
+        <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4 flex-wrap">
+              <Filter className="w-5 h-5 text-gray-500" />
+              <select
+                value={filterDept}
+                onChange={(e) => {
+                  setFilterDept(e.target.value);
+                  setFilterSection("all");
                 }}
-              />
-            )}
+                className="border border-gray-300 rounded-lg px-4 py-2 bg-white"
+              >
+                <option value="all">All Departments</option>
+                {departments.map(dept => (
+                  <option key={dept.id} value={dept.dept_name}>{dept.dept_name}</option>
+                ))}
+              </select>
+              <select
+                value={filterYear}
+                onChange={(e) => {
+                  setFilterYear(e.target.value);
+                  setFilterSection("all");
+                }}
+                className="border border-gray-300 rounded-lg px-4 py-2 bg-white"
+              >
+                <option value="all">All Years</option>
+                <option value="1">Year 1</option>
+                <option value="2">Year 2</option>
+                <option value="3">Year 3</option>
+                <option value="4">Year 4</option>
+              </select>
+              <select
+                value={filterSection}
+                onChange={(e) => setFilterSection(e.target.value)}
+                className="border border-gray-300 rounded-lg px-4 py-2 bg-white"
+              >
+                <option value="all">All Sections</option>
+                {sections
+                  .filter(s =>
+                    (filterDept === "all" || s.dept_name === filterDept) &&
+                    (filterYear === "all" || s.year === parseInt(filterYear))
+                  )
+                  .map(section => (
+                    <option key={section.id} value={section.name}>Section {section.name}</option>
+                  ))
+                }
+              </select>
+            </div>
+          </CardContent>
+        </Card>
 
-            
-          </TabsContent>
+        {isLoading ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-blue-500" />
+              <p className="text-gray-600">Loading timetable...</p>
+            </CardContent>
+          </Card>
+        ) : !areFiltersComplete ? (
+          <Card className="shadow-lg border-2 border-dashed border-gray-300 bg-gray-50/50">
+            <CardContent className="p-12 text-center">
+              <Filter className="w-16 h-16 mx-auto mb-4 text-indigo-400" />
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">Select Filters to View Timetable</h3>
+              <p className="text-gray-500 max-w-md mx-auto">
+                Please select a <strong>Department</strong>, <strong>Year</strong>, and <strong>Section</strong> from the dropdowns above to view the specific class schedule.
+              </p>
+            </CardContent>
+          </Card>
+        ) : timetable.length === 0 ? (
+          <Card className="shadow-lg">
+            <CardContent className="p-12 text-center">
+              <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">No timetable found</h3>
+              <p className="text-gray-500 mb-6">
+                Click "Generate Timetable" to create a new schedule
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="shadow-xl">
+            <CardContent className="p-6 overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gradient-to-r from-blue-50 to-indigo-50">
+                    <th className="border border-gray-300 p-3 text-left font-semibold">Time</th>
+                    {DAYS.map(day => (
+                      <th key={day} className="border border-gray-300 p-3 text-center font-semibold">
+                        {day}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {TIMES.map(time => (
+                    <tr key={time} className="hover:bg-gray-50">
+                      <td className="border border-gray-300 p-3 font-medium text-gray-700 bg-gray-50">
+                        {time}
+                      </td>
+                      {DAYS.map(day => {
+                        const classEntry = getClassForSlot(day, time);
+                        return (
+                          <td key={`${day}-${time}`} className="border border-gray-300 p-2">
+                            {classEntry ? (
+                              <div className="bg-white p-2 text-center h-full flex flex-col justify-center items-center shadow-sm border border-gray-100 rounded-md hover:shadow-md transition-shadow">
+                                <div className="font-bold text-gray-800 text-sm mb-1 leading-tight">
+                                  {classEntry.course}
+                                </div>
+                                <div className="text-xs text-gray-600 font-medium">
+                                  {classEntry.faculty}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">
+                                  {classEntry.room} • Sec {classEntry.section}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="text-center text-gray-400 text-sm py-4">
+                                Free
+                              </div>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
+        )}
 
-          <TabsContent value="conflicts">
-            <ConflictChecker
-              conflicts={conflicts}
-              timeSlots={timeSlots}
-              teachers={teachers}
-              subjects={subjects}
-              rooms={rooms}
-            />
-          </TabsContent>
-          <TabsContent value="daily">
-            <DayView
-              classes={classes}
-              setClasses={setClasses}
-              selectedDay={selectedDay}
-              setSelectedDay={setSelectedDay}
-              days={days}
-              timeSlots={timeSlots}
-              isLoading={isLoading}
-            />
-          </TabsContent>
-        </Tabs>
+        {/* Stats */}
+        {timetable.length > 0 && (
+          <Card className="shadow-lg border-0 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+                <div>
+                  <div className="text-3xl font-bold text-blue-600">{timetable.length}</div>
+                  <div className="text-sm text-gray-600">Total Classes</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-indigo-600">
+                    {new Set(timetable.map(t => t.course)).size}
+                  </div>
+                  <div className="text-sm text-gray-600">Unique Courses</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-purple-600">
+                    {new Set(timetable.map(t => t.faculty)).size}
+                  </div>
+                  <div className="text-sm text-gray-600">Faculty Members</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-pink-600">
+                    {new Set(timetable.map(t => t.room)).size}
+                  </div>
+                  <div className="text-sm text-gray-600">Rooms Used</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

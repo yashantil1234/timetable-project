@@ -47,6 +47,12 @@ export default function TeacherCard({ teacher, onEdit }) {
           </Badge>
 
           <div className="space-y-2 text-sm">
+            {teacher.subject && (
+              <div className="flex items-center gap-2 text-gray-600">
+                <Users className="w-4 h-4" />
+                <span className="font-medium">{teacher.subject}</span>
+              </div>
+            )}
             {teacher.email && (
               <div className="flex items-center gap-2 text-gray-600">
                 <Mail className="w-4 h-4" />

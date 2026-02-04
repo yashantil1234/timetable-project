@@ -7,8 +7,11 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import Courses from './pages/Courses/Course';
 import Teachers from './pages/Teachers/teachers';
+import Students from './pages/Students/Students';
+import Sections from './pages/Sections/Sections';
 import Rooms from './pages/rooms/Rooms';
 import Timetable from './pages/Timetable/timetable';
+import RegisterUser from './pages/Admin/RegisterUser';
 import Layout from './Layout/Layout';
 import ApiService from './services/api';
 
@@ -24,7 +27,7 @@ function AppRoutes() {
     try {
       const token = localStorage.getItem('token');
       const role = localStorage.getItem('role');
-      
+
       if (token && role) {
         setIsAuthenticated(true);
         setUserRole(role);
@@ -58,10 +61,10 @@ function AppRoutes() {
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
         height: '100vh',
         fontSize: '1.5rem'
       }}>
@@ -73,149 +76,179 @@ function AppRoutes() {
   return (
     <Routes>
       {/* Login Route */}
-      <Route 
-        path="/login" 
+      <Route
+        path="/login"
         element={
-          isAuthenticated ? 
-          <Navigate to={`/${userRole}`} replace /> : 
-          <LoginPage />
-        } 
+          isAuthenticated ?
+            <Navigate to={`/${userRole}`} replace /> :
+            <LoginPage />
+        }
       />
-      
+
       {/* Admin Routes */}
       <Route
         path="/admin"
         element={
           isAuthenticated && userRole === 'admin' ?
-          <Layout onLogout={handleLogout}>
-            <Dashboard />
-          </Layout> :
-          <Navigate to="/login" replace />
+            <Layout onLogout={handleLogout}>
+              <Dashboard />
+            </Layout> :
+            <Navigate to="/login" replace />
         }
       />
       <Route
         path="/courses"
         element={
           isAuthenticated && userRole === 'admin' ?
-          <Layout onLogout={handleLogout}>
-            <Courses />
-          </Layout> :
-          <Navigate to="/login" replace />
+            <Layout onLogout={handleLogout}>
+              <Courses />
+            </Layout> :
+            <Navigate to="/login" replace />
         }
       />
       <Route
-        path="/faculty"
+        path="/teachers"
         element={
           isAuthenticated && userRole === 'admin' ?
-          <Layout onLogout={handleLogout}>
-            <Teachers />
-          </Layout> :
-          <Navigate to="/login" replace />
+            <Layout onLogout={handleLogout}>
+              <Teachers />
+            </Layout> :
+            <Navigate to="/login" replace />
+        }
+      />
+      <Route
+        path="/students"
+        element={
+          isAuthenticated && userRole === 'admin' ?
+            <Layout onLogout={handleLogout}>
+              <Students />
+            </Layout> :
+            <Navigate to="/login" replace />
+        }
+      />
+      <Route
+        path="/sections"
+        element={
+          isAuthenticated && userRole === 'admin' ?
+            <Layout onLogout={handleLogout}>
+              <Sections />
+            </Layout> :
+            <Navigate to="/login" replace />
         }
       />
       <Route
         path="/rooms"
         element={
           isAuthenticated && userRole === 'admin' ?
-          <Layout onLogout={handleLogout}>
-            <Rooms />
-          </Layout> :
-          <Navigate to="/login" replace />
+            <Layout onLogout={handleLogout}>
+              <Rooms />
+            </Layout> :
+            <Navigate to="/login" replace />
         }
       />
       <Route
         path="/timetable"
         element={
           isAuthenticated && userRole === 'admin' ?
-          <Layout onLogout={handleLogout}>
-            <Timetable />
-          </Layout> :
-          <Navigate to="/login" replace />
+            <Layout onLogout={handleLogout}>
+              <Timetable />
+            </Layout> :
+            <Navigate to="/login" replace />
+        }
+      />
+      <Route
+        path="/admin/register-user"
+        element={
+          isAuthenticated && userRole === 'admin' ?
+            <Layout onLogout={handleLogout}>
+              <RegisterUser />
+            </Layout> :
+            <Navigate to="/login" replace />
         }
       />
       <Route
         path="/admin/*"
         element={
           isAuthenticated && userRole === 'admin' ?
-          <Layout onLogout={handleLogout}>
-            <Dashboard />
-          </Layout> :
-          <Navigate to="/login" replace />
+            <Layout onLogout={handleLogout}>
+              <Dashboard />
+            </Layout> :
+            <Navigate to="/login" replace />
         }
       />
-      
+
       {/* Teacher Routes */}
       <Route
         path="/teacher"
         element={
           isAuthenticated && userRole === 'teacher' ?
-          <TeacherDashboard onLogout={handleLogout} /> :
-          <Navigate to="/login" replace />
+            <TeacherDashboard onLogout={handleLogout} /> :
+            <Navigate to="/login" replace />
         }
       />
       <Route
         path="/timetable"
         element={
           isAuthenticated && userRole === 'teacher' ?
-          <Layout onLogout={handleLogout}>
-            <Timetable />
-          </Layout> :
-          <Navigate to="/login" replace />
+            <Layout onLogout={handleLogout}>
+              <Timetable />
+            </Layout> :
+            <Navigate to="/login" replace />
         }
       />
       <Route
         path="/teacher/*"
         element={
           isAuthenticated && userRole === 'teacher' ?
-          <Layout onLogout={handleLogout}>
-            <Dashboard />
-          </Layout> :
-          <Navigate to="/login" replace />
+            <Layout onLogout={handleLogout}>
+              <Dashboard />
+            </Layout> :
+            <Navigate to="/login" replace />
         }
       />
-      
+
       {/* Student Routes */}
       <Route
         path="/student"
         element={
           isAuthenticated && userRole === 'student' ?
-          <StudentDashboard onLogout={handleLogout} /> :
-          <Navigate to="/login" replace />
+            <StudentDashboard onLogout={handleLogout} /> :
+            <Navigate to="/login" replace />
         }
       />
       <Route
         path="/timetable"
         element={
           isAuthenticated && userRole === 'student' ?
-          <Layout onLogout={handleLogout}>
-            <Timetable />
-          </Layout> :
-          <Navigate to="/login" replace />
+            <Layout onLogout={handleLogout}>
+              <Timetable />
+            </Layout> :
+            <Navigate to="/login" replace />
         }
       />
       <Route
         path="/student/*"
         element={
           isAuthenticated && userRole === 'student' ?
-          <StudentDashboard onLogout={handleLogout} /> :
-          <Navigate to="/login" replace />
+            <StudentDashboard onLogout={handleLogout} /> :
+            <Navigate to="/login" replace />
         }
       />
-      
+
       {/* Default Route - Redirect to login or dashboard based on auth */}
-      <Route 
-        path="/" 
+      <Route
+        path="/"
         element={
-          isAuthenticated ? 
-          <Navigate to={`/${userRole}`} replace /> : 
-          <Navigate to="/login" replace />
-        } 
+          isAuthenticated ?
+            <Navigate to={`/${userRole}`} replace /> :
+            <Navigate to="/login" replace />
+        }
       />
 
       {/* Catch all other routes */}
-      <Route 
-        path="*" 
-        element={<Navigate to={isAuthenticated ? `/${userRole}` : "/login"} replace />} 
+      <Route
+        path="*"
+        element={<Navigate to={isAuthenticated ? `/${userRole}` : "/login"} replace />}
       />
     </Routes>
   );

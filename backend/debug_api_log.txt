@@ -1,0 +1,147 @@
+GET /leave/my-requests: User=rita singh (ID 8)
+Found 1 leave requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /leave/my-requests: User=rita singh (ID 8)
+Found 2 leave requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /leave/my-requests: User=rita singh (ID 8)
+Found 2 leave requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /leave/my-requests: User=rita singh (ID 8)
+Found 2 leave requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /leave/my-requests: User=rita singh (ID 8)
+Found 2 leave requests.
+GET /leave/my-requests: User=rita singh (ID 8)
+Found 2 leave requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /leave/my-requests: User=rita singh (ID 8)
+Found 2 leave requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /leave/my-requests: User=rita singh (ID 8)
+Found 2 leave requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+GET /leave/my-requests: User=rita singh (ID 8)
+Found 2 leave requests.
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+GET /leave/my-requests: User=rita singh (ID 8)
+Found 2 leave requests.
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+Found 2 swap requests.
+GET /swap-requests: User=rita singh (ID 8)
+Resolved Faculty ID: 5
+GET /leave/my-requests: User=rita singh (ID 8)
+Found 2 leave requests.
+Found 2 swap requests.
+GET /swap-requests: User=John Doe (ID 1)
+Resolved Faculty ID: 1
+Found 0 swap requests.
+GET /swap-requests: User=John Doe (ID 1)
+Resolved Faculty ID: 1
+Found 0 swap requests.
+GET /swap-requests: User=John Doe (ID 1)
+Resolved Faculty ID: 1
+Found 0 swap requests.
+GET /swap-requests: User=John Doe (ID 1)
+Resolved Faculty ID: 1
+Found 0 swap requests.
+GET /swap-requests: User=John Doe (ID 1)
+Resolved Faculty ID: 1
+GET /leave/my-requests: User=John Doe (ID 1)
+Found 1 leave requests.
+Found 0 swap requests.

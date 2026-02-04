@@ -1,0 +1,17 @@
+--- Departments ---
+ID: 1, Name: Computer Science
+ID: 2, Name: Mathematics
+ID: 3, Name: Physics
+ID: 4, Name: Electronics
+
+--- Courses ---
+ID: 1, Name: Data, DeptID: 1, Year: 1, Semester: 1
+ID: 2, Name: m3, DeptID: 1, Year: 1, Semester: 2
+ID: 3, Name: dsa, DeptID: 1, Year: 1, Semester: 1
+ID: 4, Name: cyvwe, DeptID: 1, Year: 1, Semester: 1
+
+--- Sections ---
+ID: 1, Name: A, DeptID: 1, Year: 1
+ID: 2, Name: B, DeptID: 1, Year: 1
+ID: 3, Name: A, DeptID: 1, Year: 2
+ID: 4, Name: B, DeptID: 1, Year: 2

@@ -7,3 +7,4 @@ class Faculty(db.Model):
     max_hours = db.Column(db.Integer, default=12)
     dept_id = db.Column(db.Integer, db.ForeignKey("departments.id"))
     email = db.Column(db.String(100), nullable=True)
+    subject = db.Column(db.String(100), nullable=True)

@@ -10,6 +10,10 @@ export function createPageUrl(pageName) {
       return "/courses";
     case "teachers":
       return "/teachers";
+    case "students":
+      return "/students";
+    case "sections":
+      return "/sections";
     case "rooms":
       return "/rooms";
     case "timeslots":

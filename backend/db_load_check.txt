@@ -1,0 +1,15 @@
+--- SECTION ANALYSIS ---
+Section A (Year 1): 24 hours required.
+CRITICAL: Section A requires 24 hours but only 20 slots available!
+Section B (Year 1): 24 hours required.
+CRITICAL: Section B requires 24 hours but only 20 slots available!
+Section A (Year 2): 0 hours required.
+Section B (Year 2): 0 hours required.
+
+--- FACULTY ANALYSIS ---
+Faculty John Doe: Assigned 0h. Available Slots: 20/20.
+Faculty t: Assigned 0h. Available Slots: 20/20.
+Faculty rrr: Assigned 0h. Available Slots: 20/20.
+Faculty yash: Assigned 0h. Available Slots: 20/20.
+Faculty rita singh: Assigned 8h. Available Slots: 20/20.
+Faculty balbir gupta: Assigned 4h. Available Slots: 20/20.

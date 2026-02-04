@@ -33,9 +33,11 @@ def create_app(config_name='development'):
     from routes.upload_routes import upload_bp
     from routes.chat_routes import chat_bp
     from routes.legacy_routes import legacy_bp
+    from routes.student_routes import student_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(student_bp, url_prefix='/student')
     # Timetable routes - some have no prefix, some have /teacher or /student
     app.register_blueprint(timetable_bp)
     # Faculty routes - /teacher prefix

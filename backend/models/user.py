@@ -13,6 +13,9 @@ class User(db.Model):
     year = db.Column(db.Integer, nullable=True)
     section_id = db.Column(db.Integer, db.ForeignKey("sections.id"), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
+    phone = db.Column(db.String(20), nullable=True)
+    roll_number = db.Column(db.String(20), nullable=True)
+    attendance = db.Column(db.Float, default=0.0)
 
     room_occupancies = db.relationship("RoomOccupancy", backref="user", lazy=True)
 

@@ -20,7 +20,7 @@ const LoginPage = () => {
 
     try {
       let response;
-      
+
       // Use different login endpoints based on user type
       if (userType === 'admin') {
         response = await ApiService.adminLogin(username, password);
@@ -36,6 +36,18 @@ const LoginPage = () => {
         // Verify the role matches the selected user type
         if (userType === 'admin' && role !== 'admin') {
           setError('Invalid admin credentials. Please use admin login.');
+          ApiService.logout();
+          return;
+        }
+
+        if (userType === 'student' && role !== 'student') {
+          setError('Access denied. You are not registered as a student.');
+          ApiService.logout();
+          return;
+        }
+
+        if (userType === 'teacher' && role !== 'teacher') {
+          setError('Access denied. You are not registered as a teacher.');
           ApiService.logout();
           return;
         }
@@ -93,8 +105,8 @@ const LoginPage = () => {
         <div className="login-header">
           <div className="logo">
             <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="50" height="50" rx="10" fill="#3498db"/>
-              <path d="M15 20H35M15 25H35M15 30H25M30 30H35" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <rect width="50" height="50" rx="10" fill="#3498db" />
+              <path d="M15 20H35M15 25H35M15 30H25M30 30H35" stroke="white" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </div>
           <h1 className="login-title">Timetable Management</h1>
@@ -150,15 +162,15 @@ const LoginPage = () => {
           {error && (
             <div className="error-message">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M8 0C3.6 0 0 3.6 0 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm1 13H7v-2h2v2zm0-3H7V4h2v6z"/>
+                <path d="M8 0C3.6 0 0 3.6 0 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm1 13H7v-2h2v2zm0-3H7V4h2v6z" />
               </svg>
               {error}
             </div>
           )}
 
-          <button 
-            type="submit" 
-            className="login-button" 
+          <button
+            type="submit"
+            className="login-button"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -176,7 +188,7 @@ const LoginPage = () => {
           <div className="credentials-section">
             <div className="credentials-header">
               <span>Test Credentials</span>
-              <button 
+              <button
                 className="toggle-credentials"
                 onClick={() => setShowCredentials(false)}
                 type="button"
@@ -185,7 +197,7 @@ const LoginPage = () => {
               </button>
             </div>
             <div className="quick-login-buttons">
-              <button 
+              <button
                 type="button"
                 className="quick-login-btn admin"
                 onClick={() => quickLogin('admin')}
@@ -197,7 +209,7 @@ const LoginPage = () => {
                   <div className="role-cred">admin / password123</div>
                 </div>
               </button>
-              <button 
+              <button
                 type="button"
                 className="quick-login-btn teacher"
                 onClick={() => quickLogin('teacher')}
@@ -209,7 +221,7 @@ const LoginPage = () => {
                   <div className="role-cred">teacher1 / password123</div>
                 </div>
               </button>
-              <button 
+              <button
                 type="button"
                 className="quick-login-btn student"
                 onClick={() => quickLogin('student')}

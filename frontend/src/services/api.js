@@ -44,7 +44,7 @@ class ApiService {
       // Parse response body (try JSON first, fallback to text)
       let responseData;
       const contentType = response.headers.get('content-type');
-      
+
       try {
         if (contentType && contentType.includes('application/json')) {
           responseData = await response.json();
@@ -54,7 +54,7 @@ class ApiService {
         }
       } catch (parseError) {
         // If parsing fails, return error info
-        responseData = { 
+        responseData = {
           error: 'Failed to parse response',
           status: response.status,
           statusText: response.statusText
@@ -90,14 +90,22 @@ class ApiService {
     }
   }
 
+  async getMySwapRequests() {
+    return this.makeRequest('/teacher/swap-requests');
+  }
+
+  async getMyLeaveRequests() {
+    return this.makeRequest('/leave/my-requests');
+  }
+
   // ==================== AUTHENTICATION ====================
-  
+
   async login(username, password) {
     const response = await this.makeRequest('/api/login', {
       method: 'POST',
       body: JSON.stringify({ username, password })
     });
-    
+
     if (response && response.token) {
       localStorage.setItem('token', response.token);
       localStorage.setItem('role', response.role);
@@ -106,7 +114,7 @@ class ApiService {
       localStorage.setItem('department', response.department || '');
       this.token = response.token;
     }
-    
+
     return response;
   }
 
@@ -115,19 +123,26 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify({ username, password })
     });
-    
+
     if (response && response.token) {
       localStorage.setItem('token', response.token);
       localStorage.setItem('role', response.role);
       localStorage.setItem('user_id', response.user_id);
       this.token = response.token;
     }
-    
+
     return response;
   }
 
   async register(userData) {
     return this.makeRequest('/api/register', {
+      method: 'POST',
+      body: JSON.stringify(userData)
+    });
+  }
+
+  async registerUser(userData) {
+    return this.makeRequest('/admin/users/register', {
       method: 'POST',
       body: JSON.stringify(userData)
     });
@@ -161,7 +176,7 @@ class ApiService {
   }
 
   // ==================== ADMIN - DEPARTMENTS ====================
-  
+
   async getDepartments() {
     return this.makeRequest('/admin/departments');
   }
@@ -174,7 +189,7 @@ class ApiService {
   }
 
   // ==================== ADMIN - FACULTY ====================
-  
+
   async getFaculty() {
     return this.makeRequest('/admin/faculty');
   }
@@ -186,7 +201,99 @@ class ApiService {
     });
   }
 
-  // Faculty Unavailability
+  async updateFaculty(facultyId, facultyData) {
+    return this.makeRequest(`/admin/faculty/${facultyId}`, {
+      method: 'PUT',
+      body: JSON.stringify(facultyData)
+    });
+  }
+
+  async deleteFaculty(facultyId) {
+    return this.makeRequest(`/admin/faculty/${facultyId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  // ==================== ADMIN - STUDENTS ====================
+
+  async getStudents() {
+    return this.makeRequest('/admin/students');
+  }
+
+  async addStudent(studentData) {
+    return this.makeRequest('/admin/students', {
+      method: 'POST',
+      body: JSON.stringify(studentData)
+    });
+  }
+
+  async getSections() {
+    return this.makeRequest('/admin/sections');
+  }
+
+  async addSection(sectionData) {
+    return this.makeRequest('/admin/sections', {
+      method: 'POST',
+      body: JSON.stringify(sectionData)
+    });
+  }
+
+  // ==================== TIMETABLE ====================
+  async generateTimetable() {
+    return this.makeRequest('/admin/generate_timetable', {
+      method: 'POST'
+    });
+  }
+
+  async getTimetable(filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.dept_name) params.append('dept_name', filters.dept_name);
+    if (filters.year) params.append('year', filters.year);
+    if (filters.section) params.append('section', filters.section);
+    const query = params.toString();
+    return this.makeRequest(`/get_timetable${query ? '?' + query : ''}`);
+  }
+
+  async getAdminSwapRequests(status = 'pending') {
+    return this.makeRequest(`/admin/swap-requests?status=${status}`);
+  }
+
+  async getAdminLeaveRequests(status = 'pending') {
+    return this.makeRequest(`/admin/leave-requests?status=${status}`);
+  }
+
+  async getUsers() {
+    return this.makeRequest('/admin/users');
+  }
+
+  async adminApproveSwap(requestId) {
+    return this.makeRequest(`/admin/swap-requests/${requestId}/approve`, {
+      method: 'POST'
+    });
+  }
+
+  async adminRejectSwap(requestId, reason = "") {
+    return this.makeRequest(`/admin/swap-requests/${requestId}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ reason })
+    });
+  }
+
+  async adminApproveLeave(requestId, notes = "") {
+    return this.makeRequest(`/admin/leave-requests/${requestId}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({ admin_notes: notes })
+    });
+  }
+
+  async adminRejectLeave(requestId, notes = "") {
+    return this.makeRequest(`/admin/leave-requests/${requestId}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ admin_notes: notes })
+    });
+  }
+
+  // ==================== ADMIN - FACULTY UNAVAILABILITY ====================
   async getFacultyUnavailability(facultyId) {
     return this.makeRequest(`/admin/faculty/${facultyId}/unavailability`);
   }
@@ -205,7 +312,7 @@ class ApiService {
   }
 
   // ==================== ADMIN - COURSES ====================
-  
+
   async getCourses() {
     return this.makeRequest('/admin/courses');
   }
@@ -217,8 +324,21 @@ class ApiService {
     });
   }
 
+  async updateCourse(courseId, courseData) {
+    return this.makeRequest(`/admin/courses/${courseId}`, {
+      method: 'PUT',
+      body: JSON.stringify(courseData)
+    });
+  }
+
+  async deleteCourse(courseId) {
+    return this.makeRequest(`/admin/courses/${courseId}`, {
+      method: 'DELETE'
+    });
+  }
+
   // ==================== ADMIN - ROOMS ====================
-  
+
   async getRooms() {
     return this.makeRequest('/admin/rooms');
   }
@@ -231,18 +351,18 @@ class ApiService {
   }
 
   // ==================== ADMIN - SECTIONS ====================
-  
+
   async getSections(deptName = null, year = null) {
     let url = '/admin/sections';
     const params = new URLSearchParams();
-    
+
     if (deptName) params.append('dept_name', deptName);
     if (year) params.append('year', year);
-    
+
     if (params.toString()) {
       url += `?${params.toString()}`;
     }
-    
+
     return this.makeRequest(url);
   }
 
@@ -254,7 +374,7 @@ class ApiService {
   }
 
   // ==================== ADMIN - STUDENTS ====================
-  
+
   async getStudents() {
     return this.makeRequest('/admin/students');
   }
@@ -291,18 +411,18 @@ class ApiService {
   }
 
   // ==================== ADMIN - COURSE ALLOCATIONS ====================
-  
+
   async getCourseAllocations(deptName = null, year = null) {
     let url = '/admin/allocations';
     const params = new URLSearchParams();
-    
+
     if (deptName) params.append('dept_name', deptName);
     if (year) params.append('year', year);
-    
+
     if (params.toString()) {
       url += `?${params.toString()}`;
     }
-    
+
     return this.makeRequest(url);
   }
 
@@ -314,7 +434,7 @@ class ApiService {
   }
 
   // ==================== ADMIN - TIMETABLE ====================
-  
+
   async generateTimetable() {
     return this.makeRequest('/admin/generate_timetable', {
       method: 'POST'
@@ -322,7 +442,7 @@ class ApiService {
   }
 
   // ==================== ADMIN - SWAP REQUESTS ====================
-  
+
   async getAdminSwapRequests(status = 'pending') {
     return this.makeRequest(`/admin/swap-requests?status=${status}`);
   }
@@ -341,7 +461,7 @@ class ApiService {
   }
 
   // ==================== ADMIN - LEAVE REQUESTS ====================
-  
+
   async getAdminLeaveRequests(status = 'pending', department = null, leaveType = null) {
     let url = `/admin/leave-requests?status=${status}`;
     if (department) url += `&department=${department}`;
@@ -379,7 +499,7 @@ class ApiService {
   }
 
   // ==================== TEACHER - ROOM OCCUPANCY ====================
-  
+
   async markRoom(roomId, status, notes = '') {
     return this.makeRequest('/teacher/mark_room', {
       method: 'POST',
@@ -392,13 +512,13 @@ class ApiService {
   }
 
   // ==================== TEACHER - TIMETABLE ====================
-  
+
   async getTeacherTimetable() {
     return this.makeRequest('/teacher/timetable');
   }
 
   // ==================== TEACHER - SWAP REQUESTS ====================
-  
+
   async getTeacherSwapRequests() {
     return this.makeRequest('/teacher/swap-requests');
   }
@@ -411,13 +531,17 @@ class ApiService {
   }
 
   // ==================== STUDENT - TIMETABLE ====================
-  
+
   async getStudentTimetable() {
     return this.makeRequest('/student/timetable');
   }
 
+  async getStudentProfile() {
+    return this.makeRequest('/student/profile');
+  }
+
   // ==================== LEAVE REQUESTS (All Users) ====================
-  
+
   async submitLeaveRequest(leaveData) {
     return this.makeRequest('/leave/request', {
       method: 'POST',
@@ -529,7 +653,7 @@ class ApiService {
   }
 
   // ==================== CSV OPERATIONS ====================
-  
+
   async generateCSVs() {
     return this.makeRequest('/generate_csvs', {
       method: 'POST'
@@ -539,7 +663,7 @@ class ApiService {
   async uploadDepartments(file) {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     return this.makeRequest('/upload/departments', {
       method: 'POST',
       body: formData,
@@ -550,7 +674,7 @@ class ApiService {
   async uploadFaculty(file) {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     return this.makeRequest('/upload/faculty', {
       method: 'POST',
       body: formData,
@@ -561,7 +685,7 @@ class ApiService {
   async uploadSections(file) {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     return this.makeRequest('/upload/sections', {
       method: 'POST',
       body: formData,
@@ -572,7 +696,7 @@ class ApiService {
   async uploadStudents(file) {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     return this.makeRequest('/upload/students', {
       method: 'POST',
       body: formData,
@@ -581,7 +705,7 @@ class ApiService {
   }
 
   // ==================== CHATBOT / AI ASSISTANT ====================
-  
+
   async sendChatMessage(message) {
     return this.makeRequest('/api/chatbot', {
       method: 'POST',
@@ -600,7 +724,7 @@ class ApiService {
   }
 
   // ==================== ANNOUNCEMENTS ====================
-  
+
   async getAnnouncements() {
     return this.makeRequest('/api/announcements');
   }
@@ -613,7 +737,7 @@ class ApiService {
   }
 
   // ==================== LEGACY ENDPOINTS (Backward Compatibility) ====================
-  
+
   async addDepartmentLegacy(deptName) {
     return this.makeRequest('/add_department', {
       method: 'POST',
@@ -646,14 +770,14 @@ class ApiService {
   async getCoursesLegacy(deptName = null, year = null) {
     let url = '/get_courses';
     const params = new URLSearchParams();
-    
+
     if (deptName) params.append('dept_name', deptName);
     if (year) params.append('year', year);
-    
+
     if (params.toString()) {
       url += `?${params.toString()}`;
     }
-    
+
     return this.makeRequest(url);
   }
 
@@ -678,14 +802,14 @@ class ApiService {
   async getSectionsLegacy(deptName = null, year = null) {
     let url = '/get_sections';
     const params = new URLSearchParams();
-    
+
     if (deptName) params.append('dept_name', deptName);
     if (year) params.append('year', year);
-    
+
     if (params.toString()) {
       url += `?${params.toString()}`;
     }
-    
+
     return this.makeRequest(url);
   }
 
@@ -699,14 +823,14 @@ class ApiService {
   async getCourseAllocationsLegacy(deptName = null, year = null) {
     let url = '/get_course_allocations';
     const params = new URLSearchParams();
-    
+
     if (deptName) params.append('dept_name', deptName);
     if (year) params.append('year', year);
-    
+
     if (params.toString()) {
       url += `?${params.toString()}`;
     }
-    
+
     return this.makeRequest(url);
   }
 

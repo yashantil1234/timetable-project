@@ -57,9 +57,24 @@ const navigationItems = [
     icon: Users,
   },
   {
+    title: "Students",
+    url: createPageUrl("Students"),
+    icon: GraduationCap,
+  },
+  {
+    title: "Sections",
+    url: createPageUrl("Sections"),
+    icon: Users,
+  },
+  {
     title: "Rooms",
     url: createPageUrl("Rooms"),
     icon: MapPin,
+  },
+  {
+    title: "Register User",
+    url: "/admin/register-user",
+    icon: Users,
   },
   // {
   //   title: "Time Slots",
@@ -86,7 +101,7 @@ export default function Layout({ children, onLogout }) {
               </div>
             </div>
           </SidebarHeader>
-          
+
           <SidebarContent className="p-3">
             <SidebarGroup>
               <SidebarGroupLabel className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 py-3">
@@ -96,18 +111,16 @@ export default function Layout({ children, onLogout }) {
                 <SidebarMenu>
                   {navigationItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton 
-                        asChild 
-                        className={`group hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 rounded-xl mb-2 ${
-                          location.pathname === item.url 
-                            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' 
-                            : 'text-gray-600'
-                        }`}
+                      <SidebarMenuButton
+                        asChild
+                        className={`group hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 rounded-xl mb-2 ${location.pathname === item.url
+                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
+                          : 'text-gray-600'
+                          }`}
                       >
                         <Link to={item.url} className="flex items-center gap-3 px-4 py-3">
-                          <item.icon className={`w-5 h-5 transition-transform duration-300 group-hover:scale-110 ${
-                            location.pathname === item.url ? 'text-white' : ''
-                          }`} />
+                          <item.icon className={`w-5 h-5 transition-transform duration-300 group-hover:scale-110 ${location.pathname === item.url ? 'text-white' : ''
+                            }`} />
                           <span className="font-medium">{item.title}</span>
                         </Link>
                       </SidebarMenuButton>

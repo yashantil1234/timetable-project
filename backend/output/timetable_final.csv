@@ -1,0 +1,49 @@
+course,section,faculty,room,day,start_time,year,semester
+Data,A,t,Room-101,Monday,09:00,1,1
+Data,A,t,Lab-202,Tuesday,09:00,1,1
+Data,A,t,Lab-202,Wednesday,03:00,1,1
+Data,A,t,Room-102,Friday,04:00,1,1
+Data,B,t,Room-102,Monday,01:00,1,1
+Data,B,t,Room-101,Thursday,11:00,1,1
+Data,B,t,e-121,Thursday,03:00,1,1
+Data,B,t,classss-222,Friday,09:00,1,1
+m3,A,yash,Room-101,Tuesday,01:00,1,2
+m3,A,yash,Lab-202,Tuesday,03:00,1,2
+m3,A,yash,w-121,Wednesday,09:00,1,2
+m3,A,yash,e-121,Friday,09:00,1,2
+m3,B,yash,Room-102,Monday,02:00,1,2
+m3,B,yash,e-121,Monday,04:00,1,2
+m3,B,yash,Room-101,Tuesday,11:00,1,2
+m3,B,yash,Room-101,Wednesday,04:00,1,2
+dsa,A,N/A,classss-222,Monday,02:00,1,1
+dsa,A,N/A,classss-222,Wednesday,02:00,1,1
+dsa,A,N/A,w-121,Wednesday,04:00,1,1
+dsa,A,N/A,Room-101,Friday,03:00,1,1
+dsa,B,N/A,classss-222,Monday,09:00,1,1
+dsa,B,N/A,w-121,Tuesday,10:00,1,1
+dsa,B,N/A,Room-102,Wednesday,02:00,1,1
+dsa,B,N/A,Lab-202,Thursday,04:00,1,1
+os,A,rita singh,classss-222,Monday,11:00,1,1
+os,A,rita singh,Room-103,Tuesday,11:00,1,1
+os,A,rita singh,Room-102,Thursday,09:00,1,1
+os,A,rita singh,e-121,Friday,11:00,1,1
+os,B,rita singh,Room-102,Wednesday,03:00,1,1
+os,B,rita singh,classss-222,Thursday,10:00,1,1
+os,B,rita singh,e-121,Friday,01:00,1,1
+os,B,rita singh,e-121,Friday,04:00,1,1
+maths,A,balbir gupta,Room-103,Thursday,10:00,1,1
+maths,A,balbir gupta,w-121,Thursday,02:00,1,1
+maths,A,balbir gupta,w-121,Thursday,04:00,1,1
+maths,A,balbir gupta,classss-222,Friday,10:00,1,1
+maths,B,balbir gupta,w-121,Tuesday,04:00,1,1
+maths,B,balbir gupta,classss-222,Wednesday,10:00,1,1
+maths,B,balbir gupta,Room-103,Wednesday,11:00,1,1
+maths,B,balbir gupta,e-121,Friday,03:00,1,1
+physics,A,rita singh,Lab-201,Monday,04:00,1,1
+physics,A,rita singh,Lab-201,Tuesday,04:00,1,1
+physics,A,rita singh,classss-222,Wednesday,11:00,1,1
+physics,A,rita singh,Room-101,Thursday,03:00,1,1
+physics,B,rita singh,w-121,Tuesday,02:00,1,1
+physics,B,rita singh,classss-222,Tuesday,03:00,1,1
+physics,B,rita singh,classss-222,Thursday,02:00,1,1
+physics,B,rita singh,Room-101,Friday,02:00,1,1

@@ -11,34 +11,6 @@ from utils.decorators import token_required
 timetable_bp = Blueprint('timetable', __name__)
 
 
-@timetable_bp.route("/generate_timetable", methods=["GET", "POST", "OPTIONS"])
-def generate_timetable():
-    try:
-        if request.method != "POST":
-            return jsonify({"message": "Use POST (no body) to generate timetable"}), 200
-        result = generate_timetable_internal()
-        if "error" in result:
-            return jsonify(result), 400
-            
-        timetable = Timetable.query.all()
-        result_data = []
-        
-        for t in timetable:
-            result_data.append({
-                "course": t.course.name,
-                "section": f"{t.section.name} (Year {t.section.year})",
-                "faculty": t.faculty.faculty_name,
-                "room": t.room.name,
-                "day": t.day,
-                "start_time": t.start_time,
-                "department": t.course.department.dept_name,
-                "year": t.section.year,
-                "credits": t.course.credits
-            })
-            
-        return jsonify({"message": "Enhanced timetable generated", "timetable": result_data}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 
 @timetable_bp.route("/get_timetable", methods=["GET", "OPTIONS"])
@@ -69,7 +41,7 @@ def get_timetable():
                 "id": t.timetable_id,
                 "course": t.course.name,
                 "section": f"{t.section.name} (Year {t.section.year})",
-                "faculty": t.faculty.faculty_name,
+                "faculty": t.faculty.faculty_name if t.faculty else "N/A",
                 "room": t.room.name,
                 "day": t.day,
                 "start_time": t.start_time,
@@ -109,11 +81,13 @@ def teacher_timetable(current_user):
 
         timetable_entries = Timetable.query.filter_by(faculty_id=faculty.faculty_id).all()
         result = [{
+            "id": e.timetable_id,
             "course": e.course.name,
             "section": f"{e.section.name} (Year {e.section.year})",
             "room": e.room.name,
             "day": e.day,
             "start_time": e.start_time,
+            "slot": e.start_time,
             "department": e.course.department.dept_name
         } for e in timetable_entries]
 
@@ -139,7 +113,7 @@ def student_timetable(current_user):
         timetable_entries = Timetable.query.filter_by(section_id=current_user.section_id).all()
         result = [{
             "course": e.course.name,
-            "faculty": e.faculty.faculty_name,
+            "faculty": e.faculty.faculty_name if e.faculty else "N/A",
             "room": e.room.name,
             "day": e.day,
             "start_time": e.start_time,

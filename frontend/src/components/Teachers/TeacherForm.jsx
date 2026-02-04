@@ -4,19 +4,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Save, X, Plus, Trash2 } from "lucide-react";
+import { Users, Save, X } from "lucide-react";
 
-const departments = [
-  "Computer Science", "Mathematics", "Physics", "Chemistry", 
-  "Biology", "English", "History", "Business", "Engineering", "Psychology"
-];
 
-export default function TeacherForm({ teacher, onSubmit, onCancel }) {
+export default function TeacherForm({ teacher, departments = [], onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
     faculty_name: teacher?.name || "",
     dept_name: teacher?.dept_name || "",
     email: teacher?.email || "",
-    max_hours: teacher?.max_hours || 12
+    max_hours: teacher?.max_hours || 12,
+    subject: teacher?.subject || ""
   });
 
   const handleSubmit = (e) => {
@@ -64,19 +61,29 @@ export default function TeacherForm({ teacher, onSubmit, onCancel }) {
             </div>
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="dept_name">Department *</Label>
+            <Select value={formData.dept_name} onValueChange={(value) => handleChange('dept_name', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select department" />
+              </SelectTrigger>
+              <SelectContent>
+                {departments.map(dept => (
+                  <SelectItem key={dept.id} value={dept.dept_name}>{dept.dept_name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="dept_name">Department *</Label>
-              <Select value={formData.dept_name} onValueChange={(value) => handleChange('dept_name', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select department" />
-                </SelectTrigger>
-                <SelectContent>
-                  {departments.map(dept => (
-                    <SelectItem key={dept} value={dept}>{dept}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="subject">Subject/Specialization</Label>
+              <Input
+                id="subject"
+                value={formData.subject}
+                onChange={(e) => handleChange('subject', e.target.value)}
+                placeholder="e.g., Data Structures, Calculus"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="max_hours">Max Hours/Week</Label>

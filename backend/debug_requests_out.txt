@@ -1,0 +1,24 @@
+=== USERS ===
+ID: 1, User: teacher1, Name: John Doe, Dept: 1
+ID: 2, User: student1, Name: Alice Smith, Dept: 1
+ID: 3, User: admin, Name: Administrator, Dept: None
+ID: 4, User: Ak, Name: None, Dept: 1
+ID: 5, User: yash, Name: None, Dept: 1
+ID: 6, User: vipul, Name: None, Dept: 3
+ID: 7, User: yash_antil, Name: yash antil, Dept: 1
+ID: 8, User: rita_singh, Name: rita singh, Dept: 1
+
+=== FACULTY ===
+ID: 1, Name: John Doe, Dept: 1
+ID: 2, Name: t, Dept: 1
+ID: 3, Name: rrr, Dept: 1
+ID: 4, Name: yash, Dept: 1
+ID: 5, Name: rita singh, Dept: 1
+ID: 6, Name: balbir gupta, Dept: 1
+
+=== LEAVE REQUESTS ===
+ID: 1, UserID: 1, Type: medical, Status: approved, Notes: 
+ID: 2, UserID: 8, Type: medical, Status: approved, Notes: 
+
+=== SWAP REQUESTS ===
+ID: 1, FacultyID: 5, Status: rejected, Notes: Rejected by admin. Reason: not fesible

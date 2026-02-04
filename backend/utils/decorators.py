@@ -63,6 +63,11 @@ def admin_required(f):
 def teacher_required(f):
     @wraps(f)
     def wrapper(current_user, *args, **kwargs):
+        if request.method == "OPTIONS":
+            response = make_response()
+            response.status_code = 200
+            return response
+
         if current_user.role not in ["teacher", "admin"]:
             return jsonify({"error": "Teacher or admin only"}), 403
         return f(current_user, *args, **kwargs)
