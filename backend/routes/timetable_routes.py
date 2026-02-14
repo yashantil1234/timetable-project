@@ -64,13 +64,40 @@ def teacher_timetable(current_user):
         return jsonify({"error": "Unauthorized - Teachers only"}), 403
 
     try:
-        faculty = Faculty.query.filter_by(faculty_name=current_user.full_name, dept_id=current_user.dept_id).first()
-        if not faculty:
-            faculty = Faculty.query.filter(
-                Faculty.faculty_name.contains(current_user.full_name.split()[-1]),
-                Faculty.dept_id == current_user.dept_id
+        # Check if user has required data
+        if not current_user.full_name:
+            return jsonify({
+                "timetable": [],
+                "teacher_name": "Unknown Teacher",
+                "department": None,
+                "message": "Profile incomplete - please contact admin"
+            }), 200
+        
+        # Try to find faculty record
+        faculty = None
+        if current_user.dept_id:
+            faculty = Faculty.query.filter_by(
+                faculty_name=current_user.full_name,
+                dept_id=current_user.dept_id
             ).first()
+            
+            if not faculty:
+                # Try partial name match
+                faculty = Faculty.query.filter(
+                    Faculty.faculty_name.contains(current_user.full_name.split()[-1]),
+                    Faculty.dept_id == current_user.dept_id
+                ).first()
+        
+        # If still no faculty record, create one
         if not faculty:
+            if not current_user.dept_id:
+                return jsonify({
+                    "timetable": [],
+                    "teacher_name": current_user.full_name,
+                    "department": None,
+                    "message": "No department assigned - please contact admin"
+                }), 200
+            
             faculty = Faculty(
                 faculty_name=current_user.full_name,
                 max_hours=12,
@@ -79,6 +106,7 @@ def teacher_timetable(current_user):
             db.session.add(faculty)
             db.session.commit()
 
+        # Get timetable entries
         timetable_entries = Timetable.query.filter_by(faculty_id=faculty.faculty_id).all()
         result = [{
             "id": e.timetable_id,
@@ -97,7 +125,15 @@ def teacher_timetable(current_user):
             "department": current_user.department.dept_name if current_user.department else None
         }), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"ERROR in teacher_timetable: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "timetable": [],
+            "teacher_name": current_user.full_name if hasattr(current_user, 'full_name') else "Unknown",
+            "department": None,
+            "error": str(e)
+        }), 200  # Return 200 instead of 500 to prevent logout
 
 
 @timetable_bp.route("/student/timetable", methods=["GET", "OPTIONS"])

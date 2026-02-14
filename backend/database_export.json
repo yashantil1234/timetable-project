@@ -1,0 +1,1686 @@
+{
+  "export_date": "2026-02-14T18:25:38.762860",
+  "tables": {
+    "departments": {
+      "row_count": 4,
+      "data": [
+        {
+          "id": 1,
+          "dept_name": "Computer Science"
+        },
+        {
+          "id": 2,
+          "dept_name": "Mathematics"
+        },
+        {
+          "id": 3,
+          "dept_name": "Physics"
+        },
+        {
+          "id": 4,
+          "dept_name": "Electronics"
+        }
+      ]
+    },
+    "classrooms": {
+      "row_count": 8,
+      "data": [
+        {
+          "room_id": 1,
+          "name": "Room-101",
+          "capacity": 50,
+          "resources": "Projector, AC"
+        },
+        {
+          "room_id": 2,
+          "name": "Room-102",
+          "capacity": 40,
+          "resources": "Whiteboard"
+        },
+        {
+          "room_id": 3,
+          "name": "Lab-201",
+          "capacity": 30,
+          "resources": "Computers, AC"
+        },
+        {
+          "room_id": 4,
+          "name": "Room-103",
+          "capacity": 60,
+          "resources": "Smart Board"
+        },
+        {
+          "room_id": 5,
+          "name": "Lab-202",
+          "capacity": 25,
+          "resources": "Lab Equipment"
+        },
+        {
+          "room_id": 6,
+          "name": "w-121",
+          "capacity": 30,
+          "resources": ""
+        },
+        {
+          "room_id": 7,
+          "name": "e-121",
+          "capacity": 30,
+          "resources": ""
+        },
+        {
+          "room_id": 8,
+          "name": "classss-222",
+          "capacity": 30,
+          "resources": ""
+        }
+      ]
+    },
+    "faculty": {
+      "row_count": 8,
+      "data": [
+        {
+          "faculty_id": 1,
+          "faculty_name": "John Doe",
+          "max_hours": 12,
+          "dept_id": 1,
+          "email": null,
+          "subject": null
+        },
+        {
+          "faculty_id": 2,
+          "faculty_name": "t",
+          "max_hours": 12,
+          "dept_id": 1,
+          "email": "yashantil1462@gmail.com",
+          "subject": null
+        },
+        {
+          "faculty_id": 3,
+          "faculty_name": "rrr",
+          "max_hours": 12,
+          "dept_id": 1,
+          "email": "priya.nair@college.edu",
+          "subject": null
+        },
+        {
+          "faculty_id": 4,
+          "faculty_name": "yash",
+          "max_hours": 12,
+          "dept_id": 1,
+          "email": "priya.nair@college.edu",
+          "subject": null
+        },
+        {
+          "faculty_id": 5,
+          "faculty_name": "rita singh",
+          "max_hours": 12,
+          "dept_id": 1,
+          "email": "rita.edu@gmail.com",
+          "subject": "os"
+        },
+        {
+          "faculty_id": 6,
+          "faculty_name": "balbir gupta",
+          "max_hours": 12,
+          "dept_id": 1,
+          "email": "yashantil992@outlook.com",
+          "subject": "math"
+        },
+        {
+          "faculty_id": 7,
+          "faculty_name": "Ankit",
+          "max_hours": 12,
+          "dept_id": 1,
+          "email": "guptaak85189@gmail.com",
+          "subject": "oops"
+        },
+        {
+          "faculty_id": 8,
+          "faculty_name": "vipul",
+          "max_hours": 12,
+          "dept_id": 1,
+          "email": "vtvipulgupta55@gmail.com",
+          "subject": "daa"
+        }
+      ]
+    },
+    "sections": {
+      "row_count": 5,
+      "data": [
+        {
+          "id": 1,
+          "name": "A",
+          "year": 1,
+          "dept_id": 1,
+          "max_hours_per_day": 5
+        },
+        {
+          "id": 2,
+          "name": "B",
+          "year": 1,
+          "dept_id": 1,
+          "max_hours_per_day": 5
+        },
+        {
+          "id": 3,
+          "name": "A",
+          "year": 2,
+          "dept_id": 1,
+          "max_hours_per_day": 5
+        },
+        {
+          "id": 4,
+          "name": "B",
+          "year": 2,
+          "dept_id": 1,
+          "max_hours_per_day": 5
+        },
+        {
+          "id": 5,
+          "name": "E",
+          "year": 1,
+          "dept_id": 4,
+          "max_hours_per_day": 5
+        }
+      ]
+    },
+    "course_allocations": {
+      "row_count": 4,
+      "data": [
+        {
+          "id": 1,
+          "dept_id": 1,
+          "year": 1,
+          "semester": 1,
+          "total_courses": 6,
+          "allocated_courses": 0
+        },
+        {
+          "id": 2,
+          "dept_id": 1,
+          "year": 1,
+          "semester": 2,
+          "total_courses": 6,
+          "allocated_courses": 0
+        },
+        {
+          "id": 3,
+          "dept_id": 1,
+          "year": 2,
+          "semester": 1,
+          "total_courses": 5,
+          "allocated_courses": 0
+        },
+        {
+          "id": 4,
+          "dept_id": 1,
+          "year": 2,
+          "semester": 2,
+          "total_courses": 5,
+          "allocated_courses": 0
+        }
+      ]
+    },
+    "users": {
+      "row_count": 8,
+      "data": [
+        {
+          "id": 1,
+          "username": "teacher1",
+          "password_hash": "scrypt:32768:8:1$QnRpicNyqLgj7rPf$dbd09f8d0161bdd1ed54226cbfd4f9089731d6e65a3caf04ec6dfce4fd07815dd94a6fa9a38939bee7ca604f9d5ed893c173b994208fa8b37472c71c91160c0b",
+          "role": "teacher",
+          "full_name": "John Doe",
+          "email": "john@example.com",
+          "dept_id": 1,
+          "year": null,
+          "section_id": null,
+          "is_active": 1,
+          "phone": null,
+          "roll_number": null,
+          "attendance": 0.0
+        },
+        {
+          "id": 2,
+          "username": "student1",
+          "password_hash": "scrypt:32768:8:1$DVOaEQTsiZkNVdQC$d4b7912ab97d5c1b4168482be54caad0262430a421921da72c0312c35d69f5a82d9f40dc1a6bfaf2f8a3c0d4c5d94153189ecf88298a4ddf2f002149cc438f1e",
+          "role": "student",
+          "full_name": "Alice Smith",
+          "email": "alice@example.com",
+          "dept_id": 1,
+          "year": 1,
+          "section_id": 1,
+          "is_active": 1,
+          "phone": "+91 9856982593",
+          "roll_number": "CS21000",
+          "attendance": 50.0
+        },
+        {
+          "id": 3,
+          "username": "admin",
+          "password_hash": "scrypt:32768:8:1$joHUdRZGTfuzsuFa$9607569f99134d4dff78b1389ea0c4c8e332cfe33668c007c8a886d9979438142b56bd5746533878308a4d813e93f8e4c1f8a915eb1fc0d4d5f6a84fa536f11f",
+          "role": "admin",
+          "full_name": "Administrator",
+          "email": "admin@example.com",
+          "dept_id": null,
+          "year": null,
+          "section_id": null,
+          "is_active": 1,
+          "phone": null,
+          "roll_number": null,
+          "attendance": 0.0
+        },
+        {
+          "id": 7,
+          "username": "yash_antil",
+          "password_hash": "scrypt:32768:8:1$20irydalEulnsb6g$18cbd9e15dae677463fc3015d50663da534f394fe3a6e46e1811e72e58b63837b3e12d5b0deaac2749ccce73211e410f8b2f7636b8aed18e75990f4488550c25",
+          "role": "student",
+          "full_name": "yash antil",
+          "email": "yashantil992@outlook.com",
+          "dept_id": 1,
+          "year": 2,
+          "section_id": 3,
+          "is_active": 1,
+          "phone": "9466371070",
+          "roll_number": "23456",
+          "attendance": 100.0
+        },
+        {
+          "id": 8,
+          "username": "rita_singh",
+          "password_hash": "scrypt:32768:8:1$45lgw8LF3y62OKtD$58e031b7b2d00443c7b2cf21d3eb71b4837d6e2de22e5fe378053c9bc3a5bfa95eff1cfce65932633dd355f9247094aab6433f7d3c4ad52842a8c92e3b1ed17c",
+          "role": "teacher",
+          "full_name": "rita singh",
+          "email": "rita.edu@gmail.com",
+          "dept_id": 1,
+          "year": null,
+          "section_id": null,
+          "is_active": 1,
+          "phone": "9466371070",
+          "roll_number": null,
+          "attendance": 0.0
+        },
+        {
+          "id": 9,
+          "username": "Y_a",
+          "password_hash": "scrypt:32768:8:1$s8qUZuMyG7X4N8PI$2c1aed1d4851288bcd61f8c7691c5244c1d13ddb668a9b838df46173e37e349d6de8d0cb7d816ee345569f390d338df95e6e9aa36707504c123de42196aeb5a8",
+          "role": "student",
+          "full_name": "Yash Antil",
+          "email": "",
+          "dept_id": 1,
+          "year": 2,
+          "section_id": 3,
+          "is_active": 1,
+          "phone": "",
+          "roll_number": null,
+          "attendance": 0.0
+        },
+        {
+          "id": 10,
+          "username": "vipul_gupta",
+          "password_hash": "scrypt:32768:8:1$FSJWX8Q2aAWC4QTl$d930512e23135db406eda67451fd137b69cf854e851b4828e19bfe79291958b9b5e751781996e48950792a40826e6ce97b9c0b8405399174ba06532e3e94abb4",
+          "role": "student",
+          "full_name": "vipul gupta",
+          "email": "vtvipulgupta55@gmail.com",
+          "dept_id": 1,
+          "year": 1,
+          "section_id": 1,
+          "is_active": 1,
+          "phone": "45678900000292929",
+          "roll_number": "2823248",
+          "attendance": 0.0
+        },
+        {
+          "id": 11,
+          "username": "ankit_gupta",
+          "password_hash": "scrypt:32768:8:1$2K1p9VWDX5TwxeKb$c9dd95719d044295cbfd912c2f0059b54f16bbf113632bf663775527d7bf96bebd46eba7e75d8783c3d85eef6b91dd65abcb988e202ad1b072b3b4d7a3658c2e",
+          "role": "student",
+          "full_name": "ankit gupta",
+          "email": "guptaak85189@gmail.com",
+          "dept_id": 1,
+          "year": 1,
+          "section_id": 1,
+          "is_active": 1,
+          "phone": null,
+          "roll_number": null,
+          "attendance": 0.0
+        }
+      ]
+    },
+    "courses": {
+      "row_count": 8,
+      "data": [
+        {
+          "course_id": 1,
+          "name": "Data",
+          "type": "lab",
+          "credits": 3,
+          "year": 1,
+          "semester": 1,
+          "dept_id": 1,
+          "faculty_id": 2,
+          "hours_per_week": 4,
+          "is_fixed": 0,
+          "fixed_day": null,
+          "fixed_slot": null,
+          "fixed_room_id": null
+        },
+        {
+          "course_id": 2,
+          "name": "CD",
+          "type": "theory",
+          "credits": 3,
+          "year": 3,
+          "semester": 2,
+          "dept_id": 1,
+          "faculty_id": 5,
+          "hours_per_week": 4,
+          "is_fixed": 0,
+          "fixed_day": null,
+          "fixed_slot": null,
+          "fixed_room_id": null
+        },
+        {
+          "course_id": 3,
+          "name": "dsa",
+          "type": "theory",
+          "credits": 3,
+          "year": 1,
+          "semester": 1,
+          "dept_id": 1,
+          "faculty_id": null,
+          "hours_per_week": 4,
+          "is_fixed": 0,
+          "fixed_day": null,
+          "fixed_slot": null,
+          "fixed_room_id": null
+        },
+        {
+          "course_id": 4,
+          "name": "os",
+          "type": "theory",
+          "credits": 3,
+          "year": 1,
+          "semester": 1,
+          "dept_id": 1,
+          "faculty_id": 5,
+          "hours_per_week": 4,
+          "is_fixed": 0,
+          "fixed_day": null,
+          "fixed_slot": null,
+          "fixed_room_id": null
+        },
+        {
+          "course_id": 5,
+          "name": "maths",
+          "type": "theory",
+          "credits": 3,
+          "year": 1,
+          "semester": 1,
+          "dept_id": 1,
+          "faculty_id": 6,
+          "hours_per_week": 4,
+          "is_fixed": 0,
+          "fixed_day": null,
+          "fixed_slot": null,
+          "fixed_room_id": null
+        },
+        {
+          "course_id": 6,
+          "name": "physics",
+          "type": "lab",
+          "credits": 3,
+          "year": 1,
+          "semester": 1,
+          "dept_id": 1,
+          "faculty_id": 5,
+          "hours_per_week": 4,
+          "is_fixed": 0,
+          "fixed_day": null,
+          "fixed_slot": null,
+          "fixed_room_id": null
+        },
+        {
+          "course_id": 7,
+          "name": "c++",
+          "type": "theory",
+          "credits": 3,
+          "year": 1,
+          "semester": 1,
+          "dept_id": 4,
+          "faculty_id": "",
+          "hours_per_week": 4,
+          "is_fixed": 0,
+          "fixed_day": null,
+          "fixed_slot": null,
+          "fixed_room_id": null
+        },
+        {
+          "course_id": 8,
+          "name": "daa",
+          "type": "theory",
+          "credits": 3,
+          "year": 1,
+          "semester": 1,
+          "dept_id": 1,
+          "faculty_id": 8,
+          "hours_per_week": 4,
+          "is_fixed": 0,
+          "fixed_day": null,
+          "fixed_slot": null,
+          "fixed_room_id": null
+        }
+      ]
+    },
+    "room_occupancy": {
+      "row_count": 55,
+      "data": [
+        {
+          "id": 1,
+          "room_id": 1,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-04 15:40:07.319970",
+          "notes": ""
+        },
+        {
+          "id": 2,
+          "room_id": 2,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-04 15:41:22.175943",
+          "notes": ""
+        },
+        {
+          "id": 3,
+          "room_id": 1,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-04 15:41:47.368213",
+          "notes": ""
+        },
+        {
+          "id": 4,
+          "room_id": 1,
+          "user_id": 1,
+          "status": "free",
+          "timestamp": "2026-02-04 15:52:27.312570",
+          "notes": ""
+        },
+        {
+          "id": 5,
+          "room_id": 2,
+          "user_id": 1,
+          "status": "free",
+          "timestamp": "2026-02-04 15:52:29.003221",
+          "notes": ""
+        },
+        {
+          "id": 6,
+          "room_id": 2,
+          "user_id": 1,
+          "status": "free",
+          "timestamp": "2026-02-04 15:52:32.355262",
+          "notes": ""
+        },
+        {
+          "id": 7,
+          "room_id": 2,
+          "user_id": 1,
+          "status": "free",
+          "timestamp": "2026-02-04 17:55:45.625410",
+          "notes": ""
+        },
+        {
+          "id": 8,
+          "room_id": 2,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-04 17:55:49.122569",
+          "notes": ""
+        },
+        {
+          "id": 9,
+          "room_id": 3,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-04 17:55:52.350126",
+          "notes": ""
+        },
+        {
+          "id": 10,
+          "room_id": 4,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-05 08:30:09.958356",
+          "notes": ""
+        },
+        {
+          "id": 11,
+          "room_id": 2,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-05 08:30:23.205455",
+          "notes": ""
+        },
+        {
+          "id": 12,
+          "room_id": 2,
+          "user_id": 1,
+          "status": "free",
+          "timestamp": "2026-02-05 08:30:25.180016",
+          "notes": ""
+        },
+        {
+          "id": 13,
+          "room_id": 8,
+          "user_id": 1,
+          "status": "free",
+          "timestamp": "2026-02-05 08:30:25.864374",
+          "notes": ""
+        },
+        {
+          "id": 14,
+          "room_id": 7,
+          "user_id": 1,
+          "status": "free",
+          "timestamp": "2026-02-05 08:30:27.385727",
+          "notes": ""
+        },
+        {
+          "id": 15,
+          "room_id": 7,
+          "user_id": 1,
+          "status": "free",
+          "timestamp": "2026-02-05 08:30:27.915792",
+          "notes": ""
+        },
+        {
+          "id": 16,
+          "room_id": 2,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-05 08:30:32.366479",
+          "notes": ""
+        },
+        {
+          "id": 17,
+          "room_id": 7,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-05 08:30:33.234521",
+          "notes": ""
+        },
+        {
+          "id": 18,
+          "room_id": 8,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-05 08:30:34.212039",
+          "notes": ""
+        },
+        {
+          "id": 19,
+          "room_id": 5,
+          "user_id": 8,
+          "status": "occupied",
+          "timestamp": "2026-02-05 08:35:53.757586",
+          "notes": ""
+        },
+        {
+          "id": 20,
+          "room_id": 1,
+          "user_id": 8,
+          "status": "occupied",
+          "timestamp": "2026-02-05 08:35:55.175272",
+          "notes": ""
+        },
+        {
+          "id": 21,
+          "room_id": 1,
+          "user_id": 8,
+          "status": "free",
+          "timestamp": "2026-02-05 08:35:56.951518",
+          "notes": ""
+        },
+        {
+          "id": 22,
+          "room_id": 1,
+          "user_id": 8,
+          "status": "occupied",
+          "timestamp": "2026-02-05 08:35:59.012583",
+          "notes": ""
+        },
+        {
+          "id": 23,
+          "room_id": 6,
+          "user_id": 8,
+          "status": "occupied",
+          "timestamp": "2026-02-05 08:36:02.038636",
+          "notes": ""
+        },
+        {
+          "id": 24,
+          "room_id": 8,
+          "user_id": 8,
+          "status": "free",
+          "timestamp": "2026-02-05 08:36:08.604595",
+          "notes": ""
+        },
+        {
+          "id": 25,
+          "room_id": 3,
+          "user_id": 8,
+          "status": "free",
+          "timestamp": "2026-02-05 08:36:13.305765",
+          "notes": ""
+        },
+        {
+          "id": 26,
+          "room_id": 8,
+          "user_id": 8,
+          "status": "free",
+          "timestamp": "2026-02-05 08:36:14.288533",
+          "notes": ""
+        },
+        {
+          "id": 27,
+          "room_id": 8,
+          "user_id": 8,
+          "status": "occupied",
+          "timestamp": "2026-02-05 08:36:15.873441",
+          "notes": ""
+        },
+        {
+          "id": 28,
+          "room_id": 1,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:26:41.624459",
+          "notes": ""
+        },
+        {
+          "id": 29,
+          "room_id": 6,
+          "user_id": 1,
+          "status": "free",
+          "timestamp": "2026-02-07 17:26:49.467668",
+          "notes": ""
+        },
+        {
+          "id": 30,
+          "room_id": 1,
+          "user_id": 1,
+          "status": "free",
+          "timestamp": "2026-02-07 17:29:12.420153",
+          "notes": ""
+        },
+        {
+          "id": 31,
+          "room_id": 1,
+          "user_id": 1,
+          "status": "free",
+          "timestamp": "2026-02-07 17:29:24.278296",
+          "notes": ""
+        },
+        {
+          "id": 32,
+          "room_id": 1,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:29:26.541356",
+          "notes": ""
+        },
+        {
+          "id": 33,
+          "room_id": 1,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:29:36.903256",
+          "notes": ""
+        },
+        {
+          "id": 34,
+          "room_id": 1,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:29:38.227423",
+          "notes": ""
+        },
+        {
+          "id": 35,
+          "room_id": 7,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:29:40.815281",
+          "notes": ""
+        },
+        {
+          "id": 36,
+          "room_id": 7,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:29:43.460934",
+          "notes": ""
+        },
+        {
+          "id": 37,
+          "room_id": 7,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:29:44.014466",
+          "notes": ""
+        },
+        {
+          "id": 38,
+          "room_id": 7,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:29:44.088891",
+          "notes": ""
+        },
+        {
+          "id": 39,
+          "room_id": 8,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:29:44.925324",
+          "notes": ""
+        },
+        {
+          "id": 40,
+          "room_id": 8,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:29:45.453826",
+          "notes": ""
+        },
+        {
+          "id": 41,
+          "room_id": 4,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:29:47.555843",
+          "notes": ""
+        },
+        {
+          "id": 42,
+          "room_id": 4,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:29:48.175568",
+          "notes": ""
+        },
+        {
+          "id": 43,
+          "room_id": 4,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:29:48.287202",
+          "notes": ""
+        },
+        {
+          "id": 44,
+          "room_id": 4,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:29:48.533920",
+          "notes": ""
+        },
+        {
+          "id": 45,
+          "room_id": 6,
+          "user_id": 1,
+          "status": "free",
+          "timestamp": "2026-02-07 17:29:49.966272",
+          "notes": ""
+        },
+        {
+          "id": 46,
+          "room_id": 6,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:29:50.917042",
+          "notes": ""
+        },
+        {
+          "id": 47,
+          "room_id": 3,
+          "user_id": 1,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:29:52.189206",
+          "notes": ""
+        },
+        {
+          "id": 48,
+          "room_id": 2,
+          "user_id": 8,
+          "status": "occupied",
+          "timestamp": "2026-02-07 17:30:54.222325",
+          "notes": ""
+        },
+        {
+          "id": 49,
+          "room_id": 2,
+          "user_id": 8,
+          "status": "free",
+          "timestamp": "2026-02-07 17:30:54.988183",
+          "notes": ""
+        },
+        {
+          "id": 50,
+          "room_id": 1,
+          "user_id": 8,
+          "status": "free",
+          "timestamp": "2026-02-07 17:30:57.027965",
+          "notes": ""
+        },
+        {
+          "id": 51,
+          "room_id": 3,
+          "user_id": 8,
+          "status": "free",
+          "timestamp": "2026-02-07 17:30:58.763962",
+          "notes": ""
+        },
+        {
+          "id": 52,
+          "room_id": 4,
+          "user_id": 8,
+          "status": "free",
+          "timestamp": "2026-02-07 17:30:59.981498",
+          "notes": ""
+        },
+        {
+          "id": 53,
+          "room_id": 5,
+          "user_id": 8,
+          "status": "free",
+          "timestamp": "2026-02-12 07:48:25.196194",
+          "notes": ""
+        },
+        {
+          "id": 54,
+          "room_id": 8,
+          "user_id": 8,
+          "status": "free",
+          "timestamp": "2026-02-12 07:48:32.576112",
+          "notes": ""
+        },
+        {
+          "id": 55,
+          "room_id": 2,
+          "user_id": 8,
+          "status": "free",
+          "timestamp": "2026-02-14 10:40:39.397329",
+          "notes": ""
+        }
+      ]
+    },
+    "swap_requests": {
+      "row_count": 3,
+      "data": [
+        {
+          "id": 1,
+          "requesting_faculty_id": 5,
+          "original_timetable_id": 27,
+          "proposed_day": "Monday",
+          "status": "rejected",
+          "reason": "not",
+          "admin_notes": "Rejected by admin. Reason: not fesible",
+          "created_at": "2026-02-04 17:14:29.599466",
+          "proposed_start_time": "09:00"
+        },
+        {
+          "id": 2,
+          "requesting_faculty_id": 5,
+          "original_timetable_id": 41,
+          "proposed_day": "Wednesday",
+          "status": "rejected",
+          "reason": "not",
+          "admin_notes": "Rejected by admin. Reason: not fesible",
+          "created_at": "2026-02-04 17:21:37.467800",
+          "proposed_start_time": "09:00"
+        },
+        {
+          "id": 3,
+          "requesting_faculty_id": 5,
+          "original_timetable_id": 21,
+          "proposed_day": "Tuesday",
+          "status": "pending",
+          "reason": "Not good time\n",
+          "admin_notes": null,
+          "created_at": "2026-02-14 10:24:55.928311",
+          "proposed_start_time": "2:00"
+        }
+      ]
+    },
+    "leave_requests": {
+      "row_count": 5,
+      "data": [
+        {
+          "id": 1,
+          "user_id": 1,
+          "leave_type": "medical",
+          "start_date": "2026-02-05",
+          "end_date": "2026-02-06",
+          "reason": "fever",
+          "status": "approved",
+          "approved_by": 3,
+          "admin_notes": "",
+          "created_at": "2026-02-04 15:47:01.069453",
+          "updated_at": "2026-02-04 16:49:59.373347"
+        },
+        {
+          "id": 2,
+          "user_id": 8,
+          "leave_type": "medical",
+          "start_date": "2026-02-06",
+          "end_date": "2026-02-07",
+          "reason": "fever",
+          "status": "approved",
+          "approved_by": 3,
+          "admin_notes": "",
+          "created_at": "2026-02-04 16:54:22.252368",
+          "updated_at": "2026-02-04 16:54:34.888134"
+        },
+        {
+          "id": 3,
+          "user_id": 8,
+          "leave_type": "casual",
+          "start_date": "2026-02-10",
+          "end_date": "2026-02-11",
+          "reason": "not",
+          "status": "approved",
+          "approved_by": 3,
+          "admin_notes": "",
+          "created_at": "2026-02-04 17:22:20.673754",
+          "updated_at": "2026-02-04 17:22:46.305260"
+        },
+        {
+          "id": 4,
+          "user_id": 1,
+          "leave_type": "casual",
+          "start_date": "2026-02-26",
+          "end_date": "2026-02-27",
+          "reason": "fever",
+          "status": "approved",
+          "approved_by": 3,
+          "admin_notes": "",
+          "created_at": "2026-02-05 07:49:12.757703",
+          "updated_at": "2026-02-05 07:49:53.627131"
+        },
+        {
+          "id": 5,
+          "user_id": 1,
+          "leave_type": "casual",
+          "start_date": "2026-02-28",
+          "end_date": "2026-03-01",
+          "reason": "fever",
+          "status": "rejected",
+          "approved_by": null,
+          "admin_notes": "loda lasan",
+          "created_at": "2026-02-05 08:32:09.867081",
+          "updated_at": "2026-02-05 08:33:27.244600"
+        }
+      ]
+    },
+    "chatbot_conversations": {
+      "row_count": 10,
+      "data": [
+        {
+          "id": 1,
+          "user_id": 8,
+          "query": "Hi",
+          "response": "\ud83e\udd14 I didn't understand that. Here are some things I can help with:\n\n\u2022 Ask about your 'timetable' or 'next class'\n\u2022 Check 'free rooms' or 'room availability'\n\u2022 View 'announcements' or 'leave status'\n\u2022 Type 'help' for all commands",
+          "intent": "unknown",
+          "response_type": "unknown",
+          "timestamp": "2026-02-10 14:17:05.076596"
+        },
+        {
+          "id": 2,
+          "user_id": 8,
+          "query": "Next class",
+          "response": "\ud83d\udcc5 No upcoming classes found this week.",
+          "intent": "next_class",
+          "response_type": "info",
+          "timestamp": "2026-02-10 14:17:16.666166"
+        },
+        {
+          "id": 3,
+          "user_id": 8,
+          "query": "Annoucement",
+          "response": "\ud83e\udd14 I didn't understand that. Here are some things I can help with:\n\n\u2022 Ask about your 'timetable' or 'next class'\n\u2022 Check 'free rooms' or 'room availability'\n\u2022 View 'announcements' or 'leave status'\n\u2022 Type 'help' for all commands",
+          "intent": "unknown",
+          "response_type": "unknown",
+          "timestamp": "2026-02-10 14:17:30.486099"
+        },
+        {
+          "id": 4,
+          "user_id": 8,
+          "query": "Free rooms",
+          "response": "\u2139\ufe0f No classes are currently running.",
+          "intent": "free_rooms",
+          "response_type": "info",
+          "timestamp": "2026-02-10 14:17:37.557031"
+        },
+        {
+          "id": 5,
+          "user_id": 8,
+          "query": "Help",
+          "response": "\ud83e\udd16 **SIH Timetable Assistant Commands:**\n\n\ud83d\udcc5 **Schedule Management:**\n\u2022 'my timetable' - View your complete schedule\n\u2022 'next class' - Find your next class\n\u2022 'today classes' - Today's schedule\n\n\ud83c\udfeb **Room Management:**\n\u2022 'free rooms' - Currently available rooms\n\u2022 'book room' - Reserve a room\n\u2022 'room status' - Room occupancy\n\n\ud83d\udc68\u200d\ud83c\udfeb **Faculty Features:**\n\u2022 'faculty load' - Teaching workload\n\u2022 'swap class' - Request class swap\n\u2022 'leave status' - Check leave requests\n\n\ud83d\udce2 **System Info:**\n\u2022 'announcements' - Latest updates\n\u2022 'room utilization' - Room usage statistics\n\u2022 'help' - Show this menu",
+          "intent": "help",
+          "response_type": "help",
+          "timestamp": "2026-02-10 14:17:47.413215"
+        },
+        {
+          "id": 6,
+          "user_id": 1,
+          "query": "Hi",
+          "response": "\ud83e\udd14 I didn't understand that. Here are some things I can help with:\n\n\u2022 Ask about your 'timetable' or 'next class'\n\u2022 Check 'free rooms' or 'room availability'\n\u2022 View 'announcements' or 'leave status'\n\u2022 Type 'help' for all commands",
+          "intent": "unknown",
+          "response_type": "unknown",
+          "timestamp": "2026-02-12 07:47:03.453354"
+        },
+        {
+          "id": 7,
+          "user_id": 1,
+          "query": "Timetable",
+          "response": "\ud83d\udcc5 You have no classes scheduled.",
+          "intent": "timetable",
+          "response_type": "info",
+          "timestamp": "2026-02-12 07:47:09.763399"
+        },
+        {
+          "id": 8,
+          "user_id": 8,
+          "query": "Timetable",
+          "response": "\ud83d\udc68\u200d\ud83c\udfeb **Your Teaching Schedule** (16 classes)\n\n\ud83d\udd50 **Wednesday 15:00:00**\n\ud83d\udcda os\n\ud83d\udc65 Section A, Year 1\n\ud83d\udccd w-121\n\n\ud83d\udd50 **Wednesday 17:00:00**\n\ud83d\udcda os\n\ud83d\udc65 Section A, Year 1\n\ud83d\udccd w-121\n\n\ud83d\udd50 **Friday 10:00:00**\n\ud83d\udcda os\n\ud83d\udc65 Section A, Year 1\n\ud83d\udccd e-121\n\n\ud83d\udd50 **Friday 13:00:00**\n\ud83d\udcda os\n\ud83d\udc65 Section A, Year 1\n\ud83d\udccd Room-101\n\n\ud83d\udd50 **Tuesday 10:00:00**\n\ud83d\udcda os\n\ud83d\udc65 Section B, Year 1\n\ud83d\udccd e-121\n\n\ud83d\udd50 **Wednesday 10:00:00**\n\ud83d\udcda os\n\ud83d\udc65 Section B, Year 1\n\ud83d\udccd classss-222\n\n\ud83d\udd50 **Friday 14:00:00**\n\ud83d\udcda os\n\ud83d\udc65 Section B, Year 1\n\ud83d\udccd Lab-201\n\n\ud83d\udd50 **Friday 16:00:00**\n\ud83d\udcda os\n\ud83d\udc65 Section B, Year 1\n\ud83d\udccd classss-222\n\n\ud83d\udd50 **Tuesday 13:00:00**\n\ud83d\udcda physics\n\ud83d\udc65 Section A, Year 1\n\ud83d\udccd Room-101\n\n\ud83d\udd50 **Thursday 14:00:00**\n\ud83d\udcda physics\n\ud83d\udc65 Section A, Year 1\n\ud83d\udccd w-121\n\n\ud83d\udd50 **Friday 11:00:00**\n\ud83d\udcda physics\n\ud83d\udc65 Section A, Year 1\n\ud83d\udccd Room-103\n\n\ud83d\udd50 **Friday 12:00:00**\n\ud83d\udcda physics\n\ud83d\udc65 Section A, Year 1\n\ud83d\udccd Room-102\n\n\ud83d\udd50 **Tuesday 15:00:00**\n\ud83d\udcda physics\n\ud83d\udc65 Section B, Year 1\n\ud83d\udccd classss-222\n\n\ud83d\udd50 **Thursday 10:00:00**\n\ud83d\udcda physics\n\ud83d\udc65 Section B, Year 1\n\ud83d\udccd Lab-202\n\n\ud83d\udd50 **Thursday 12:00:00**\n\ud83d\udcda physics\n\ud83d\udc65 Section B, Year 1\n\ud83d\udccd Room-101\n\n\ud83d\udd50 **Thursday 17:00:00**\n\ud83d\udcda physics\n\ud83d\udc65 Section B, Year 1\n\ud83d\udccd classss-222\n\n",
+          "intent": "timetable",
+          "response_type": "timetable",
+          "timestamp": "2026-02-12 07:48:07.176757"
+        },
+        {
+          "id": 9,
+          "user_id": 1,
+          "query": "Free room",
+          "response": "\ud83e\udd14 I didn't understand that. Here are some things I can help with:\n\n\u2022 Ask about your 'timetable' or 'next class'\n\u2022 Check 'free rooms' or 'room availability'\n\u2022 View 'announcements' or 'leave status'\n\u2022 Type 'help' for all commands",
+          "intent": "unknown",
+          "response_type": "unknown",
+          "timestamp": "2026-02-12 08:22:51.899060"
+        },
+        {
+          "id": 10,
+          "user_id": 1,
+          "query": "Free rooms",
+          "response": "\ud83c\udfeb **Free Rooms Right Now** (Thu 01:00)\n\n\ud83d\udccd **Room-101**\n   \ud83d\udc65 Capacity: 50\n   \ud83d\udd27 Resources: Projector, AC\n\n\ud83d\udccd **Room-102**\n   \ud83d\udc65 Capacity: 40\n   \ud83d\udd27 Resources: Whiteboard\n\n\ud83d\udccd **Lab-201**\n   \ud83d\udc65 Capacity: 30\n   \ud83d\udd27 Resources: Computers, AC\n\n\ud83d\udccd **Room-103**\n   \ud83d\udc65 Capacity: 60\n   \ud83d\udd27 Resources: Smart Board\n\n\ud83d\udccd **Lab-202**\n   \ud83d\udc65 Capacity: 25\n   \ud83d\udd27 Resources: Lab Equipment\n\n\ud83d\udccd **w-121**\n   \ud83d\udc65 Capacity: 30\n\n\ud83d\udccd **e-121**\n   \ud83d\udc65 Capacity: 30\n\n\ud83d\udccd **classss-222**\n   \ud83d\udc65 Capacity: 30\n\n",
+          "intent": "free_rooms",
+          "response_type": "free_rooms",
+          "timestamp": "2026-02-12 08:23:01.964464"
+        }
+      ]
+    },
+    "system_announcements": {
+      "row_count": 0,
+      "data": []
+    },
+    "timetable": {
+      "row_count": 52,
+      "data": [
+        {
+          "timetable_id": 1,
+          "course_id": 1,
+          "section_id": 1,
+          "faculty_id": 2,
+          "room_id": 1,
+          "day": "Monday",
+          "start_time": "09:00"
+        },
+        {
+          "timetable_id": 2,
+          "course_id": 1,
+          "section_id": 1,
+          "faculty_id": 2,
+          "room_id": 6,
+          "day": "Wednesday",
+          "start_time": "14:00"
+        },
+        {
+          "timetable_id": 3,
+          "course_id": 1,
+          "section_id": 1,
+          "faculty_id": 2,
+          "room_id": 4,
+          "day": "Thursday",
+          "start_time": "15:00"
+        },
+        {
+          "timetable_id": 4,
+          "course_id": 1,
+          "section_id": 1,
+          "faculty_id": 2,
+          "room_id": 6,
+          "day": "Friday",
+          "start_time": "13:00"
+        },
+        {
+          "timetable_id": 5,
+          "course_id": 1,
+          "section_id": 2,
+          "faculty_id": 2,
+          "room_id": 4,
+          "day": "Monday",
+          "start_time": "14:00"
+        },
+        {
+          "timetable_id": 6,
+          "course_id": 1,
+          "section_id": 2,
+          "faculty_id": 2,
+          "room_id": 7,
+          "day": "Tuesday",
+          "start_time": "14:00"
+        },
+        {
+          "timetable_id": 7,
+          "course_id": 1,
+          "section_id": 2,
+          "faculty_id": 2,
+          "room_id": 8,
+          "day": "Tuesday",
+          "start_time": "16:00"
+        },
+        {
+          "timetable_id": 8,
+          "course_id": 1,
+          "section_id": 2,
+          "faculty_id": 2,
+          "room_id": 1,
+          "day": "Wednesday",
+          "start_time": "17:00"
+        },
+        {
+          "timetable_id": 9,
+          "course_id": 3,
+          "section_id": 1,
+          "faculty_id": null,
+          "room_id": 5,
+          "day": "Monday",
+          "start_time": "13:00"
+        },
+        {
+          "timetable_id": 10,
+          "course_id": 3,
+          "section_id": 1,
+          "faculty_id": null,
+          "room_id": 7,
+          "day": "Thursday",
+          "start_time": "13:00"
+        },
+        {
+          "timetable_id": 11,
+          "course_id": 3,
+          "section_id": 1,
+          "faculty_id": null,
+          "room_id": 8,
+          "day": "Friday",
+          "start_time": "14:00"
+        },
+        {
+          "timetable_id": 12,
+          "course_id": 3,
+          "section_id": 1,
+          "faculty_id": null,
+          "room_id": 3,
+          "day": "Friday",
+          "start_time": "15:00"
+        },
+        {
+          "timetable_id": 13,
+          "course_id": 3,
+          "section_id": 2,
+          "faculty_id": null,
+          "room_id": 1,
+          "day": "Monday",
+          "start_time": "10:00"
+        },
+        {
+          "timetable_id": 14,
+          "course_id": 3,
+          "section_id": 2,
+          "faculty_id": null,
+          "room_id": 1,
+          "day": "Monday",
+          "start_time": "15:00"
+        },
+        {
+          "timetable_id": 15,
+          "course_id": 3,
+          "section_id": 2,
+          "faculty_id": null,
+          "room_id": 7,
+          "day": "Wednesday",
+          "start_time": "09:00"
+        },
+        {
+          "timetable_id": 16,
+          "course_id": 3,
+          "section_id": 2,
+          "faculty_id": null,
+          "room_id": 1,
+          "day": "Thursday",
+          "start_time": "10:00"
+        },
+        {
+          "timetable_id": 17,
+          "course_id": 4,
+          "section_id": 1,
+          "faculty_id": 5,
+          "room_id": 2,
+          "day": "Tuesday",
+          "start_time": "09:00"
+        },
+        {
+          "timetable_id": 18,
+          "course_id": 4,
+          "section_id": 1,
+          "faculty_id": 5,
+          "room_id": 1,
+          "day": "Tuesday",
+          "start_time": "11:00"
+        },
+        {
+          "timetable_id": 19,
+          "course_id": 4,
+          "section_id": 1,
+          "faculty_id": 5,
+          "room_id": 2,
+          "day": "Wednesday",
+          "start_time": "13:00"
+        },
+        {
+          "timetable_id": 20,
+          "course_id": 4,
+          "section_id": 1,
+          "faculty_id": 5,
+          "room_id": 5,
+          "day": "Thursday",
+          "start_time": "17:00"
+        },
+        {
+          "timetable_id": 21,
+          "course_id": 4,
+          "section_id": 2,
+          "faculty_id": 5,
+          "room_id": 4,
+          "day": "Tuesday",
+          "start_time": "15:00"
+        },
+        {
+          "timetable_id": 22,
+          "course_id": 4,
+          "section_id": 2,
+          "faculty_id": 5,
+          "room_id": 6,
+          "day": "Thursday",
+          "start_time": "15:00"
+        },
+        {
+          "timetable_id": 23,
+          "course_id": 4,
+          "section_id": 2,
+          "faculty_id": 5,
+          "room_id": 6,
+          "day": "Friday",
+          "start_time": "09:00"
+        },
+        {
+          "timetable_id": 24,
+          "course_id": 4,
+          "section_id": 2,
+          "faculty_id": 5,
+          "room_id": 5,
+          "day": "Friday",
+          "start_time": "15:00"
+        },
+        {
+          "timetable_id": 25,
+          "course_id": 5,
+          "section_id": 1,
+          "faculty_id": 6,
+          "room_id": 3,
+          "day": "Monday",
+          "start_time": "11:00"
+        },
+        {
+          "timetable_id": 26,
+          "course_id": 5,
+          "section_id": 1,
+          "faculty_id": 6,
+          "room_id": 1,
+          "day": "Monday",
+          "start_time": "12:00"
+        },
+        {
+          "timetable_id": 27,
+          "course_id": 5,
+          "section_id": 1,
+          "faculty_id": 6,
+          "room_id": 3,
+          "day": "Tuesday",
+          "start_time": "13:00"
+        },
+        {
+          "timetable_id": 28,
+          "course_id": 5,
+          "section_id": 1,
+          "faculty_id": 6,
+          "room_id": 4,
+          "day": "Wednesday",
+          "start_time": "09:00"
+        },
+        {
+          "timetable_id": 29,
+          "course_id": 5,
+          "section_id": 2,
+          "faculty_id": 6,
+          "room_id": 3,
+          "day": "Monday",
+          "start_time": "16:00"
+        },
+        {
+          "timetable_id": 30,
+          "course_id": 5,
+          "section_id": 2,
+          "faculty_id": 6,
+          "room_id": 2,
+          "day": "Monday",
+          "start_time": "17:00"
+        },
+        {
+          "timetable_id": 31,
+          "course_id": 5,
+          "section_id": 2,
+          "faculty_id": 6,
+          "room_id": 2,
+          "day": "Thursday",
+          "start_time": "11:00"
+        },
+        {
+          "timetable_id": 32,
+          "course_id": 5,
+          "section_id": 2,
+          "faculty_id": 6,
+          "room_id": 7,
+          "day": "Friday",
+          "start_time": "10:00"
+        },
+        {
+          "timetable_id": 33,
+          "course_id": 6,
+          "section_id": 1,
+          "faculty_id": 5,
+          "room_id": 3,
+          "day": "Tuesday",
+          "start_time": "16:00"
+        },
+        {
+          "timetable_id": 34,
+          "course_id": 6,
+          "section_id": 1,
+          "faculty_id": 5,
+          "room_id": 7,
+          "day": "Thursday",
+          "start_time": "10:00"
+        },
+        {
+          "timetable_id": 35,
+          "course_id": 6,
+          "section_id": 1,
+          "faculty_id": 5,
+          "room_id": 2,
+          "day": "Thursday",
+          "start_time": "14:00"
+        },
+        {
+          "timetable_id": 36,
+          "course_id": 6,
+          "section_id": 1,
+          "faculty_id": 5,
+          "room_id": 1,
+          "day": "Friday",
+          "start_time": "17:00"
+        },
+        {
+          "timetable_id": 37,
+          "course_id": 6,
+          "section_id": 2,
+          "faculty_id": 5,
+          "room_id": 7,
+          "day": "Tuesday",
+          "start_time": "12:00"
+        },
+        {
+          "timetable_id": 38,
+          "course_id": 6,
+          "section_id": 2,
+          "faculty_id": 5,
+          "room_id": 8,
+          "day": "Wednesday",
+          "start_time": "11:00"
+        },
+        {
+          "timetable_id": 39,
+          "course_id": 6,
+          "section_id": 2,
+          "faculty_id": 5,
+          "room_id": 5,
+          "day": "Wednesday",
+          "start_time": "12:00"
+        },
+        {
+          "timetable_id": 40,
+          "course_id": 6,
+          "section_id": 2,
+          "faculty_id": 5,
+          "room_id": 8,
+          "day": "Friday",
+          "start_time": "13:00"
+        },
+        {
+          "timetable_id": 41,
+          "course_id": 7,
+          "section_id": 5,
+          "faculty_id": "",
+          "room_id": 6,
+          "day": "Monday",
+          "start_time": "09:00"
+        },
+        {
+          "timetable_id": 42,
+          "course_id": 7,
+          "section_id": 5,
+          "faculty_id": "",
+          "room_id": 7,
+          "day": "Tuesday",
+          "start_time": "13:00"
+        },
+        {
+          "timetable_id": 43,
+          "course_id": 7,
+          "section_id": 5,
+          "faculty_id": "",
+          "room_id": 3,
+          "day": "Tuesday",
+          "start_time": "17:00"
+        },
+        {
+          "timetable_id": 44,
+          "course_id": 7,
+          "section_id": 5,
+          "faculty_id": "",
+          "room_id": 8,
+          "day": "Friday",
+          "start_time": "15:00"
+        },
+        {
+          "timetable_id": 45,
+          "course_id": 8,
+          "section_id": 1,
+          "faculty_id": 8,
+          "room_id": 8,
+          "day": "Monday",
+          "start_time": "16:00"
+        },
+        {
+          "timetable_id": 46,
+          "course_id": 8,
+          "section_id": 1,
+          "faculty_id": 8,
+          "room_id": 6,
+          "day": "Tuesday",
+          "start_time": "12:00"
+        },
+        {
+          "timetable_id": 47,
+          "course_id": 8,
+          "section_id": 1,
+          "faculty_id": 8,
+          "room_id": 2,
+          "day": "Wednesday",
+          "start_time": "16:00"
+        },
+        {
+          "timetable_id": 48,
+          "course_id": 8,
+          "section_id": 1,
+          "faculty_id": 8,
+          "room_id": 2,
+          "day": "Friday",
+          "start_time": "12:00"
+        },
+        {
+          "timetable_id": 49,
+          "course_id": 8,
+          "section_id": 2,
+          "faculty_id": 8,
+          "room_id": 7,
+          "day": "Tuesday",
+          "start_time": "09:00"
+        },
+        {
+          "timetable_id": 50,
+          "course_id": 8,
+          "section_id": 2,
+          "faculty_id": 8,
+          "room_id": 3,
+          "day": "Thursday",
+          "start_time": "12:00"
+        },
+        {
+          "timetable_id": 51,
+          "course_id": 8,
+          "section_id": 2,
+          "faculty_id": 8,
+          "room_id": 7,
+          "day": "Thursday",
+          "start_time": "14:00"
+        },
+        {
+          "timetable_id": 52,
+          "course_id": 8,
+          "section_id": 2,
+          "faculty_id": 8,
+          "room_id": 5,
+          "day": "Friday",
+          "start_time": "17:00"
+        }
+      ]
+    },
+    "faculty_unavailability": {
+      "row_count": 0,
+      "data": []
+    },
+    "attendance": {
+      "row_count": 7,
+      "data": [
+        {
+          "id": 1,
+          "student_id": 2,
+          "course_id": null,
+          "timetable_id": null,
+          "date": "2026-02-12",
+          "status": "absent",
+          "marked_by": 1,
+          "notes": "",
+          "created_at": "2026-02-12 07:46:14.375448"
+        },
+        {
+          "id": 2,
+          "student_id": 10,
+          "course_id": null,
+          "timetable_id": null,
+          "date": "2026-02-12",
+          "status": "absent",
+          "marked_by": 1,
+          "notes": "",
+          "created_at": "2026-02-12 07:46:14.382204"
+        },
+        {
+          "id": 3,
+          "student_id": 7,
+          "course_id": null,
+          "timetable_id": null,
+          "date": "2026-02-12",
+          "status": "present",
+          "marked_by": 1,
+          "notes": "",
+          "created_at": "2026-02-12 07:46:26.004585"
+        },
+        {
+          "id": 4,
+          "student_id": 9,
+          "course_id": null,
+          "timetable_id": null,
+          "date": "2026-02-12",
+          "status": "absent",
+          "marked_by": 1,
+          "notes": "",
+          "created_at": "2026-02-12 07:46:26.008420"
+        },
+        {
+          "id": 5,
+          "student_id": 2,
+          "course_id": null,
+          "timetable_id": null,
+          "date": "2026-02-14",
+          "status": "present",
+          "marked_by": 8,
+          "notes": "",
+          "created_at": "2026-02-14 10:26:38.613363"
+        },
+        {
+          "id": 6,
+          "student_id": 10,
+          "course_id": null,
+          "timetable_id": null,
+          "date": "2026-02-14",
+          "status": "absent",
+          "marked_by": 8,
+          "notes": "",
+          "created_at": "2026-02-14 10:26:38.614369"
+        },
+        {
+          "id": 7,
+          "student_id": 11,
+          "course_id": null,
+          "timetable_id": null,
+          "date": "2026-02-14",
+          "status": "absent",
+          "marked_by": 8,
+          "notes": "",
+          "created_at": "2026-02-14 10:26:38.616879"
+        }
+      ]
+    }
+  }
+}

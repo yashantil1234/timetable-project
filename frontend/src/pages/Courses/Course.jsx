@@ -12,6 +12,8 @@ import CourseCard from "../../components/courses/CourseCard";
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
+  const [sections, setSections] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,13 +21,25 @@ export default function Courses() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadCourses();
+    loadData();
   }, []);
 
-  const loadCourses = async () => {
+  const loadData = async () => {
     setIsLoading(true);
-    const data = await api.getCoursesLegacy();
-    setCourses(data);
+    const [coursesData, sectionsData] = await Promise.all([
+      api.getCoursesLegacy(),
+      api.getSections()
+    ]);
+    setCourses(coursesData);
+    setSections(sectionsData);
+
+    // Extract unique departments from sections
+    const uniqueDepts = [...new Set(
+      sectionsData
+        .map(s => s.dept_name)
+        .filter(Boolean)
+    )];
+    setDepartments(uniqueDepts);
     setIsLoading(false);
   };
 
@@ -37,7 +51,7 @@ export default function Courses() {
     }
     setShowForm(false);
     setEditingCourse(null);
-    loadCourses();
+    loadData();
   };
 
   const handleEdit = (course) => {
@@ -50,13 +64,12 @@ export default function Courses() {
     const courseCode = (course.code || '').toLowerCase();
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = courseName.includes(searchLower) || courseCode.includes(searchLower);
-    
+
     const courseDept = course.dept_name || course.department || '';
     const matchesDepartment = filterDepartment === "all" || courseDept === filterDepartment;
     return matchesSearch && matchesDepartment;
   });
 
-  const departments = [...new Set(courses.map(c => c.dept_name || c.department).filter(Boolean))];
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -69,7 +82,7 @@ export default function Courses() {
             </h1>
             <p className="text-gray-600 mt-1">Manage your college courses and curriculum</p>
           </div>
-          <Button 
+          <Button
             onClick={() => setShowForm(true)}
             className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-lg hover:scale-105 transition-all duration-300"
           >

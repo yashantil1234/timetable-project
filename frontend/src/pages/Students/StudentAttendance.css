@@ -1,0 +1,184 @@
+.attendance-container {
+    padding: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.back-button {
+    background: #e0e0e0;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.back-button:hover {
+    background: #d0d0d0;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #2c3e50;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    font-size: 18px;
+    color: #7f8c8d;
+}
+
+.error-message {
+    background: #fee;
+    color: #c33;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+.overall-card,
+.subjects-card,
+.no-data-card,
+.legend-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.overall-card h2,
+.subjects-card h2,
+.no-data-card h2 {
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.attendance-circle {
+    width: 200px;
+    height: 200px;
+    border: 12px solid;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    position: relative;
+}
+
+.percentage {
+    font-size: 48px;
+    font-weight: bold;
+}
+
+.status-label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.attendance-message {
+    text-align: center;
+    font-size: 16px;
+    color: #555;
+    margin: 0;
+}
+
+.subjects-table {
+    overflow-x: auto;
+}
+
+.subjects-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.subjects-table th {
+    background: #f8f9fa;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #2c3e50;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.subjects-table td {
+    padding: 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.subject-name {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.present-count {
+    color: #2ecc71;
+    font-weight: 600;
+}
+
+.absent-count {
+    color: #e74c3c;
+    font-weight: 600;
+}
+
+.percentage-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.no-data-card {
+    text-align: center;
+}
+
+.no-data-card p {
+    color: #7f8c8d;
+    margin: 0;
+}
+
+.legend-card h3 {
+    margin-top: 0;
+    font-size: 16px;
+    color: #2c3e50;
+    margin-bottom: 12px;
+}
+
+.legend-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.legend-item span {
+    font-size: 14px;
+    color: #555;
+}

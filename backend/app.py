@@ -10,10 +10,14 @@ from extensions import init_extensions, db
 from models import *
 from utils import *
 
-def create_app(config_name='development'):
+def create_app(config_name=None):
     """Application factory pattern"""
     app = Flask(__name__)
 
+    # Auto-detect environment from FLASK_ENV or use provided config_name
+    if config_name is None:
+        config_name = os.environ.get('FLASK_ENV', 'development')
+    
     # Load configuration
     app.config.from_object(config[config_name])
 

@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, Search, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Users, Search, Filter, Upload, FileUp } from "lucide-react";
 import ApiService from "../../services/api";
 
 export default function UserManagement() {
@@ -10,6 +15,10 @@ export default function UserManagement() {
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [roleFilter, setRoleFilter] = useState("all");
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+    const [uploadType, setUploadType] = useState("student");
+    const [uploadFile, setUploadFile] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         fetchUsers();
@@ -65,6 +74,34 @@ export default function UserManagement() {
         }
     };
 
+    const handleFileUpload = async (e) => {
+        e.preventDefault();
+        if (!uploadFile) {
+            alert("Please select a file first");
+            return;
+        }
+
+        try {
+            setIsUploading(true);
+            let response;
+            if (uploadType === "student") {
+                response = await ApiService.uploadStudents(uploadFile);
+            } else {
+                response = await ApiService.uploadFaculty(uploadFile);
+            }
+
+            alert(response.message || "Upload successful!");
+            setIsUploadModalOpen(false);
+            setUploadFile(null);
+            fetchUsers(); // Refresh list
+        } catch (error) {
+            console.error("Upload failed:", error);
+            alert(error.message || "Upload failed");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <Card className="shadow-lg">
@@ -87,10 +124,76 @@ export default function UserManagement() {
                 <CardTitle className="flex items-center gap-2">
                     <Users className="w-5 h-5 text-purple-600" />
                     User Management
-                    <Badge className="ml-auto">{filteredUsers.length} users</Badge>
+                    <div className="ml-auto flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-white hover:bg-gray-50 text-purple-600 border-purple-200"
+                            onClick={() => setIsUploadModalOpen(true)}
+                        >
+                            <Upload className="w-4 h-4 mr-2" />
+                            Bulk Import
+                        </Button>
+                        <Badge>{filteredUsers.length} users</Badge>
+                    </div>
                 </CardTitle>
             </CardHeader>
             <CardContent>
+                {/* Upload Modal */}
+                <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Bulk Import Users</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handleFileUpload} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>User Type</Label>
+                                <Select value={uploadType} onValueChange={setUploadType}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="student">Students</SelectItem>
+                                        <SelectItem value="teacher">Teachers</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>CSV File</Label>
+                                <Input
+                                    type="file"
+                                    accept=".csv"
+                                    onChange={(e) => setUploadFile(e.target.files[0])}
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    {uploadType === "student"
+                                        ? "Required columns: username, password, dept_name, year, section_name"
+                                        : "Required columns: faculty_name, dept_name, username, password, email, max_hours"
+                                    }
+                                </p>
+                            </div>
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => setIsUploadModalOpen(false)}>
+                                    Cancel
+                                </Button>
+                                <Button type="submit" disabled={isUploading || !uploadFile}>
+                                    {isUploading ? (
+                                        <>
+                                            <FileUp className="w-4 h-4 mr-2 animate-bounce" />
+                                            Uploading...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Upload className="w-4 h-4 mr-2" />
+                                            Upload
+                                        </>
+                                    )}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+
                 {/* Search and Filter */}
                 <div className="flex gap-4 mb-6">
                     <div className="flex-1 relative">

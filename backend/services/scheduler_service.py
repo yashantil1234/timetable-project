@@ -25,11 +25,11 @@ def generate_timetable_internal():
         return {"error": "Need courses, faculty, rooms, and sections to generate timetable"}
 
     time_slots = [
-        "Mon_09", "Mon_10", "Mon_11", "Mon_01", "Mon_02", "Mon_03", "Mon_04",
-        "Tue_09", "Tue_10", "Tue_11", "Tue_01", "Tue_02", "Tue_03", "Tue_04",
-        "Wed_09", "Wed_10", "Wed_11", "Wed_01", "Wed_02", "Wed_03", "Wed_04",
-        "Thu_09", "Thu_10", "Thu_11", "Thu_01", "Thu_02", "Thu_03", "Thu_04",
-        "Fri_09", "Fri_10", "Fri_11", "Fri_01", "Fri_02", "Fri_03", "Fri_04"
+        "Mon_09", "Mon_10", "Mon_11", "Mon_12", "Mon_13", "Mon_14", "Mon_15", "Mon_16", "Mon_17",
+        "Tue_09", "Tue_10", "Tue_11", "Tue_12", "Tue_13", "Tue_14", "Tue_15", "Tue_16", "Tue_17",
+        "Wed_09", "Wed_10", "Wed_11", "Wed_12", "Wed_13", "Wed_14", "Wed_15", "Wed_16", "Wed_17",
+        "Thu_09", "Thu_10", "Thu_11", "Thu_12", "Thu_13", "Thu_14", "Thu_15", "Thu_16", "Thu_17",
+        "Fri_09", "Fri_10", "Fri_11", "Fri_12", "Fri_13", "Fri_14", "Fri_15", "Fri_16", "Fri_17"
     ]
 
     model = cp_model.CpModel()
@@ -183,7 +183,7 @@ def generate_timetable_internal():
                             }
                             time_map = {
                                 "09": "09:00", "10": "10:00", "11": "11:00", "12": "12:00",
-                                "01": "01:00", "02": "02:00", "03": "03:00", "04": "04:00"
+                                "13": "13:00", "14": "14:00", "15": "15:00", "16": "16:00", "17": "17:00"
                             }
                             
                             raw_day = slot.split("_")[0]

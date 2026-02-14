@@ -49,6 +49,26 @@ def admin_get_users(current_user):
         return jsonify({"error": f"Failed to fetch users: {str(e)}"}), 500
 
 
+@admin_bp.route("/stats", methods=["GET"])
+@token_required
+@admin_required
+def admin_stats(current_user):
+    """Get system statistics"""
+    try:
+        total_users = User.query.count()
+        pending_leaves = LeaveRequest.query.filter_by(status='pending').count()
+        pending_swaps = SwapRequest.query.filter_by(status='pending').count()
+        
+        return jsonify({
+            "total_users": total_users,
+            "pending_requests": pending_leaves + pending_swaps,
+            "pending_leaves": pending_leaves,
+            "pending_swaps": pending_swaps
+        })
+    except Exception as e:
+        return jsonify({"error": f"Failed to fetch stats: {str(e)}"}), 500
+
+
 @admin_bp.route("/departments", methods=["GET", "POST", "OPTIONS"])
 @token_required
 @admin_required
@@ -471,6 +491,7 @@ def admin_sections(current_user):
                     "id": s.id,
                     "name": s.name,
                     "year": s.year,
+                    "dept_id": s.dept_id,
                     "dept_name": s.department.dept_name if s.department else None,
                     "student_count": student_count,
                     "max_hours_per_day": s.max_hours_per_day

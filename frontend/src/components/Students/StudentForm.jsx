@@ -84,7 +84,7 @@ export default function StudentForm({ student, departments = [], onSubmit, onCan
                     {student ? 'Edit Student' : 'Add New Student'}
                 </CardTitle>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-6 overflow-visible">
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -143,7 +143,7 @@ export default function StudentForm({ student, departments = [], onSubmit, onCan
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select department" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent position="popper" sideOffset={5}>
                                     {departments.map(dept => (
                                         <SelectItem key={dept.id} value={dept.dept_name}>{dept.dept_name}</SelectItem>
                                     ))}
@@ -156,7 +156,7 @@ export default function StudentForm({ student, departments = [], onSubmit, onCan
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select year" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent position="popper" sideOffset={5}>
                                     <SelectItem value="1">Year 1</SelectItem>
                                     <SelectItem value="2">Year 2</SelectItem>
                                     <SelectItem value="3">Year 3</SelectItem>
@@ -176,7 +176,7 @@ export default function StudentForm({ student, departments = [], onSubmit, onCan
                             <SelectTrigger>
                                 <SelectValue placeholder={getSectionPlaceholder()} />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent position="popper" sideOffset={5}>
                                 {sections.map(section => (
                                     <SelectItem key={section.id} value={section.name}>Section {section.name}</SelectItem>
                                 ))}

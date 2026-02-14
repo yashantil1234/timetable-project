@@ -4,7 +4,13 @@ class Config:
     """Base configuration class"""
     SECRET_KEY = os.environ.get("SECRET_KEY", "TimetableSecretKey2025")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    CORS_ORIGINS = ["http://localhost:5173", "http://localhost:5174"]
+    
+    # CORS configuration - support environment variable for production
+    cors_origins_env = os.environ.get("CORS_ORIGINS", "")
+    if cors_origins_env:
+        CORS_ORIGINS = [origin.strip() for origin in cors_origins_env.split(",")]
+    else:
+        CORS_ORIGINS = ["http://localhost:5173", "http://localhost:5174"]
 
     # Mail configuration
     MAIL_SERVER = 'smtp.gmail.com'
@@ -24,8 +30,12 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
-    # Add production database URI here
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///timetable_enhanced.db")
+    # Production database - use DATABASE_URL from environment
+    # Handle both postgres:// and postgresql:// schemes (Heroku uses postgres://)
+    database_url = os.environ.get("DATABASE_URL", "sqlite:///timetable_enhanced.db")
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    SQLALCHEMY_DATABASE_URI = database_url
 
 # Configuration mapping
 config = {

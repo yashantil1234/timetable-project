@@ -151,7 +151,7 @@ def chatbot_assistant(current_user):
 @token_required
 def get_chatbot_history(current_user):
     try:
-        conversations = ChatbotConversation.query.filter_by(user_id=current_user.id)\
+        conversations = db.session.query(ChatbotConversation).filter_by(user_id=current_user.id)\
             .order_by(ChatbotConversation.timestamp.desc())\
             .limit(50).all()
         
@@ -172,6 +172,9 @@ def get_chatbot_history(current_user):
         
         return jsonify({"history": history})
     except Exception as e:
+        print(f"ERROR in get_chatbot_history: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 
@@ -179,11 +182,14 @@ def get_chatbot_history(current_user):
 @token_required
 def clear_chat_history(current_user):
     try:
-        deleted = ChatbotConversation.query.filter_by(user_id=current_user.id).delete()
+        deleted = db.session.query(ChatbotConversation).filter_by(user_id=current_user.id).delete()
         db.session.commit()
         return jsonify({"message": f"Cleared {deleted} conversations"})
     except Exception as e:
         db.session.rollback()
+        print(f"ERROR in clear_chat_history: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 

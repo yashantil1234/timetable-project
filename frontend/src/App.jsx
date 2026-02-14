@@ -12,6 +12,8 @@ import Sections from './pages/Sections/Sections';
 import Rooms from './pages/rooms/Rooms';
 import Timetable from './pages/Timetable/timetable';
 import RegisterUser from './pages/Admin/RegisterUser';
+import MarkAttendance from './pages/Teachers/MarkAttendance';
+import StudentAttendance from './pages/Students/StudentAttendance';
 import Layout from './Layout/Layout';
 import ApiService from './services/api';
 
@@ -197,6 +199,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/teacher/mark-attendance"
+        element={
+          isAuthenticated && userRole === 'teacher' ?
+            <MarkAttendance /> :
+            <Navigate to="/login" replace />
+        }
+      />
+      <Route
         path="/teacher/*"
         element={
           isAuthenticated && userRole === 'teacher' ?
@@ -223,6 +233,14 @@ function AppRoutes() {
             <Layout onLogout={handleLogout}>
               <Timetable />
             </Layout> :
+            <Navigate to="/login" replace />
+        }
+      />
+      <Route
+        path="/student/attendance"
+        element={
+          isAuthenticated && userRole === 'student' ?
+            <StudentAttendance /> :
             <Navigate to="/login" replace />
         }
       />

@@ -109,7 +109,7 @@ const LoginPage = () => {
               <path d="M15 20H35M15 25H35M15 30H25M30 30H35" stroke="white" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </div>
-          <h1 className="login-title">Timetable Management</h1>
+          <h1 className="login-title">EduScheduler</h1>
           <p className="login-subtitle">Sign in to access your dashboard</p>
         </div>
 
@@ -238,7 +238,7 @@ const LoginPage = () => {
         )}
 
         <div className="login-footer">
-          <p>© 2026 Timetable Management System</p>
+          <p>© 2026 EduScheduler</p>
         </div>
       </div>
     </div>

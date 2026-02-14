@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Plus, 
-  BookOpen, 
-  Search, 
-  ChevronRight, 
-  User, 
-  Calendar, 
+import {
+  Plus,
+  BookOpen,
+  Search,
+  ChevronRight,
+  User,
+  Calendar,
   Building2,
   AlertTriangle,
   CheckCircle,
@@ -60,7 +60,7 @@ export default function Courses() {
         getFaculty().catch(() => ({ data: [] })),
         getRooms().catch(() => ({ data: [] }))
       ]);
-      
+
       setDepartments(deptResponse.data || []);
       setFacultyList(facultyResponse.data || []);
       setRoomsList(roomsResponse.data || []);
@@ -102,7 +102,7 @@ export default function Courses() {
 
   const handleSubmit = async (courseData) => {
     setError(null);
-    
+
     try {
       const dataToSend = {
         ...courseData,
@@ -128,11 +128,11 @@ export default function Courses() {
       setShowForm(false);
       setEditingCourse(null);
       loadCourses(); // Reload data after submission
-      
+
     } catch (error) {
       console.error("Error saving course:", error);
-      const errorMessage = error.response?.data?.error || 
-                          (editingCourse ? "Failed to update course." : "Failed to add course.");
+      const errorMessage = error.response?.data?.error ||
+        (editingCourse ? "Failed to update course." : "Failed to add course.");
       showErrorMessage(errorMessage);
     }
   };
@@ -143,7 +143,7 @@ export default function Courses() {
     setError(null);
     setSuccessMessage("");
   };
-  
+
   const handleProceed = () => {
     if (selectedYear && selectedSemester && selectedDepartment) {
       setShowCourses(true);
@@ -173,13 +173,12 @@ export default function Courses() {
   // Success/Error Toast Component
   const Toast = ({ message, type, onClose }) => {
     if (!message) return null;
-    
+
     return (
-      <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 p-4 rounded-lg shadow-lg transition-all duration-300 ${
-        type === 'success' 
-          ? 'bg-green-50 text-green-800 border border-green-200' 
+      <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 p-4 rounded-lg shadow-lg transition-all duration-300 ${type === 'success'
+          ? 'bg-green-50 text-green-800 border border-green-200'
           : 'bg-red-50 text-red-800 border border-red-200'
-      }`}>
+        }`}>
         {type === 'success' ? (
           <CheckCircle className="w-5 h-5 text-green-600" />
         ) : (
@@ -197,17 +196,17 @@ export default function Courses() {
   if (!showCourses) {
     return (
       <div className="min-h-screen p-6 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-        <Toast 
-          message={successMessage} 
-          type="success" 
-          onClose={() => setSuccessMessage("")} 
+        <Toast
+          message={successMessage}
+          type="success"
+          onClose={() => setSuccessMessage("")}
         />
-        <Toast 
-          message={error} 
-          type="error" 
-          onClose={() => setError("")} 
+        <Toast
+          message={error}
+          type="error"
+          onClose={() => setError("")}
         />
-        
+
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
@@ -215,7 +214,7 @@ export default function Courses() {
             </h1>
             <p className="text-gray-600">Select year, semester, and department to manage courses</p>
           </div>
-          
+
           <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
             <CardHeader className="text-center pb-6">
               <CardTitle className="text-2xl text-gray-800">Course Selection Criteria</CardTitle>
@@ -241,7 +240,7 @@ export default function Courses() {
                   ))}
                 </div>
               </div>
-              
+
               {/* Semester Selection */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2 mb-3">
@@ -261,7 +260,7 @@ export default function Courses() {
                   ))}
                 </div>
               </div>
-              
+
               {/* Department Selection */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2 mb-3">
@@ -281,7 +280,7 @@ export default function Courses() {
                   ))}
                 </div>
               </div>
-              
+
               {/* Proceed Button */}
               <div className="pt-6 text-center">
                 <Button
@@ -302,17 +301,17 @@ export default function Courses() {
   // --- MAIN COURSES SCREEN ---
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <Toast 
-        message={successMessage} 
-        type="success" 
-        onClose={() => setSuccessMessage("")} 
+      <Toast
+        message={successMessage}
+        type="success"
+        onClose={() => setSuccessMessage("")}
       />
-      <Toast 
-        message={error} 
-        type="error" 
-        onClose={() => setError("")} 
+      <Toast
+        message={error}
+        type="error"
+        onClose={() => setError("")}
       />
-      
+
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header with Selection Info */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -432,9 +431,9 @@ function EnhancedCourseForm({ course, facultyList, roomsList, onSubmit, onCancel
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({ 
-      ...prev, 
-      [name]: type === 'checkbox' ? checked : value 
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -450,8 +449,8 @@ function EnhancedCourseForm({ course, facultyList, roomsList, onSubmit, onCancel
 
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const timeSlots = [
-    '09:00-10:00', '10:00-11:00', '11:00-12:00', 
-    '13:00-14:00', '14:00-15:00', '15:00-16:00'
+    '09:00', '10:00', '11:00', '12:00',
+    '13:00', '14:00', '15:00', '16:00', '17:00'
   ];
 
   return (
@@ -467,12 +466,12 @@ function EnhancedCourseForm({ course, facultyList, roomsList, onSubmit, onCancel
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">Course Name *</label>
-              <Input 
-                name="name" 
-                value={formData.name} 
-                onChange={handleChange} 
-                placeholder="e.g., Data Structures and Algorithms" 
-                required 
+              <Input
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="e.g., Data Structures and Algorithms"
+                required
               />
             </div>
             <div>
@@ -496,28 +495,28 @@ function EnhancedCourseForm({ course, facultyList, roomsList, onSubmit, onCancel
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">Credits *</label>
-              <Input 
-                name="credits" 
-                type="number" 
-                value={formData.credits} 
-                onChange={handleChange} 
-                placeholder="e.g., 3" 
+              <Input
+                name="credits"
+                type="number"
+                value={formData.credits}
+                onChange={handleChange}
+                placeholder="e.g., 3"
                 min="1"
                 max="10"
-                required 
+                required
               />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Hours per Week *</label>
-              <Input 
-                name="hours_per_week" 
-                type="number" 
-                value={formData.hours_per_week} 
-                onChange={handleChange} 
-                placeholder="e.g., 4" 
+              <Input
+                name="hours_per_week"
+                type="number"
+                value={formData.hours_per_week}
+                onChange={handleChange}
+                placeholder="e.g., 4"
                 min="1"
                 max="20"
-                required 
+                required
               />
             </div>
             <div>
@@ -608,8 +607,8 @@ function EnhancedCourseForm({ course, facultyList, roomsList, onSubmit, onCancel
           </div>
 
           <div className="flex gap-3 pt-6 border-t">
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isSubmitting}
               className="bg-blue-600 hover:bg-blue-700"
             >
@@ -622,9 +621,9 @@ function EnhancedCourseForm({ course, facultyList, roomsList, onSubmit, onCancel
                 course ? "Update Course" : "Add Course"
               )}
             </Button>
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={onCancel}
               disabled={isSubmitting}
             >
@@ -695,10 +694,10 @@ function EnhancedCourseCard({ course, onEdit }) {
           </div>
         )}
 
-        <Button 
-          onClick={() => onEdit(course)} 
-          variant="outline" 
-          size="sm" 
+        <Button
+          onClick={() => onEdit(course)}
+          variant="outline"
+          size="sm"
           className="w-full hover:bg-blue-50 hover:border-blue-300"
         >
           Edit Course

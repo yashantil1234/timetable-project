@@ -12,9 +12,11 @@ from .faculty_unavailability import FacultyUnavailability
 from .leave_request import LeaveRequest
 from .chatbot_conversation import ChatbotConversation
 from .system_announcement import SystemAnnouncement
+from .attendance import Attendance
 
 __all__ = [
     'User', 'Department', 'Faculty', 'Section', 'Course', 'Classroom',
     'RoomOccupancy', 'CourseAllocation', 'Timetable', 'SwapRequest',
-    'FacultyUnavailability', 'LeaveRequest', 'ChatbotConversation', 'SystemAnnouncement'
+    'FacultyUnavailability', 'LeaveRequest', 'ChatbotConversation', 'SystemAnnouncement',
+    'Attendance'
 ]

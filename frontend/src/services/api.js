@@ -1,4 +1,7 @@
 // src/services/api.js
+// API Base URL - automatically switches between development and production
+// In production, set VITE_API_URL environment variable to your deployed backend URL
+// Example: VITE_API_URL=https://timetable-backend.onrender.com
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 class ApiService {
@@ -837,6 +840,37 @@ class ApiService {
   async generateTimetableLegacy() {
     return this.makeRequest('/generate_timetable', {
       method: 'POST'
+    });
+  }
+
+  // ==================== ATTENDANCE ====================
+
+  async getDetailedAttendance() {
+    return this.makeRequest('/student/attendance/details');
+  }
+
+  async getAttendanceForDate(date, department, year, section) {
+    const params = new URLSearchParams({ date, department, year, section });
+    return this.makeRequest(`/teacher/attendance/view?${params.toString()}`);
+  }
+
+  async getTeacherSections(department, year) {
+    return this.makeRequest(`/teacher/sections?department=${encodeURIComponent(department)}&year=${year}`);
+  }
+
+  async getCourses(department, year) {
+    return this.makeRequest(`/teacher/courses?department=${encodeURIComponent(department)}&year=${year}`);
+  }
+
+  async getTeacherStudents(department, year, section) {
+    const params = new URLSearchParams({ department, year, section });
+    return this.makeRequest(`/teacher/students?${params.toString()}`);
+  }
+
+  async markAttendance(attendanceData) {
+    return this.makeRequest('/teacher/mark-attendance', {
+      method: 'POST',
+      body: JSON.stringify(attendanceData)
     });
   }
 }

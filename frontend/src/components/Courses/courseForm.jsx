@@ -8,11 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BookOpen, Save, X } from "lucide-react";
 import api from "../../services/api";
 
-const departments = [
-  "Computer Science", "Mathematics", "Physics", "Chemistry",
-  "Biology", "English", "History", "Business", "Engineering", "Psychology"
-];
-
 export default function CourseForm({ course, onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
     name: course?.name || "",
@@ -26,17 +21,29 @@ export default function CourseForm({ course, onSubmit, onCancel }) {
   });
 
   const [faculty, setFaculty] = useState([]);
+  const [departments, setDepartments] = useState([]);
 
   useEffect(() => {
-    const loadFaculty = async () => {
+    const loadData = async () => {
       try {
-        const data = await api.getFaculty();
-        setFaculty(data);
+        const [facultyData, sectionsData] = await Promise.all([
+          api.getFaculty(),
+          api.getSections()
+        ]);
+        setFaculty(facultyData);
+
+        // Extract unique departments from sections
+        const uniqueDepts = [...new Set(
+          sectionsData
+            .map(s => s.dept_name)
+            .filter(Boolean)
+        )];
+        setDepartments(uniqueDepts);
       } catch (error) {
-        console.error("Error loading faculty:", error);
+        console.error("Error loading data:", error);
       }
     };
-    loadFaculty();
+    loadData();
   }, []);
 
   const handleSubmit = (e) => {
@@ -121,7 +128,7 @@ export default function CourseForm({ course, onSubmit, onCancel }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {[1,2,3,4,5,6].map(credit => (
+                  {[1, 2, 3, 4, 5, 6].map(credit => (
                     <SelectItem key={credit} value={credit.toString()}>{credit}</SelectItem>
                   ))}
                 </SelectContent>
@@ -134,7 +141,7 @@ export default function CourseForm({ course, onSubmit, onCancel }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {[1,2,3,4,5,6,7,8].map(hour => (
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map(hour => (
                     <SelectItem key={hour} value={hour.toString()}>{hour}</SelectItem>
                   ))}
                 </SelectContent>

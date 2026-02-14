@@ -171,3 +171,303 @@ def teacher_swap_requests(current_user):
             import traceback
             traceback.print_exc(file=f)
         return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
+
+
+@faculty_bp.route("/students", methods=["GET", "OPTIONS"])
+@token_required
+@teacher_required
+def get_students_for_section(current_user):
+    """Get list of students for a specific year/dept/section"""
+    try:
+        from models import User, Department, Section
+        
+        dept_name = request.args.get('department')
+        year = request.args.get('year', type=int)
+        section_name = request.args.get('section')
+        
+        if not all([dept_name, year, section_name]):
+            return jsonify({"error": "Missing required parameters: department, year, section"}), 400
+        
+        # Find department
+        department = Department.query.filter_by(dept_name=dept_name).first()
+        if not department:
+            return jsonify({"error": f"Department '{dept_name}' not found"}), 404
+        
+        # Find section
+        section = Section.query.filter_by(
+            name=section_name,
+            dept_id=department.id,
+            year=year
+        ).first()
+        
+        if not section:
+            return jsonify({"error": f"Section '{section_name}' not found"}), 404
+        
+        # Get students
+        students = User.query.filter_by(
+            role='student',
+            dept_id=department.id,
+            year=year,
+            section_id=section.id
+        ).order_by(User.roll_number, User.full_name).all()
+        
+        return jsonify({
+            "students": [{
+                "id": s.id,
+                "full_name": s.full_name,
+                "roll_number": s.roll_number,
+                "email": s.email,
+                "attendance": s.attendance
+            } for s in students]
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@faculty_bp.route("/courses", methods=["GET", "OPTIONS"])
+@token_required
+@teacher_required
+def get_courses(current_user):
+    """Get courses for a department and year"""
+    try:
+        from models import Course, Department
+        dept_name = request.args.get("department")
+        year = request.args.get("year")
+        
+        if not dept_name or not year:
+            return jsonify({"error": "Department and year are required"}), 400
+            
+        dept = Department.query.filter_by(dept_name=dept_name).first()
+        if not dept:
+            return jsonify({"error": "Department not found"}), 404
+            
+        courses = Course.query.filter_by(
+            dept_id=dept.id, 
+            year=int(year)
+        ).all()
+        
+        return jsonify([
+            {
+                "id": c.course_id,
+                "name": c.name
+            } for c in courses
+        ]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@faculty_bp.route("/attendance/view", methods=["GET", "OPTIONS"])
+@token_required
+@teacher_required
+def view_attendance_for_date(current_user):
+    """View attendance for a date, section, and optional course"""
+    try:
+        from models import Department, Section, User, Attendance
+        from datetime import datetime
+        
+        date_str = request.args.get("date")
+        dept_name = request.args.get("department")
+        year = request.args.get("year")
+        section_name = request.args.get("section")
+        course_id = request.args.get("course_id") # Optional course filter
+        
+        if not all([date_str, dept_name, year, section_name]):
+            return jsonify({"error": "Missing required parameters"}), 400
+            
+        attendance_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        
+        dept = Department.query.filter_by(dept_name=dept_name).first()
+        if not dept:
+            return jsonify({"error": "Department not found"}), 404
+            
+        section = Section.query.filter_by(
+            name=section_name,
+            dept_id=dept.id,
+            year=year
+        ).first()
+        
+        if not section:
+            return jsonify({"error": "Section not found"}), 404
+        
+        # Get all students in this section
+        students = User.query.filter_by(
+            role='student',
+            dept_id=dept.id,
+            year=year,
+            section_id=section.id
+        ).order_by(User.roll_number, User.full_name).all()
+        
+        # Get attendance records for this date
+        query = Attendance.query.filter_by(date=attendance_date)
+        
+        if course_id:
+            query = query.filter_by(course_id=course_id)
+        
+        attendance_records = query.all()
+        attendance_map = {a.student_id: a.status for a in attendance_records}
+        
+        # Build response with attendance status for each student
+        result = []
+        for student in students:
+            result.append({
+                "id": student.id,
+                "full_name": student.full_name,
+                "roll_number": student.roll_number,
+                "status": attendance_map.get(student.id)  # null if unmarked
+            })
+        
+        return jsonify({
+            "date": date_str,
+            "students": result
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@faculty_bp.route("/mark-attendance", methods=["POST", "OPTIONS"])
+@token_required
+@teacher_required
+def mark_attendance(current_user):
+    """Mark attendance for multiple students"""
+    try:
+        from models import Attendance, Course
+        from datetime import datetime, date
+        
+        data = request.json
+        attendance_records = data.get('attendance', [])
+        course_id = data.get('course_id')
+        date_str = data.get('date')  # Expected format: YYYY-MM-DD
+        
+        if not attendance_records:
+            return jsonify({"error": "No attendance records provided"}), 400
+        
+        # Parse date
+        attendance_date = datetime.strptime(date_str, '%Y-%m-%d').date() if date_str else date.today()
+        
+        marked_count = 0
+        for record in attendance_records:
+            student_id = record.get('student_id')
+            status = record.get('status', 'absent')  # present, absent, late
+            notes = record.get('notes', '')
+            
+            if not student_id:
+                continue
+            
+            # Check if attendance already exists for this student/course/date
+            existing = Attendance.query.filter_by(
+                student_id=student_id,
+                course_id=course_id,
+                date=attendance_date
+            ).first()
+            
+            if existing:
+                # Update existing record
+                existing.status = status
+                existing.notes = notes
+                existing.marked_by = current_user.id
+            else:
+                # Create new record
+                new_attendance = Attendance(
+                    student_id=student_id,
+                    course_id=course_id,
+                    date=attendance_date,
+                    status=status,
+                    marked_by=current_user.id,
+                    notes=notes
+                )
+                db.session.add(new_attendance)
+            
+            marked_count += 1
+        
+        db.session.commit()
+        
+        # Update overall attendance percentage for each student
+        for record in attendance_records:
+            student_id = record.get('student_id')
+            if student_id:
+                update_student_overall_attendance(student_id)
+        
+        return jsonify({
+            "message": f"Attendance marked for {marked_count} students",
+            "marked_count": marked_count
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+
+@faculty_bp.route("/departments", methods=["GET", "OPTIONS"])
+@token_required
+@teacher_required
+def get_departments_for_teacher(current_user):
+    """Get all departments - teacher accessible endpoint"""
+    try:
+        from models import Department
+        departments = Department.query.all()
+        return jsonify([{
+            "id": d.id,
+            "dept_name": d.dept_name
+        } for d in departments]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@faculty_bp.route("/sections", methods=["GET", "OPTIONS"])
+@token_required
+@teacher_required
+def get_sections_for_teacher(current_user):
+    """Get sections by department and year - teacher accessible endpoint"""
+    try:
+        from models import Section
+        dept_name = request.args.get('department')
+        year = request.args.get('year')
+        
+        query = Section.query
+        if dept_name:
+            from models import Department
+            dept = Department.query.filter_by(dept_name=dept_name).first()
+            if dept:
+                query = query.filter_by(dept_id=dept.id)
+        if year:
+            query = query.filter_by(year=int(year))
+        
+        sections = query.all()
+        return jsonify([{
+            "id": s.id,
+            "name": s.name,
+            "year": s.year,
+            "dept_id": s.dept_id
+        } for s in sections]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+def update_student_overall_attendance(student_id):
+    """Helper function to recalculate overall attendance percentage"""
+    from models import Attendance, User
+    from sqlalchemy import func
+    
+    total = db.session.query(func.count(Attendance.id)).filter_by(student_id=student_id).scalar() or 0
+    if total == 0:
+        return
+    
+    present = db.session.query(func.count(Attendance.id)).filter_by(
+        student_id=student_id,
+        status='present'
+    ).scalar() or 0
+    
+    late = db.session.query(func.count(Attendance.id)).filter_by(
+        student_id=student_id,
+        status='late'
+    ).scalar() or 0
+    
+    percentage = round(((present + late) / total) * 100, 2)
+    
+    student = User.query.get(student_id)
+    if student:
+        student.attendance = percentage
+        db.session.commit()

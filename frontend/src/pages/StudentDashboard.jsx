@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import ApiService from "../services/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ import {
 } from "lucide-react";
 
 export default function StudentDashboard({ onLogout }) {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalCourses: 0,
     totalClasses: 0,
@@ -71,15 +73,6 @@ export default function StudentDashboard({ onLogout }) {
       const todayClasses = getTodayClasses(timetableArray);
       const courseStats = calculateCourseStats(timetableArray);
 
-      setStats({
-        totalCourses: courseStats.totalCourses,
-        totalClasses: courseStats.totalClasses,
-        attendedClasses: courseStats.attendedClasses,
-        upcomingClasses: todayClasses.length,
-        cgpa: 8.5, // This would come from student record
-        attendance: courseStats.attendancePercentage
-      });
-
       // Load student profile
       const profile = await ApiService.getStudentProfile();
       setStudentInfo({
@@ -92,13 +85,34 @@ export default function StudentDashboard({ onLogout }) {
         phone: profile.phone || "N/A"
       });
 
+      // Load attendance details from API
+      let attendanceData = {
+        overall_attendance: profile.attendance || courseStats.attendancePercentage,
+        total_classes_all: courseStats.totalClasses,
+        attended_classes_all: courseStats.attendedClasses
+      };
+
+      try {
+        const detailedAttendance = await ApiService.getDetailedAttendance();
+        if (detailedAttendance) {
+          attendanceData = {
+            overall_attendance: detailedAttendance.overall_attendance || attendanceData.overall_attendance,
+            total_classes_all: detailedAttendance.total_classes_all || attendanceData.total_classes_all,
+            attended_classes_all: detailedAttendance.attended_classes_all || attendanceData.attended_classes_all
+          };
+        }
+      } catch (attendanceError) {
+        console.error("Error loading detailed attendance, using fallback:", attendanceError);
+        // Use fallback data calculated from timetable
+      }
+
       setStats({
         totalCourses: courseStats.totalCourses,
-        totalClasses: courseStats.totalClasses,
-        attendedClasses: courseStats.attendedClasses,
+        totalClasses: attendanceData.total_classes_all,
+        attendedClasses: attendanceData.attended_classes_all,
         upcomingClasses: todayClasses.length,
-        cgpa: 8.5, // This is still hardcoded as we didn't add CGPA yet, but attendance is real now
-        attendance: profile.attendance || courseStats.attendancePercentage
+        cgpa: 8.5, // This is still hardcoded as we didn't add CGPA yet
+        attendance: attendanceData.overall_attendance
       });
 
     } catch (error) {
@@ -174,9 +188,9 @@ export default function StudentDashboard({ onLogout }) {
             </div>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button className="gap-2 bg-blue-600 hover:bg-blue-700">
-              <BookOpen className="w-4 h-4" />
-              View Timetable
+            <Button className="gap-2 bg-blue-600 hover:bg-blue-700" onClick={() => navigate('/student/attendance')}>
+              <Target className="w-4 h-4" />
+              View Attendance
             </Button>
             <Button variant="outline" className="gap-2">
               <Calendar className="w-4 h-4" />
@@ -196,7 +210,7 @@ export default function StudentDashboard({ onLogout }) {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           <StatCard
             title="Total Courses"
             value={stats.totalCourses}
@@ -205,31 +219,10 @@ export default function StudentDashboard({ onLogout }) {
             isLoading={isLoading}
           />
           <StatCard
-            title="CGPA"
-            value={stats.cgpa}
-            icon={Award}
-            color="green"
-            isLoading={isLoading}
-          />
-          <StatCard
             title="Attendance"
             value={`${stats.attendance}%`}
             icon={Target}
             color={stats.attendance >= 75 ? "green" : "red"}
-            isLoading={isLoading}
-          />
-          <StatCard
-            title="Total Classes"
-            value={stats.totalClasses}
-            icon={Calendar}
-            color="purple"
-            isLoading={isLoading}
-          />
-          <StatCard
-            title="Classes Attended"
-            value={stats.attendedClasses}
-            icon={TrendingUp}
-            color="orange"
             isLoading={isLoading}
           />
           <StatCard

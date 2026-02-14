@@ -1,5 +1,6 @@
 name,year,dept_name,student_count,max_hours_per_day
-A,1,Computer Science,1,5
+A,1,Computer Science,3,5
 B,1,Computer Science,0,5
-A,2,Computer Science,1,5
+A,2,Computer Science,2,5
 B,2,Computer Science,0,5
+E,1,Electronics,0,5

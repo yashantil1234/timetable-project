@@ -21,7 +21,7 @@ def upload_faculty(current_user):
         if not file:
             return jsonify({"error": "No file uploaded"}), 400
         df = pd.read_csv(file)
-        required_cols = ['faculty_name', 'dept_name']
+        required_cols = ['faculty_name', 'dept_name', 'username', 'password', 'email', 'max_hours']
         missing_cols = [c for c in required_cols if c not in df.columns]
         if missing_cols:
             return jsonify({"error": f"CSV must contain columns: {', '.join(missing_cols)}"}), 400
@@ -29,20 +29,46 @@ def upload_faculty(current_user):
         for _, row in df.iterrows():
             fname = str(row['faculty_name']).strip() if pd.notna(row['faculty_name']) else ""
             dname = str(row['dept_name']).strip() if pd.notna(row['dept_name']) else ""
-            if not fname or not dname:
+            username = str(row['username']).strip() if pd.notna(row['username']) else ""
+            password = str(row['password']).strip() if pd.notna(row['password']) else ""
+            email = str(row['email']).strip() if pd.notna(row['email']) else ""
+            max_hours = int(row['max_hours']) if pd.notna(row['max_hours']) else None
+
+            if not fname or not dname or not username or not password or not email or not max_hours:
                 continue
+            
+            # Check if Faculty exists
             if Faculty.query.filter_by(faculty_name=fname).first():
                 continue
+            
+            # Check if User exists
+            if User.query.filter_by(username=username).first():
+                continue
+
             dept = Department.query.filter_by(dept_name=dname).first()
             if not dept:
                 continue
+
+            # Create Faculty record
             faculty = Faculty(
                 faculty_name=fname,
-                max_hours=int(row.get('max_hours', 12)) if pd.notna(row.get('max_hours')) else 12,
+                max_hours=max_hours,
                 dept_id=dept.id,
-                email=str(row.get('email', '')).strip() if pd.notna(row.get('email')) else None
+                email=email
             )
             db.session.add(faculty)
+            
+            # Create User record for login
+            user = User(
+                username=username,
+                role='teacher',
+                dept_id=dept.id,
+                full_name=fname,
+                email=faculty.email
+            )
+            user.set_password(password)
+            db.session.add(user)
+
             added += 1
         db.session.commit()
         export_csvs()

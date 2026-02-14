@@ -506,6 +506,8 @@ function TodaySchedule({ classes, isLoading }) {
 
 // Quick Actions Component
 function QuickActions({ onSwapClick, onLeaveClick, onProfileClick }) {
+  const navigate = useNavigate();
+
   return (
     <Card className="shadow-lg">
       <CardHeader>
@@ -515,6 +517,10 @@ function QuickActions({ onSwapClick, onLeaveClick, onProfileClick }) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
+        <Button className="w-full justify-start gap-2" variant="outline" onClick={() => navigate('/teacher/mark-attendance')}>
+          <UserCheck className="w-4 h-4" />
+          Mark Attendance
+        </Button>
         <Button className="w-full justify-start gap-2" variant="outline" onClick={onSwapClick}>
           <ArrowRightLeft className="w-4 h-4" />
           Request Class Swap
