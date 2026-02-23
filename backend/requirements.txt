@@ -1,0 +1,12 @@
+flask
+flask-sqlalchemy
+flask-cors
+psycopg2-binary
+python-dotenv
+google-auth
+google-auth-oauthlib
+google-api-python-client
+requests
+APScheduler
+pytz
+cryptography

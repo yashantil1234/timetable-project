@@ -23,6 +23,8 @@ import QuickActions from "../../components/Dashboard/quickActions";
 import RecentSwapRequests from "../../components/Dashboard/recentSwapRequests";
 import RecentLeaveRequests from "../../components/Dashboard/recentLeaveRequests";
 import UserManagement from "../../components/Dashboard/UserManagement";
+import DepartmentManagement from "../../components/Dashboard/DepartmentManagement";
+import AdminTimetableEditor from "../../components/Dashboard/AdminTimetableEditor";
 
 
 export default function Dashboard() {
@@ -156,7 +158,7 @@ export default function Dashboard() {
           <div className="lg:col-span-2">
             <div className="grid md:grid-cols-2 gap-8">
               <RecentSwapRequests requests={swapRequests} isLoading={isLoading} onUpdate={loadDashboardData} />
-              <RecentLeaveRequests requests={leaveRequests} isLoading={isLoading} onUpdate={loadDashboardData} />
+              <RecentLeaveRequests />
             </div>
           </div>
 
@@ -166,8 +168,10 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* User Management */}
-        <div className="mt-8">
+        {/* Management Sections */}
+        <div className="mt-8 space-y-8">
+          <AdminTimetableEditor />
+          <DepartmentManagement />
           <UserManagement />
         </div>
       </div>

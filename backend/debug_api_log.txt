@@ -482,3 +482,117 @@ Found 3 swap requests.
 GET /swap-requests: User=rita singh (ID 8)
 Resolved Faculty ID: 5
 Found 3 swap requests.
+GET /swap-requests: User=John Doe (ID 1)
+Resolved Faculty ID: 1
+Found 0 swap requests.
+GET /swap-requests: User=John Doe (ID 1)
+Resolved Faculty ID: 1
+Found 0 swap requests.
+GET /swap-requests: User=John Doe (ID 1)
+Resolved Faculty ID: 1
+Found 0 swap requests.
+GET /swap-requests: User=John Doe (ID 1)
+Resolved Faculty ID: 1
+Found 0 swap requests.
+GET /swap-requests: User=sunny  (ID 13)
+Resolved Faculty ID: 10
+Found 0 swap requests.
+GET /swap-requests: User=sunny  (ID 13)
+Resolved Faculty ID: 10
+Found 0 swap requests.
+GET /swap-requests: User=sunny  (ID 13)
+Resolved Faculty ID: 10
+Found 0 swap requests.
+GET /swap-requests: User=sunny  (ID 13)
+Resolved Faculty ID: 10
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.
+GET /swap-requests: User=Teacher One (ID 4)
+Resolved Faculty ID: 2
+Found 0 swap requests.

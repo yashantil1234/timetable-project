@@ -76,20 +76,33 @@ const navigationItems = [
     url: "/admin/register-user",
     icon: Users,
   },
-  // {
-  //   title: "Time Slots",
-  //   url: createPageUrl("TimeSlots"),
-  //   icon: Clock,
-  // },
+  {
+    title: "Resources",
+    url: "/resources",
+    icon: BookOpen,
+  },
+  {
+    title: "Notifications",
+    url: "/admin/notifications",
+    icon: Bell,
+    role: 'admin',
+  },
 ];
 
-export default function Layout({ children, onLogout }) {
+import NotificationCenter from "../components/NotificationCenter";
+import { Bell } from "lucide-react"; // Ensure Bell is imported
+
+export default function Layout({ children, onLogout, role }) {
   const location = useLocation();
+
+  // Filter items based on role
+  const visibleItems = navigationItems.filter(item => !item.role || item.role === role);
 
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <Sidebar className="border-r border-blue-100/60 bg-white/80 backdrop-blur-sm">
+          {/* ... Header ... */}
           <SidebarHeader className="border-b border-blue-100/60 p-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -109,7 +122,7 @@ export default function Layout({ children, onLogout }) {
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {navigationItems.map((item) => (
+                  {visibleItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild
@@ -132,6 +145,9 @@ export default function Layout({ children, onLogout }) {
           </SidebarContent>
 
           <SidebarFooter className="border-t border-blue-100/60 p-4">
+            <div className="flex items-center justify-between mb-2 px-2">
+              <NotificationCenter position="sidebar-right" />
+            </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 cursor-pointer hover:bg-gradient-to-r hover:from-blue-100 hover:to-indigo-100 transition-colors duration-200">

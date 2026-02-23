@@ -873,6 +873,127 @@ class ApiService {
       body: JSON.stringify(attendanceData)
     });
   }
+  // ==================== NOTIFICATIONS ====================
+
+  async getNotifications() {
+    return this.makeRequest('/api/notifications');
+  }
+
+  async markNotificationRead(id) {
+    return this.makeRequest(`/api/notifications/${id}/read`, {
+      method: 'PUT'
+    });
+  }
+
+  async markAllNotificationsRead() {
+    return this.makeRequest('/api/notifications/read-all', {
+      method: 'PUT'
+    });
+  }
+
+  async clearAllNotifications() {
+    return this.makeRequest('/api/notifications', {
+      method: 'DELETE'
+    });
+  }
+
+  async getNotificationPreferences() {
+    return this.makeRequest('/api/notifications/preferences');
+  }
+
+  async updateNotificationPreferences(prefs) {
+    return this.makeRequest('/api/notifications/preferences', {
+      method: 'PUT',
+      body: JSON.stringify(prefs)
+    });
+  }
+
+  // ==================== RESOURCE MANAGEMENT ====================
+
+  async getResources() {
+    return this.makeRequest('/api/resources');
+  }
+
+  async getBookings() {
+    return this.makeRequest('/api/bookings');
+  }
+
+  async createBooking(bookingData) {
+    return this.makeRequest('/api/bookings', {
+      method: 'POST',
+      body: JSON.stringify(bookingData)
+    });
+  }
+
+  async updateBookingStatus(bookingId, status) {
+    return this.makeRequest(`/api/bookings/${bookingId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status })
+    });
+  }
+  async sendNotification(notificationData) {
+    return this.makeRequest('/api/admin/notifications/send', {
+      method: 'POST',
+      body: JSON.stringify(notificationData)
+    });
+  }
+  // ==================== GOOGLE CALENDAR ====================
+
+  async getGoogleAuthUrl(redirectUri) {
+    return this.makeRequest(`/api/auth/google/url?redirect_uri=${encodeURIComponent(redirectUri)}`);
+  }
+
+  async connectGoogleCalendar(code, redirectUri) {
+    return this.makeRequest('/api/auth/google/callback', {
+      method: 'POST',
+      body: JSON.stringify({ code, redirect_uri: redirectUri })
+    });
+  }
+
+  async getGoogleCalendarStatus() {
+    return this.makeRequest('/api/calendar/status');
+  }
+
+  async syncGoogleCalendar() {
+    return this.makeRequest('/api/calendar/sync', { method: 'POST' });
+  }
+
+  async disconnectGoogleCalendar() {
+    return this.makeRequest('/api/calendar/disconnect', { method: 'POST' });
+  }
+
+  // ==================== ADMIN LEAVE MANAGEMENT ====================
+
+  async adminGetAllLeaveRequests(status = 'pending') {
+    return this.makeRequest('/api/leave/admin/all?status=' + status);
+  }
+
+  async adminApproveLeave(id, notes = '') {
+    return this.makeRequest('/api/leave/admin/approve/' + id, {
+      method: 'POST',
+      body: JSON.stringify({ notes })
+    });
+  }
+
+  async adminRejectLeave(id, notes) {
+    return this.makeRequest('/api/leave/admin/reject/' + id, {
+      method: 'POST',
+      body: JSON.stringify({ notes })
+    });
+  }
+
+  // ==================== ADMIN TIMETABLE MANAGEMENT ====================
+
+  async adminUpdateTimetable(id, data) {
+    return this.makeRequest('/api/admin/timetable/' + id, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async adminDeleteTimetable(id) {
+    return this.makeRequest('/api/admin/timetable/' + id, { method: 'DELETE' });
+  }
 }
 
 export default new ApiService();

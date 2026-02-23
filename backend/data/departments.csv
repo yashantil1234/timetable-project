@@ -1,5 +1,4 @@
 id,dept_name,sections,faculty
-1,Computer Science,"A, B, A, B","John Doe, t, rrr, yash, rita singh, balbir gupta, Ankit, vipul"
-2,Mathematics,,sonu bhide
-3,Physics,,
-4,Electronics,E,
+1,computer science,"A, B",yash
+2,electronics,,
+3,mathematics,,pooja

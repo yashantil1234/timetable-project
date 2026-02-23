@@ -16,6 +16,8 @@ import MarkAttendance from './pages/Teachers/MarkAttendance';
 import StudentAttendance from './pages/Students/StudentAttendance';
 import Layout from './Layout/Layout';
 import ApiService from './services/api';
+import ResourceBookingSystem from './components/ResourceBookingSystem';
+import AdminNotificationManager from './pages/Admin/NotificationManager';
 
 // Inner component that has access to useLocation
 function AppRoutes() {
@@ -92,7 +94,7 @@ function AppRoutes() {
         path="/admin"
         element={
           isAuthenticated && userRole === 'admin' ?
-            <Layout onLogout={handleLogout}>
+            <Layout onLogout={handleLogout} role={userRole}>
               <Dashboard />
             </Layout> :
             <Navigate to="/login" replace />
@@ -102,7 +104,7 @@ function AppRoutes() {
         path="/courses"
         element={
           isAuthenticated && userRole === 'admin' ?
-            <Layout onLogout={handleLogout}>
+            <Layout onLogout={handleLogout} role={userRole}>
               <Courses />
             </Layout> :
             <Navigate to="/login" replace />
@@ -112,7 +114,7 @@ function AppRoutes() {
         path="/teachers"
         element={
           isAuthenticated && userRole === 'admin' ?
-            <Layout onLogout={handleLogout}>
+            <Layout onLogout={handleLogout} role={userRole}>
               <Teachers />
             </Layout> :
             <Navigate to="/login" replace />
@@ -122,7 +124,7 @@ function AppRoutes() {
         path="/students"
         element={
           isAuthenticated && userRole === 'admin' ?
-            <Layout onLogout={handleLogout}>
+            <Layout onLogout={handleLogout} role={userRole}>
               <Students />
             </Layout> :
             <Navigate to="/login" replace />
@@ -132,7 +134,7 @@ function AppRoutes() {
         path="/sections"
         element={
           isAuthenticated && userRole === 'admin' ?
-            <Layout onLogout={handleLogout}>
+            <Layout onLogout={handleLogout} role={userRole}>
               <Sections />
             </Layout> :
             <Navigate to="/login" replace />
@@ -142,7 +144,7 @@ function AppRoutes() {
         path="/rooms"
         element={
           isAuthenticated && userRole === 'admin' ?
-            <Layout onLogout={handleLogout}>
+            <Layout onLogout={handleLogout} role={userRole}>
               <Rooms />
             </Layout> :
             <Navigate to="/login" replace />
@@ -152,7 +154,7 @@ function AppRoutes() {
         path="/timetable"
         element={
           isAuthenticated && userRole === 'admin' ?
-            <Layout onLogout={handleLogout}>
+            <Layout onLogout={handleLogout} role={userRole}>
               <Timetable />
             </Layout> :
             <Navigate to="/login" replace />
@@ -162,8 +164,18 @@ function AppRoutes() {
         path="/admin/register-user"
         element={
           isAuthenticated && userRole === 'admin' ?
-            <Layout onLogout={handleLogout}>
+            <Layout onLogout={handleLogout} role={userRole}>
               <RegisterUser />
+            </Layout> :
+            <Navigate to="/login" replace />
+        }
+      />
+      <Route
+        path="/admin/notifications"
+        element={
+          isAuthenticated && userRole === 'admin' ?
+            <Layout onLogout={handleLogout} role={userRole}>
+              <AdminNotificationManager />
             </Layout> :
             <Navigate to="/login" replace />
         }
@@ -172,7 +184,7 @@ function AppRoutes() {
         path="/admin/*"
         element={
           isAuthenticated && userRole === 'admin' ?
-            <Layout onLogout={handleLogout}>
+            <Layout onLogout={handleLogout} role={userRole}>
               <Dashboard />
             </Layout> :
             <Navigate to="/login" replace />
@@ -184,17 +196,7 @@ function AppRoutes() {
         path="/teacher"
         element={
           isAuthenticated && userRole === 'teacher' ?
-            <TeacherDashboard onLogout={handleLogout} /> :
-            <Navigate to="/login" replace />
-        }
-      />
-      <Route
-        path="/timetable"
-        element={
-          isAuthenticated && userRole === 'teacher' ?
-            <Layout onLogout={handleLogout}>
-              <Timetable />
-            </Layout> :
+            <TeacherDashboard onLogout={handleLogout} /> : // TeacherDashboard handles its own layout probably? Check later or assume standard
             <Navigate to="/login" replace />
         }
       />
@@ -210,12 +212,16 @@ function AppRoutes() {
         path="/teacher/*"
         element={
           isAuthenticated && userRole === 'teacher' ?
-            <Layout onLogout={handleLogout}>
+            <Layout onLogout={handleLogout} role={userRole}>
               <Dashboard />
             </Layout> :
             <Navigate to="/login" replace />
         }
       />
+      {/* Note: TeacherDashboard usually doesn't use Layout if it has its own, but routes under /teacher/* might. 
+          Assuming Layout handles teacher nav if role is passed. 
+          Standardizing Layout usage for all roles is better. 
+      */}
 
       {/* Student Routes */}
       <Route
@@ -223,16 +229,6 @@ function AppRoutes() {
         element={
           isAuthenticated && userRole === 'student' ?
             <StudentDashboard onLogout={handleLogout} /> :
-            <Navigate to="/login" replace />
-        }
-      />
-      <Route
-        path="/timetable"
-        element={
-          isAuthenticated && userRole === 'student' ?
-            <Layout onLogout={handleLogout}>
-              <Timetable />
-            </Layout> :
             <Navigate to="/login" replace />
         }
       />
@@ -249,6 +245,18 @@ function AppRoutes() {
         element={
           isAuthenticated && userRole === 'student' ?
             <StudentDashboard onLogout={handleLogout} /> :
+            <Navigate to="/login" replace />
+        }
+      />
+
+      {/* Shared Routes */}
+      <Route
+        path="/resources"
+        element={
+          isAuthenticated ?
+            <Layout onLogout={handleLogout} role={userRole}>
+              <ResourceBookingSystem />
+            </Layout> :
             <Navigate to="/login" replace />
         }
       />

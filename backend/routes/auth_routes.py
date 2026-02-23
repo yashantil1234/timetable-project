@@ -22,17 +22,21 @@ def register():
     role = data.get("role")
     dept_id = data.get("dept_id")
     year = data.get("year")
+    email = data.get("email")
 
-    if not username or not password or role not in ["student", "teacher", "admin"]:
-        return jsonify({"error": "Invalid data"}), 400
+    if not username or not password or not email or role not in ["student", "teacher", "admin"]:
+        return jsonify({"error": "Invalid data (email is required)"}), 400
     if User.query.filter_by(username=username).first():
         return jsonify({"error": "Username exists"}), 400
+    if User.query.filter_by(email=email).first():
+        return jsonify({"error": "Email already registered"}), 400
 
     user_data = {
         "username": username,
         "role": role,
         "dept_id": dept_id,
         "year": year,
+        "email": email,
     }
     user = User(**user_data)
     user.set_password(password)

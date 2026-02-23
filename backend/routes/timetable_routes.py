@@ -164,3 +164,68 @@ def student_timetable(current_user):
         }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+# =========================================================
+# ADMIN: Timetable management with Google Calendar hooks
+# =========================================================
+
+@timetable_bp.route("/admin/timetable/<int:timetable_id>", methods=["PUT", "OPTIONS"])
+@token_required
+def update_timetable_entry(current_user, timetable_id):
+    """Admin updates a timetable entry → auto-updates all connected users' Google Calendars."""
+    if current_user.role != 'admin':
+        return jsonify({"error": "Unauthorized"}), 403
+
+    entry = Timetable.query.get(timetable_id)
+    if not entry:
+        return jsonify({"error": "Timetable entry not found"}), 404
+
+    data = request.json or {}
+
+    # Apply changes
+    if 'day' in data:
+        entry.day = data['day']
+    if 'start_time' in data:
+        entry.start_time = data['start_time']
+    if 'end_time' in data:
+        entry.end_time = data['end_time']
+    if 'faculty_id' in data:
+        entry.faculty_id = data['faculty_id']
+    if 'room_id' in data:
+        entry.room_id = data['room_id']
+
+    db.session.commit()
+
+    # Fire Google Calendar hook asynchronously (best effort)
+    try:
+        from services.google_calendar_service import on_timetable_updated
+        on_timetable_updated(entry)
+    except Exception as e:
+        print(f"[GCal] Hook error on update: {e}")
+
+    return jsonify({"message": "Timetable entry updated"}), 200
+
+
+@timetable_bp.route("/admin/timetable/<int:timetable_id>", methods=["DELETE", "OPTIONS"])
+@token_required
+def delete_timetable_entry(current_user, timetable_id):
+    """Admin deletes a timetable entry → removes event from all connected users' Google Calendars."""
+    if current_user.role != 'admin':
+        return jsonify({"error": "Unauthorized"}), 403
+
+    entry = Timetable.query.get(timetable_id)
+    if not entry:
+        return jsonify({"error": "Timetable entry not found"}), 404
+
+    # Fire Google Calendar hook BEFORE deleting (needs timetable data)
+    try:
+        from services.google_calendar_service import on_timetable_deleted
+        on_timetable_deleted(timetable_id)
+    except Exception as e:
+        print(f"[GCal] Hook error on delete: {e}")
+
+    db.session.delete(entry)
+    db.session.commit()
+
+    return jsonify({"message": "Timetable entry deleted"}), 200

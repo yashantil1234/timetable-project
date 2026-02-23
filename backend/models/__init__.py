@@ -13,10 +13,25 @@ from .leave_request import LeaveRequest
 from .chatbot_conversation import ChatbotConversation
 from .system_announcement import SystemAnnouncement
 from .attendance import Attendance
+from .faculty_workload import FacultyWorkload
+from .meeting import Meeting, FacultyMeetingParticipation
+from .assessment import Assessment
+from .grade import Grade
+from .student_performance import StudentPerformance
+from .resource import Resource
+from .booking import ResourceBooking
+from .notification import Notification, NotificationPreference
+from .user_google_auth import UserGoogleAuth
+from .calendar_event_map import CalendarEventMap
+from .user_google_auth import UserGoogleAuth
 
 __all__ = [
     'User', 'Department', 'Faculty', 'Section', 'Course', 'Classroom',
     'RoomOccupancy', 'CourseAllocation', 'Timetable', 'SwapRequest',
     'FacultyUnavailability', 'LeaveRequest', 'ChatbotConversation', 'SystemAnnouncement',
-    'Attendance'
+    'Attendance', 'FacultyWorkload', 'Meeting', 'FacultyMeetingParticipation',
+    'Assessment', 'Grade', 'StudentPerformance',
+    'Resource', 'ResourceBooking',
+    'Notification', 'NotificationPreference',
+    'UserGoogleAuth', 'CalendarEventMap'
 ]

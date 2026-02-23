@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ApiService from "../services/api";
+import NotificationCenter from "../components/NotificationCenter";
+import GoogleCalendarConnect from "../components/GoogleCalendarConnect";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -196,9 +198,7 @@ export default function StudentDashboard({ onLogout }) {
               <Calendar className="w-4 h-4" />
               Full Schedule
             </Button>
-            <Button variant="ghost" size="sm">
-              <Bell className="w-4 h-4" />
-            </Button>
+            <NotificationCenter />
             <Button variant="ghost" size="sm" onClick={() => setShowProfileModal(true)}>
               <Settings className="w-4 h-4" />
             </Button>
@@ -245,8 +245,9 @@ export default function StudentDashboard({ onLogout }) {
           </div>
 
           {/* Profile Summary */}
-          <div>
+          <div className="space-y-4">
             <ProfileSummary student={studentInfo} />
+            <GoogleCalendarConnect />
           </div>
 
           {/* Weekly Timetable */}

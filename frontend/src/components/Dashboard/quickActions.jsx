@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../../utils/navigation";
-import { Plus, Calendar, BookOpen, Users } from "lucide-react";
+import { Plus, Calendar, BookOpen, Users, Bell } from "lucide-react";
 
 export default function QuickActions() {
   const actions = [
@@ -20,9 +20,15 @@ export default function QuickActions() {
       variant: "outline"
     },
     {
-      label: "Add Teacher", 
+      label: "Add Teacher",
       url: createPageUrl("Teachers"),
       icon: Users,
+      variant: "outline"
+    },
+    {
+      label: "Notify",
+      url: "/admin/notifications",
+      icon: Bell,
       variant: "outline"
     }
   ];
@@ -31,7 +37,7 @@ export default function QuickActions() {
     <div className="flex flex-wrap gap-3">
       {actions.map((action) => (
         <Link key={action.label} to={action.url}>
-          <Button 
+          <Button
             variant={action.variant}
             className={`gap-2 hover:scale-105 transition-all duration-300 shadow-lg ${action.className || ''}`}
           >

@@ -1,10 +1,4 @@
 faculty_name,max_hours,dept_name,email,faculty_id
-John Doe,12,Computer Science,,1
-t,12,Computer Science,yashantil1462@gmail.com,2
-rrr,12,Computer Science,priya.nair@college.edu,3
-yash,12,Computer Science,priya.nair@college.edu,4
-rita singh,12,Computer Science,rita.edu@gmail.com,5
-balbir gupta,12,Computer Science,yashantil992@outlook.com,6
-Ankit,12,Computer Science,guptaak85189@gmail.com,7
-vipul,12,Computer Science,vtvipulgupta55@gmail.com,8
-sonu bhide,12,Mathematics,sonu.bhide@gmail.com,9
+yash,12,computer science,yashantil1462@gmail.com,1
+Teacher One,12,,,2
+pooja,12,mathematics,yashantil1462@gmail.com,3

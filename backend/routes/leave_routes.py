@@ -195,3 +195,92 @@ def cancel_leave_request(current_user, request_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Failed to cancel leave request: {str(e)}"}), 500
+
+
+# ─────────────────────────────────────────────
+# Admin-only routes
+# ─────────────────────────────────────────────
+
+@leave_bp.route("/admin/all", methods=["GET"])
+@token_required
+def admin_get_all_leave_requests(current_user):
+    """Admin: get all leave requests with optional status filter."""
+    if current_user.role != 'admin':
+        return jsonify({"error": "Admin access required"}), 403
+    try:
+        status_filter = request.args.get("status", "pending")
+        query = LeaveRequest.query
+        if status_filter and status_filter != "all":
+            query = query.filter_by(status=status_filter)
+        requests = query.order_by(LeaveRequest.created_at.desc()).all()
+        return jsonify([{
+            "id": req.id,
+            "user_id": req.user_id,
+            "full_name": req.user.full_name if req.user else "Unknown",
+            "username": req.user.username if req.user else "",
+            "role": req.user.role if req.user else "",
+            "leave_type": req.leave_type,
+            "start_date": req.start_date.isoformat(),
+            "end_date": req.end_date.isoformat(),
+            "reason": req.reason,
+            "status": req.status,
+            "admin_notes": req.admin_notes,
+            "created_at": req.created_at.isoformat(),
+            "days_requested": (req.end_date - req.start_date).days + 1
+        } for req in requests]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@leave_bp.route("/admin/approve/<int:request_id>", methods=["POST"])
+@token_required
+def admin_approve_leave(current_user, request_id):
+    """Admin: approve a leave request."""
+    if current_user.role != 'admin':
+        return jsonify({"error": "Admin access required"}), 403
+    try:
+        leave_request = LeaveRequest.query.get(request_id)
+        if not leave_request:
+            return jsonify({"error": "Leave request not found"}), 404
+        if leave_request.status != 'pending':
+            return jsonify({"error": f"Cannot approve a {leave_request.status} request"}), 400
+
+        data = request.json or {}
+        leave_request.status = 'approved'
+        leave_request.admin_notes = data.get('notes', '')
+        leave_request.approved_by = current_user.id
+        leave_request.updated_at = datetime.utcnow()
+        db.session.commit()
+        return jsonify({"message": "Leave request approved"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+@leave_bp.route("/admin/reject/<int:request_id>", methods=["POST"])
+@token_required
+def admin_reject_leave(current_user, request_id):
+    """Admin: reject a leave request."""
+    if current_user.role != 'admin':
+        return jsonify({"error": "Admin access required"}), 403
+    try:
+        leave_request = LeaveRequest.query.get(request_id)
+        if not leave_request:
+            return jsonify({"error": "Leave request not found"}), 404
+        if leave_request.status != 'pending':
+            return jsonify({"error": f"Cannot reject a {leave_request.status} request"}), 400
+
+        data = request.json or {}
+        notes = data.get('notes', '')
+        if not notes:
+            return jsonify({"error": "Rejection notes are required"}), 400
+
+        leave_request.status = 'rejected'
+        leave_request.admin_notes = notes
+        leave_request.approved_by = current_user.id
+        leave_request.updated_at = datetime.utcnow()
+        db.session.commit()
+        return jsonify({"message": "Leave request rejected"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500

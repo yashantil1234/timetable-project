@@ -6,7 +6,7 @@ Uses the modular structure with separate models, routes, services, and utils
 import os
 from flask import Flask, request
 from config import config
-from extensions import init_extensions, db
+from extensions import init_extensions, db, scheduler
 from models import *
 from utils import *
 
@@ -38,6 +38,11 @@ def create_app(config_name=None):
     from routes.chat_routes import chat_bp
     from routes.legacy_routes import legacy_bp
     from routes.student_routes import student_bp
+    from routes.faculty_workload_routes import workload_bp
+    from routes.performance_routes import performance_bp
+    from routes.resource_routes import resource_bp
+    from routes.notification_routes import notification_bp
+    from routes.google_calendar_routes import google_calendar_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(admin_bp, url_prefix='/admin')
@@ -46,6 +51,19 @@ def create_app(config_name=None):
     app.register_blueprint(timetable_bp)
     # Faculty routes - /teacher prefix
     app.register_blueprint(faculty_bp, url_prefix='/teacher')
+    # Faculty workload routes - /teacher prefix
+    app.register_blueprint(workload_bp, url_prefix='/teacher')
+    # Performance routes - /teacher and /student prefixes
+    app.register_blueprint(performance_bp, url_prefix='/teacher')
+    # Also register for student access
+    app.register_blueprint(performance_bp, url_prefix='/student', name='student_performance')
+    # Resource routes - /api prefix for shared access
+    app.register_blueprint(resource_bp, url_prefix='/api')
+    # Notification routes - /api prefix
+    app.register_blueprint(notification_bp, url_prefix='/api')
+    # Google Calendar routes - /api prefix
+    app.register_blueprint(google_calendar_bp, url_prefix='/api')
+    
     # Rooms status route - register separately at root level
     from routes.faculty_routes import get_rooms_status
     from utils.decorators import token_required
@@ -73,7 +91,9 @@ def create_app(config_name=None):
                 "Leave Request System",
                 "Class Swap Requests",
                 "AI Chat Assistant",
-                "Email Notifications"
+                "Email Notifications",
+                "Faculty Workload Management",
+                "Meeting Scheduling"
             ],
             "modular_structure": {
                 "models": "Database models",
@@ -104,6 +124,24 @@ def create_app(config_name=None):
 
 # Create app instance for gunicorn
 app = create_app()
+
+# Start background scheduler for Google Calendar sync
+def _background_sync():
+    with app.app_context():
+        try:
+            from services.google_calendar_service import background_sync_all_users
+            background_sync_all_users()
+        except Exception as e:
+            print(f"[GCal BG] Scheduler error: {e}")
+
+scheduler.add_job(
+    _background_sync,
+    trigger='interval',
+    hours=6,
+    id='gcal_sync',
+    replace_existing=True
+)
+scheduler.start()
 
 if __name__ == "__main__":
     #app = create_app()

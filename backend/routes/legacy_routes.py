@@ -147,7 +147,7 @@ def get_faculty():
             {
                 "id": f.faculty_id,
                 "name": f.faculty_name,
-                "dept_name": f.department.dept_name,
+                "dept_name": f.department.dept_name if f.department else "Unknown",
                 "max_hours": f.max_hours
             }
             for f in faculty

@@ -1,11 +1,13 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_mail import Mail
+from apscheduler.schedulers.background import BackgroundScheduler
 
 # Initialize extensions
 db = SQLAlchemy()
 cors = CORS()
 mail = Mail()
+scheduler = BackgroundScheduler(timezone='Asia/Kolkata')
 
 def init_extensions(app):
     """Initialize Flask extensions"""
