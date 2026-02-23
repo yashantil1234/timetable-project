@@ -128,7 +128,7 @@ def admin_login():
 # ─────────────────────────────────────────────
 @auth_bp.route("/setup/admin", methods=["POST"])
 def setup_admin():
-    import os
+    import os, traceback
     secret = os.environ.get("SETUP_SECRET", "")
     if not secret or secret == "disabled":
         return jsonify({"error": "Setup endpoint is disabled"}), 403
@@ -137,21 +137,32 @@ def setup_admin():
     if data.get("setup_key") != secret:
         return jsonify({"error": "Invalid setup key"}), 403
 
-    # Only allow if no admin exists yet
-    if User.query.filter_by(role="admin").first():
-        return jsonify({"error": "Admin already exists. Set SETUP_SECRET=disabled in env vars."}), 400
+    try:
+        # Only allow if no admin exists yet
+        existing = User.query.filter_by(role="admin").first()
+        if existing:
+            return jsonify({"error": "Admin already exists. Set SETUP_SECRET=disabled in env vars."}), 400
 
-    username = data.get("username", "admin")
-    password = data.get("password", "Admin@123")
-    email = data.get("email", "admin@school.com")
-    full_name = data.get("full_name", "System Admin")
+        username = data.get("username", "admin")
+        password = data.get("password", "Admin@123")
+        email = data.get("email", "admin@school.com")
+        full_name = data.get("full_name", "System Admin")
 
-    user = User(username=username, role="admin", email=email, full_name=full_name)
-    user.set_password(password)
-    db.session.add(user)
-    db.session.commit()
+        user = User(
+            username=username,
+            role="admin",
+            email=email,
+            full_name=full_name,
+            is_active=True
+        )
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
 
-    return jsonify({
-        "message": f"✅ Admin '{username}' created. Set SETUP_SECRET=disabled in Render env vars now.",
-        "username": username
-    }), 201
+        return jsonify({
+            "message": f"Admin '{username}' created successfully! Now set SETUP_SECRET=disabled in Render env vars.",
+            "username": username
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
