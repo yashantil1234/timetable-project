@@ -13,17 +13,33 @@ Edge cases:
 """
 import os
 import datetime
-import pytz
 import logging
 
-from google_auth_oauthlib.flow import Flow
-from google.oauth2.credentials import Credentials
-from google.auth.transport.requests import Request
-from google.auth.exceptions import RefreshError
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
+# Google libraries — optional, gracefully degrade if not installed
+try:
+    import pytz
+    from google_auth_oauthlib.flow import Flow
+    from google.oauth2.credentials import Credentials
+    from google.auth.transport.requests import Request
+    from google.auth.exceptions import RefreshError
+    from googleapiclient.discovery import build
+    from googleapiclient.errors import HttpError
+    GOOGLE_LIBS_AVAILABLE = True
+except ImportError as _e:
+    GOOGLE_LIBS_AVAILABLE = False
+    pytz = None
+    logging.getLogger('gcal').warning(
+        f"[GCal] Google libraries not installed ({_e}). "
+        "Google Calendar features disabled. Run: pip install google-auth google-auth-oauthlib google-api-python-client pytz"
+    )
 
-from cryptography.fernet import Fernet
+# Cryptography — optional
+try:
+    from cryptography.fernet import Fernet
+    CRYPTO_AVAILABLE = True
+except ImportError:
+    CRYPTO_AVAILABLE = False
+    logging.getLogger('gcal').warning("[GCal] cryptography not installed. Token encryption disabled.")
 
 from extensions import db
 from models import UserGoogleAuth, CalendarEventMap, Timetable, Faculty, User
@@ -31,7 +47,7 @@ from models import UserGoogleAuth, CalendarEventMap, Timetable, Faculty, User
 # ─────────────────────────────────────────────
 # Constants
 # ─────────────────────────────────────────────
-IST = pytz.timezone('Asia/Kolkata')
+IST = pytz.timezone('Asia/Kolkata') if pytz else None
 CALENDAR_NAME = 'EduScheduler Timetable'
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 SYNC_DEBOUNCE_MINUTES = 2      # Prevent sync within 2 min (multi-device)
@@ -61,11 +77,8 @@ def _safe_log(msg, **kwargs):
 # Fernet Token Encryption
 # ─────────────────────────────────────────────
 def _get_fernet():
-    """
-    Returns Fernet cipher from FERNET_SECRET_KEY env var.
-    Generate once via: Fernet.generate_key().decode()
-    Add to .env as FERNET_SECRET_KEY=<value>
-    """
+    if not CRYPTO_AVAILABLE:
+        return None
     key = os.environ.get('FERNET_SECRET_KEY')
     if not key:
         raise RuntimeError("FERNET_SECRET_KEY not set in environment")
@@ -73,13 +86,13 @@ def _get_fernet():
 
 
 def _encrypt(value: str) -> str:
-    if not value:
+    if not value or not CRYPTO_AVAILABLE:
         return value
     return _get_fernet().encrypt(value.encode()).decode()
 
 
 def _decrypt(value: str) -> str:
-    if not value:
+    if not value or not CRYPTO_AVAILABLE:
         return value
     try:
         return _get_fernet().decrypt(value.encode()).decode()
@@ -106,6 +119,8 @@ def _get_client_config():
 # ─────────────────────────────────────────────
 def get_auth_url(redirect_uri, login_hint=None):
     """Generate OAuth 2.0 consent URL."""
+    if not GOOGLE_LIBS_AVAILABLE:
+        raise RuntimeError("Google libraries not installed on this server.")
     flow = Flow.from_client_config(_get_client_config(), scopes=SCOPES, redirect_uri=redirect_uri)
     url, _ = flow.authorization_url(
         access_type='offline',
