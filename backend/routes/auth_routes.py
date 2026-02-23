@@ -119,4 +119,39 @@ def admin_login():
             "user_id": user.id
         }), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({\"error\": str(e)}), 500
+
+
+# ─────────────────────────────────────────────
+# ONE-TIME ADMIN SEED — for fresh production deploys
+# Disable by setting SETUP_SECRET=disabled in env vars after first use
+# ─────────────────────────────────────────────
+@auth_bp.route("/setup/admin", methods=["POST"])
+def setup_admin():
+    import os
+    secret = os.environ.get("SETUP_SECRET", "")
+    if not secret or secret == "disabled":
+        return jsonify({"error": "Setup endpoint is disabled"}), 403
+
+    data = request.json or {}
+    if data.get("setup_key") != secret:
+        return jsonify({"error": "Invalid setup key"}), 403
+
+    # Only allow if no admin exists yet
+    if User.query.filter_by(role="admin").first():
+        return jsonify({"error": "Admin already exists. Set SETUP_SECRET=disabled in env vars."}), 400
+
+    username = data.get("username", "admin")
+    password = data.get("password", "Admin@123")
+    email = data.get("email", "admin@school.com")
+    full_name = data.get("full_name", "System Admin")
+
+    user = User(username=username, role="admin", email=email, full_name=full_name)
+    user.set_password(password)
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({
+        "message": f"✅ Admin '{username}' created. Set SETUP_SECRET=disabled in Render env vars now.",
+        "username": username
+    }), 201
