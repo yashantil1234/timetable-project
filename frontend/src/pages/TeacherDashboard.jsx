@@ -24,6 +24,7 @@ import {
   BookOpen,
   GraduationCap,
   AlertTriangle,
+  AlertCircle,
 
   User,
   List,
@@ -986,13 +987,20 @@ function CreateMeetingModal({ isOpen, onClose, teacherInfo }) {
       const fetchData = async () => {
         try {
           const [sectionsRes, deptsRes, statusRes] = await Promise.all([
-            ApiService.getSections(),
-            ApiService.getDepartments(),
-            ApiService.getCalendarStatus()
+            ApiService.getSectionsPublic(),
+            ApiService.getDepartmentsPublic(),
+            ApiService.getGoogleCalendarStatus()
           ]);
           
-          if (sectionsRes && sectionsRes.sections) setSections(sectionsRes.sections);
-          if (deptsRes && deptsRes.departments) setDepartments(deptsRes.departments);
+          if (sectionsRes) {
+            // Handle if response is an array or object with sections property
+            const sectionList = Array.isArray(sectionsRes) ? sectionsRes : sectionsRes.sections || [];
+            setSections(sectionList);
+          }
+          if (deptsRes) {
+            const deptList = Array.isArray(deptsRes) ? deptsRes : deptsRes.departments || [];
+            setDepartments(deptList);
+          }
           if (statusRes && statusRes.is_connected) setIsGoogleConnected(true);
         } catch (err) {
           console.error("Failed to load metadata", err);

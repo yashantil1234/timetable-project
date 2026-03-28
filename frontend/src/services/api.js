@@ -184,6 +184,10 @@ class ApiService {
     return this.makeRequest('/admin/departments');
   }
 
+  async getDepartmentsPublic() {
+    return this.makeRequest('/get_departments');
+  }
+
   async addDepartment(deptName) {
     return this.makeRequest('/admin/departments', {
       method: 'POST',
@@ -232,6 +236,15 @@ class ApiService {
 
   async getSections() {
     return this.makeRequest('/admin/sections');
+  }
+
+  async getSectionsPublic(deptName = null, year = null) {
+    let url = '/get_sections';
+    const params = new URLSearchParams();
+    if (deptName) params.append('dept_name', deptName);
+    if (year) params.append('year', year);
+    if (params.toString()) url += `?${params.toString()}`;
+    return this.makeRequest(url);
   }
 
   async addSection(sectionData) {
