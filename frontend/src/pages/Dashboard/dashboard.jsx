@@ -141,8 +141,6 @@ export default function Dashboard() {
             color="blue"
             isLoading={isLoading}
             onClick={() => navigate('/courses')}
-            trend={8}
-            trendLabel="this semester"
           />
           <StatCard
             title="Teachers"
@@ -151,8 +149,6 @@ export default function Dashboard() {
             color="green"
             isLoading={isLoading}
             onClick={() => navigate('/faculty')}
-            trend={3}
-            trendLabel="new this month"
           />
           <StatCard
             title="Rooms"
@@ -161,8 +157,6 @@ export default function Dashboard() {
             color="purple"
             isLoading={isLoading}
             onClick={() => navigate('/rooms')}
-            trend={0}
-            trendLabel="no change"
           />
           <StatCard
             title="Active Classes"
@@ -171,8 +165,6 @@ export default function Dashboard() {
             color="orange"
             isLoading={isLoading}
             onClick={() => navigate('/timetable')}
-            trend={12}
-            trendLabel="vs last week"
           />
           <StatCard
             title="Time Slots"
@@ -181,8 +173,6 @@ export default function Dashboard() {
             color="indigo"
             isLoading={isLoading}
             onClick={() => navigate('/timetable')}
-            trend={5}
-            trendLabel="utilization up"
           />
         </div>
 

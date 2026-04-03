@@ -2,3 +2,4 @@ room_id,name,capacity,resources,current_status
 1,b-121,30,,free
 2,b-122,30,,free
 3,b-201,30,,free
+4,g-203,30,,free

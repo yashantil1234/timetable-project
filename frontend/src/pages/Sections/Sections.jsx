@@ -7,6 +7,7 @@ import { Plus, Users, Search, Filter } from "lucide-react";
 
 import SectionForm from "../../components/Sections/SectionForm";
 import SectionCard from "../../components/Sections/SectionCard";
+import BulkImportModal from "../../components/Dashboard/BulkImportModal";
 
 export default function Sections() {
     const [sections, setSections] = useState([]);
@@ -16,6 +17,7 @@ export default function Sections() {
     const [filterYear, setFilterYear] = useState("all");
     const [departments, setDepartments] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [showBulkModal, setShowBulkModal] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -72,13 +74,23 @@ export default function Sections() {
                         </h1>
                         <p className="text-gray-600 mt-1">Manage sections for each department and year</p>
                     </div>
-                    <Button
-                        onClick={() => setShowForm(true)}
-                        className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-lg hover:scale-105 transition-all duration-300"
-                    >
-                        <Plus className="w-4 h-4" />
-                        Add New Section
-                    </Button>
+                    <div className="flex gap-3">
+                        <Button
+                            onClick={() => setShowBulkModal(true)}
+                            variant="outline"
+                            className="gap-2 border-blue-200 text-blue-600 hover:bg-blue-50"
+                        >
+                            <Plus className="w-4 h-4 rotate-45" />
+                            Bulk Import
+                        </Button>
+                        <Button
+                            onClick={() => setShowForm(true)}
+                            className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-lg hover:scale-105 transition-all duration-300"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Add New Section
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Search and Filters */}
@@ -162,6 +174,15 @@ export default function Sections() {
                         ))
                     )}
                 </div>
+
+                <BulkImportModal
+                    isOpen={showBulkModal}
+                    onClose={() => setShowBulkModal(false)}
+                    title="Bulk Import Sections"
+                    endpoint="/upload/sections"
+                    templateInfo="name, year, dept_name"
+                    onSuccess={() => loadData()}
+                />
             </div>
         </div>
     );

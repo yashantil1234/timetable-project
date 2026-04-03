@@ -83,8 +83,12 @@ def create_meeting(current_user):
             )
             if generated_link:
                 meeting_link = generated_link
+            else:
+                print(f"WARN: Google Meet link could not be generated for user {current_user.id}. Check server logs for details.")
         except Exception as e:
-            print(f"Meet Generation Error: {e}")
+            print(f"Meet Generation CRITICAL Error: {e}")
+            import traceback
+            traceback.print_exc()
             pass # Fallback to manual link validation
 
     # 3. Save meeting in DB

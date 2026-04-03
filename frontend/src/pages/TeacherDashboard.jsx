@@ -30,11 +30,14 @@ import {
   List,
   Video,
   Radio,
-  ExternalLink
+  ExternalLink,
+  Layout
 } from "lucide-react";
 import MyRequestsModal from "./Teachers/MyRequestsModal";
 import MyMeetingsModal from "../components/Dashboard/MyMeetingsModal";
 import SendNotificationModal from "../components/Dashboard/SendNotificationModal";
+import AssessmentManager from "./Teachers/AssessmentManager";
+import AssignmentManager from "./Teachers/AssignmentManager";
 
 const ProfileModal = ({ isOpen, onClose, teacher }) => {
   if (!isOpen) return null;
@@ -108,6 +111,7 @@ export default function TeacherDashboard({ onLogout }) {
   const [showCreateMeetingModal, setShowCreateMeetingModal] = useState(false);
   const [showMyMeetingsModal, setShowMyMeetingsModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview"); // overview, assessments, assignments
 
   useEffect(() => {
     loadTeacherData();
@@ -317,8 +321,26 @@ export default function TeacherDashboard({ onLogout }) {
               <Badge variant="secondary" className="bg-green-50 text-green-700 hover:bg-green-100">ID: {teacherInfo.employeeId}</Badge>
             </div>
           </div>
-          {/* Action buttons removed since they are now in the sidebar */}
-          <div className="flex flex-wrap gap-3 hidden md:flex opacity-0 pointer-events-none"></div>
+          <div className="flex flex-wrap gap-2 mt-4 md:mt-0 bg-slate-100 p-1.5 rounded-2xl w-fit">
+            {[
+              { id: "overview", label: "Overview", icon: Layout },
+              { id: "assessments", label: "Assessments", icon: BookOpen },
+              { id: "assignments", label: "Assignments", icon: FileText }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                  activeTab === tab.id 
+                    ? "bg-white text-indigo-600 shadow-sm" 
+                    : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/50"
+                }`}
+              >
+                {tab.icon && <tab.icon className="w-4 h-4" />}
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -366,54 +388,58 @@ export default function TeacherDashboard({ onLogout }) {
           </div>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Today's Schedule */}
-          <div className="lg:col-span-2" id="schedule">
-            <TodaySchedule
-              classes={todayClasses}
-              isLoading={isLoading}
-            />
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-4" id="calendar">
-            <CreateMeetingCard
-              onCreateClick={() => setShowCreateMeetingModal(true)}
-            />
-            <div
-              className="group cursor-pointer rounded-xl border-2 border-dashed border-blue-200 bg-blue-50/50 p-6 text-center hover:border-blue-500 hover:bg-blue-50 transition-all duration-300"
-              onClick={() => setShowNotificationModal(true)}
-            >
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 mb-3 group-hover:scale-110 transition-transform duration-300">
-                <Bell className="h-6 w-6 text-blue-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">Send Notification</h3>
-              <p className="text-sm text-gray-500 mt-1">Broadcast an announcement</p>
+        {activeTab === "overview" && (
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Today's Schedule */}
+            <div className="lg:col-span-2" id="schedule">
+              <TodaySchedule
+                classes={todayClasses}
+                isLoading={isLoading}
+              />
             </div>
-            {meetings.length > 0 && (
-              <ActiveMeetingsCard meetings={meetings} />
-            )}
-            <GoogleCalendarConnect />
-          </div>
 
-          {/* Room Status */}
-          <div className="lg:col-span-2" id="rooms">
-            <RoomStatusCard
-              rooms={roomStatus}
-              onStatusChange={handleRoomStatusChange}
-              isLoading={isLoading}
-            />
-          </div>
+            {/* Right Column */}
+            <div className="space-y-4" id="calendar">
+              <CreateMeetingCard
+                onCreateClick={() => setShowCreateMeetingModal(true)}
+              />
+              <div
+                className="group cursor-pointer rounded-xl border-2 border-dashed border-blue-200 bg-blue-50/50 p-6 text-center hover:border-blue-500 hover:bg-blue-50 transition-all duration-300"
+                onClick={() => setShowNotificationModal(true)}
+              >
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 mb-3 group-hover:scale-110 transition-transform duration-300">
+                  <Bell className="h-6 w-6 text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">Send Notification</h3>
+                <p className="text-sm text-gray-500 mt-1">Broadcast an announcement</p>
+              </div>
+              {meetings.length > 0 && (
+                <ActiveMeetingsCard meetings={meetings} />
+              )}
+              <GoogleCalendarConnect />
+            </div>
 
-          {/* Weekly Overview */}
-          <div>
-            <WeeklyOverview
-              timetable={timetable}
-              isLoading={isLoading}
-            />
+            {/* Room Status */}
+            <div className="lg:col-span-2" id="rooms">
+              <RoomStatusCard
+                rooms={roomStatus}
+                onStatusChange={handleRoomStatusChange}
+                isLoading={isLoading}
+              />
+            </div>
+
+            {/* Weekly Overview */}
+            <div>
+              <WeeklyOverview
+                timetable={timetable}
+                isLoading={isLoading}
+              />
+            </div>
           </div>
-        </div>
+        )}
+
+        {activeTab === "assessments" && <AssessmentManager />}
+        {activeTab === "assignments" && <AssignmentManager />}
       </div>
 
       <SwapRequestModal
@@ -444,6 +470,7 @@ export default function TeacherDashboard({ onLogout }) {
         isOpen={showCreateMeetingModal}
         onClose={() => setShowCreateMeetingModal(false)}
         teacherInfo={teacherInfo}
+        onMeetingCreated={loadTeacherData}
       />
 
       <MyMeetingsModal
@@ -565,9 +592,14 @@ function TodaySchedule({ classes, isLoading }) {
                   <p className="text-sm text-gray-600">{classItem.section || 'Unknown Section'}</p>
                 </div>
                 <div className="text-right">
-                  <Badge className="bg-orange-100 text-orange-800">
-                    Scheduled
+                  <Badge className={classItem.is_swapped ? "bg-amber-100 text-amber-800 border-amber-200" : "bg-orange-100 text-orange-800"}>
+                    {classItem.is_swapped ? "🔄 Rescheduled" : "Scheduled"}
                   </Badge>
+                  {classItem.is_swapped && (
+                    <div className="text-[10px] text-amber-600 mt-1 cursor-help" title={`By Admin on ${new Date(classItem.swapped_at).toLocaleDateString()}`}>
+                      Modified
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -974,7 +1006,7 @@ function CreateMeetingCard({ onCreateClick }) {
 }
 
 // Create Meeting Modal
-function CreateMeetingModal({ isOpen, onClose, teacherInfo }) {
+function CreateMeetingModal({ isOpen, onClose, teacherInfo, onMeetingCreated }) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -1031,6 +1063,12 @@ function CreateMeetingModal({ isOpen, onClose, teacherInfo }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!isGoogleConnected && (!formData.manual_link || !formData.manual_link.trim())) {
+      alert("Please provide a Meeting Link, or connect your Google Calendar to have one auto-generated.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -1054,12 +1092,13 @@ function CreateMeetingModal({ isOpen, onClose, teacherInfo }) {
       });
 
       alert("Meeting Broadcast Created Successfully!");
+      if (onMeetingCreated) onMeetingCreated();
       onClose();
       // Reset form
       setFormData({
         title: "",
         description: "",
-        audience_type: "section",
+        audience_role: "students",
         section_id: "",
         start_time: "",
         manual_link: "",
@@ -1203,8 +1242,8 @@ function CreateMeetingModal({ isOpen, onClose, teacherInfo }) {
                       <option value="">All Sections</option>
                       {sections
                         .filter(s => 
-                          (!formData.dept_id || s.dept_id == formData.dept_id) && 
-                          (s.year == formData.year)
+                          (!formData.dept_id || String(s.dept_id) === String(formData.dept_id)) && 
+                          (String(s.year) === String(formData.year))
                         )
                         .map(sec => (
                           <option key={sec.id} value={sec.id}>{sec.name}</option>
@@ -1291,7 +1330,7 @@ function ActiveMeetingsCard({ meetings }) {
                   <div className="text-[10px] text-gray-500 font-medium truncate pr-2">
                     By {meet.organizer_name}
                   </div>
-                  {meet.meeting_link && (
+                  {meet.meeting_link ? (
                     <a
                       href={meet.meeting_link}
                       target="_blank"
@@ -1300,6 +1339,10 @@ function ActiveMeetingsCard({ meetings }) {
                     >
                       Join <ExternalLink className="w-3 h-3" />
                     </a>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-gray-400 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded flex-shrink-0">
+                      No Link Provided
+                    </span>
                   )}
                 </div>
               </div>

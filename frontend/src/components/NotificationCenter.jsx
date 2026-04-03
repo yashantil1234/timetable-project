@@ -1,8 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Bell, Check, Trash2, Settings } from 'lucide-react';
+import { Bell, Check, Trash2, Settings, FileText, Image, FileSpreadsheet, File, Download, ExternalLink } from 'lucide-react';
 import ApiService from '../services/api';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+// ── File helpers ──
+function getFileIcon(fileType, className = 'w-4 h-4') {
+    if (!fileType) return <File className={className} />;
+    const t = fileType.toLowerCase();
+    if (t === 'pdf') return <FileText className={`${className} text-red-500`} />;
+    if (t === 'docx' || t === 'doc') return <FileText className={`${className} text-blue-500`} />;
+    if (t === 'xlsx' || t === 'xls') return <FileSpreadsheet className={`${className} text-green-500`} />;
+    if (['png','jpg','jpeg','gif','webp'].includes(t)) return <Image className={`${className} text-purple-500`} />;
+    return <File className={className} />;
+}
+
+function FileAttachmentCard({ notif }) {
+    if (!notif.file_url) return null;
+    const fileUrl = `${API_BASE}${notif.file_url}`;
+    const ext = notif.file_type?.toLowerCase();
+    const isImage = ['png','jpg','jpeg','gif','webp'].includes(ext);
+    const isPdf   = ext === 'pdf';
+
+    return (
+        <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 overflow-hidden" onClick={e => e.stopPropagation()}>
+            {isImage && (
+                <img src={fileUrl} alt={notif.file_name} className="w-full max-h-40 object-cover" />
+            )}
+            <div className="flex items-center gap-2 px-3 py-2">
+                <span className="flex-shrink-0">{getFileIcon(notif.file_type, 'w-5 h-5')}</span>
+                <span className="flex-1 text-xs font-medium text-slate-700 truncate" title={notif.file_name}>
+                    {notif.file_name || 'Attachment'}
+                </span>
+                {isPdf ? (
+                    <a href={fileUrl} target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded transition-colors flex-shrink-0">
+                        View <ExternalLink className="w-3 h-3" />
+                    </a>
+                ) : (
+                    <a href={fileUrl} download={notif.file_name}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded transition-colors flex-shrink-0">
+                        <Download className="w-3 h-3" /> Download
+                    </a>
+                )}
+            </div>
+        </div>
+    );
+}
 
 const NotificationCenter = ({ position = 'bottom-right' }) => {
     const [notifications, setNotifications] = useState([]);
@@ -10,6 +56,7 @@ const NotificationCenter = ({ position = 'bottom-right' }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [showPreferences, setShowPreferences] = useState(false);
     const [preferences, setPreferences] = useState(null);
+    const [expandedIds, setExpandedIds] = useState(new Set());
 
     // Position mapping
     const positionClasses = {
@@ -234,7 +281,15 @@ const NotificationCenter = ({ position = 'bottom-right' }) => {
                                         <div
                                             key={notif.id}
                                             className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer ${!notif.is_read ? 'bg-blue-50/50 dark:bg-blue-900/10 border-l-2 border-blue-500' : 'border-l-2 border-transparent'}`}
-                                            onClick={() => !notif.is_read && markRead(notif.id)}
+                                            onClick={() => {
+                                                if (!notif.is_read) markRead(notif.id);
+                                                setExpandedIds(prev => {
+                                                    const next = new Set(prev);
+                                                    if (next.has(notif.id)) next.delete(notif.id);
+                                                    else next.add(notif.id);
+                                                    return next;
+                                                });
+                                            }}
                                         >
                                             <div className="flex gap-3">
                                                 <div className="text-xl pt-0.5">{getIcon(notif.type)}</div>
@@ -242,11 +297,18 @@ const NotificationCenter = ({ position = 'bottom-right' }) => {
                                                     <p className={`text-sm ${!notif.is_read ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'}`}>
                                                         {notif.title}
                                                     </p>
-                                                    <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                                                    <p className={`text-xs text-gray-600 dark:text-gray-400 ${expandedIds.has(notif.id) ? 'whitespace-pre-wrap mt-1.5 leading-relaxed bg-gray-50 dark:bg-gray-800 p-2 rounded-md border border-gray-100 dark:border-gray-700' : 'line-clamp-2'}`}>
                                                         {notif.message}
                                                     </p>
+
+                                                    {/* File attachment card */}
+                                                    <FileAttachmentCard notif={notif} />
+
                                                     <div className="flex justify-between items-center text-[10px] text-gray-400 mt-2">
-                                                        <span>{notif.time_ago}</span>
+                                                        <span className="flex flex-col gap-0.5">
+                                                            <span>{notif.time_ago}</span>
+                                                            {notif.sender_name && <span className="text-gray-400">From: {notif.sender_name}</span>}
+                                                        </span>
                                                         <span className="capitalize bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded text-gray-600 dark:text-gray-300">
                                                             {notif.category}
                                                         </span>

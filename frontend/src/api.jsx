@@ -728,6 +728,78 @@ class ApiService {
     return this.makeRequest(`/get_timetable?class_id=${classId}`);
   }
 
+  // ==================== ASSESSMENTS & MARKS ====================
+
+  async getAssessments(courseId = null) {
+    let url = '/api/assessments';
+    if (courseId) url += `?course_id=${courseId}`;
+    return this.makeRequest(url);
+  }
+
+  async getTeacherStudents(courseId = null) {
+    let url = '/api/teacher/students';
+    if (courseId) url += `?course_id=${courseId}`;
+    return this.makeRequest(url);
+  }
+
+  async getTeacherCourses() {
+    return this.makeRequest('/api/teacher/my-courses');
+  }
+
+  async createAssessment(assessmentData) {
+    return this.makeRequest('/api/assessments', {
+      method: 'POST',
+      body: JSON.stringify(assessmentData)
+    });
+  }
+
+  async deleteAssessment(assessmentId) {
+    return this.makeRequest(`/api/assessments/${assessmentId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  async uploadMarks(assessmentId, marksData, isFile = false) {
+    let body;
+    if (isFile) {
+      body = new FormData();
+      body.append('assessment_id', assessmentId);
+      body.append('file', marksData); // marksData is the file object
+    } else {
+      body = JSON.stringify({
+        assessment_id: assessmentId,
+        marks: marksData // marksData is the array of {student_id, marks}
+      });
+    }
+
+    return this.makeRequest('/api/marks/upload', {
+      method: 'POST',
+      body
+    });
+  }
+
+  async getStudentMarks() {
+    return this.makeRequest('/api/student/marks');
+  }
+
+  // ==================== ASSIGNMENTS ====================
+
+  async createAssignment(formData) {
+    // formData should be a FormData object containing title, description, file, target_audience, etc.
+    return this.makeRequest('/api/assignments/create', {
+      method: 'POST',
+      body: formData
+    });
+  }
+
+  async getStudentAssignments() {
+    return this.makeRequest('/api/student/assignments');
+  }
+
+  async getFacultyAssignments() {
+    return this.makeRequest('/api/faculty/assignments');
+  }
+
   // ==================== UTILITY METHODS ====================
 
   // Get API base URL

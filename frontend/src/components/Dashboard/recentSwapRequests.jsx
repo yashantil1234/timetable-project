@@ -11,17 +11,37 @@ export default function RecentSwapRequests({ requests = [], isLoading = false, o
         try {
             if (action === 'approve') {
                 if (confirm('Approve this swap request?')) {
-                    await ApiService.adminApproveSwap(id);
-                    alert('Swap request approved');
+                    try {
+                        const response = await ApiService.adminApproveSwap(id);
+                        alert(response.message || 'Swap request approved');
+                        if (onUpdate) onUpdate();
+                    } catch (error) {
+                        // Handle the 409 Swap Suggestion
+                        if (error.status === 409 && error.data?.suggest_swap) {
+                            const confirmSwap = confirm(
+                                `CONFLICT FOUND: The slot is occupied by "${error.data.conflicting_class}".\n\n` +
+                                `Would you like to perform a 🔄 SWAP (Exchange slots between these two classes) instead?`
+                            );
+                            
+                            if (confirmSwap) {
+                                const swapResponse = await ApiService.adminApproveSwap(id, true);
+                                alert(swapResponse.message || 'Classes swapped successfully');
+                                if (onUpdate) onUpdate();
+                            }
+                        } else {
+                            // Standard error
+                            alert('Approval failed: ' + error.message);
+                        }
+                    }
                 }
             } else {
                 const reason = prompt('Enter rejection reason:');
                 if (reason) {
                     await ApiService.adminRejectSwap(id, reason);
                     alert('Swap request rejected');
+                    if (onUpdate) onUpdate();
                 }
             }
-            if (onUpdate) onUpdate();
         } catch (error) {
             console.error(error);
             alert('Action failed: ' + error.message);

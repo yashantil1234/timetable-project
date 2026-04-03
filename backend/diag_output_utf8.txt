@@ -1,0 +1,14 @@
+﻿[Seed] Admin already exists, skipping seed.
+[GCal] Background sync scheduler started (every 6h)
+[Seed] Admin already exists, skipping seed.
+--- LAST 5 MEETINGS ---
+ID: 8 | Title: hi | Link: None | Start: 2026-03-31 17:18:45.190000
+ID: 7 | Title: hi | Link: None | Start: 2026-03-31 17:18:45.190000
+ID: 6 | Title: extra class | Link: None | Start: 2026-03-31 17:13:19.456000
+ID: 5 | Title: extra class | Link: None | Start: 2026-03-31 08:57:04.173000
+ID: 4 | Title: extra classs | Link: None | Start: 2026-03-31 08:14:10.747000
+
+--- GOOGLE AUTH STATUS ---
+User ID: 9 | Cal ID: 5dab715e00960ff389c99131bfcfc57487430e84127a1692c7a057608149f9ea@group.calendar.google.com | Status: synced | Error: None
+User ID: 8 | Cal ID: ee8cb34379321406025b15728fcb96ae62a1b714ca35e2456c4fa1038f62d6b1@group.calendar.google.com | Status: synced | Error: None
+User ID: 6 | Cal ID: a07def78937ab14b3c124a57262226aec687acc2b0c57204ca53ead5f7410fac@group.calendar.google.com | Status: synced | Error: None

@@ -57,6 +57,10 @@ def create_app(config_name=None):
     # Create database tables and seed default admin if needed
     with app.app_context():
         try:
+            # Ensure uploads directory exists
+            import os as _os
+            _os.makedirs(app.config.get('UPLOAD_FOLDER', 'uploads'), exist_ok=True)
+
             db.create_all()
             _seed_admin()
         except Exception as e:
@@ -89,6 +93,9 @@ def create_app(config_name=None):
     from routes.notification_routes import notification_bp
     from routes.google_calendar_routes import google_calendar_bp
     from routes.meeting_routes import meeting_bp
+    from routes.assessment_routes import assessment_bp
+    from routes.marks_routes import marks_bp
+    from routes.assignment_routes import assignment_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(admin_bp, url_prefix='/admin')
@@ -111,6 +118,11 @@ def create_app(config_name=None):
     app.register_blueprint(google_calendar_bp, url_prefix='/api')
     # Meeting routes - /api prefix
     app.register_blueprint(meeting_bp, url_prefix='/api')
+    # Assessment & Marks routes
+    app.register_blueprint(assessment_bp, url_prefix='/api')
+    app.register_blueprint(marks_bp, url_prefix='/api')
+    # Assignment routes
+    app.register_blueprint(assignment_bp, url_prefix='/api')
     
     # Rooms status route - register separately at root level
     from routes.faculty_routes import get_rooms_status
@@ -120,6 +132,14 @@ def create_app(config_name=None):
     app.register_blueprint(upload_bp, url_prefix='/upload')
     app.register_blueprint(chat_bp, url_prefix='/api')
     app.register_blueprint(legacy_bp)
+
+    # ── Static file serving for notification attachments ──
+    from flask import send_from_directory
+    @app.route('/api/uploads/<path:filename>', methods=['GET'])
+    def serve_upload(filename):
+        import os as _os
+        upload_folder = app.config.get('UPLOAD_FOLDER', 'uploads')
+        return send_from_directory(_os.path.abspath(upload_folder), filename)
 
     # Basic home route
     @app.route('/', methods=['GET'])

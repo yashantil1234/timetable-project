@@ -10,8 +10,11 @@ import {
   Calendar, Clock, BookOpen, Target, TrendingUp,
   User, Mail, Phone, GraduationCap, MapPin, Bell,
   Settings, LogOut, AlertTriangle, ChevronRight,
-  Sparkles, BookMarked, Award, Video, Radio, ExternalLink
+  Sparkles, BookMarked, Award, Video, Radio, ExternalLink,
+  Layout, List, FilePlus, FileText
 } from "lucide-react";
+import StudentMarks from "./Studentdashboard/StudentMarks";
+import StudentAssignments from "./Studentdashboard/StudentAssignments";
 
 export default function StudentDashboard({ onLogout }) {
   const navigate = useNavigate();
@@ -24,6 +27,7 @@ export default function StudentDashboard({ onLogout }) {
   const [studentInfo, setStudentInfo] = useState({ name: "Student", email: "", department: "", year: "", semester: "", rollNumber: "", phone: "" });
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showMyMeetingsModal, setShowMyMeetingsModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview"); // overview, marks, assignments
 
   useEffect(() => { loadStudentData(); }, []);
 
@@ -150,8 +154,25 @@ export default function StudentDashboard({ onLogout }) {
           </div>
 
           {/* Action buttons - Removed since they are now in the Sidebar */}
-          <div className="flex flex-wrap gap-2 hidden md:flex opacity-0 pointer-events-none">
-             {/* Holding space if needed, otherwise just empty */}
+          <div className="flex flex-wrap gap-2 mt-4 md:mt-0 bg-white/50 backdrop-blur-sm p-1.5 rounded-2xl w-fit border border-blue-100/50 shadow-sm">
+            {[
+              { id: "overview", label: "Overview", icon: Layout },
+              { id: "marks", label: "My Marks", icon: Award },
+              { id: "assignments", label: "Assignments", icon: FileText }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+                  activeTab === tab.id 
+                    ? "bg-blue-600 text-white shadow-md shadow-blue-200" 
+                    : "text-slate-500 hover:text-blue-600 hover:bg-white"
+                }`}
+              >
+                {tab.icon && <tab.icon className="w-4 h-4" />}
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -172,29 +193,34 @@ export default function StudentDashboard({ onLogout }) {
 
       {/* ── MAIN CONTENT ── */}
       <div className="relative max-w-7xl mx-auto px-6 -mt-10 pb-12 space-y-6">
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left: Today's Schedule + Weekly Timetable */}
-          <div className="lg:col-span-2 space-y-6">
-            <TodaySchedule classes={todayClasses} isLoading={isLoading} />
-            <div id="weekly-timetable">
-              <WeeklyTimetable timetable={timetable} isLoading={isLoading} />
+        {activeTab === "overview" && (
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Left: Today's Schedule + Weekly Timetable */}
+            <div className="lg:col-span-2 space-y-6">
+              <TodaySchedule classes={todayClasses} isLoading={isLoading} />
+              <div id="weekly-timetable">
+                <WeeklyTimetable timetable={timetable} isLoading={isLoading} />
+              </div>
+            </div>
+
+            {/* Right: Profile + Google Calendar + Announcements */}
+            <div className="space-y-5">
+              <ProfileSummary student={studentInfo} isLoading={isLoading} onEdit={() => setShowProfileModal(true)} />
+              <div id="calendar">
+                <GoogleCalendarConnect />
+              </div>
+              
+              {meetings.length > 0 && (
+                <ActiveMeetingsCard meetings={meetings} />
+              )}
+
+              <AnnouncementsCard />
             </div>
           </div>
+        )}
 
-          {/* Right: Profile + Google Calendar + Announcements */}
-          <div className="space-y-5">
-            <ProfileSummary student={studentInfo} isLoading={isLoading} onEdit={() => setShowProfileModal(true)} />
-            <div id="calendar">
-              <GoogleCalendarConnect />
-            </div>
-            
-            {meetings.length > 0 && (
-              <ActiveMeetingsCard meetings={meetings} />
-            )}
-
-            <AnnouncementsCard />
-          </div>
-        </div>
+        {activeTab === "marks" && <StudentMarks />}
+        {activeTab === "assignments" && <StudentAssignments />}
       </div>
 
       <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} student={studentInfo} />
@@ -302,6 +328,14 @@ function TodaySchedule({ classes, isLoading }) {
                 <div className="text-right flex-shrink-0">
                   <p className="text-sm font-bold text-gray-700">{cls.slot || cls.start_time || "—"}</p>
                   <p className="text-xs text-gray-400">{cls.room || "TBA"}</p>
+                  {cls.is_swapped && (
+                    <div 
+                      className="mt-1 bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded text-[9px] font-bold border border-amber-200 cursor-help"
+                      title={`Rescheduled on ${new Date(cls.swapped_at).toLocaleDateString()} by ${cls.swapped_by || 'Admin'}`}
+                    >
+                      🔄 Rescheduled
+                    </div>
+                  )}
                 </div>
                 <span className="hidden group-hover:flex items-center text-blue-500">
                   <ChevronRight className="w-4 h-4" />
@@ -397,6 +431,14 @@ function WeeklyTimetable({ timetable, isLoading }) {
                 <div className="text-right flex-shrink-0 ml-4">
                   <p className="text-sm font-bold">{cls.slot || cls.start_time || "—"}</p>
                   <p className="text-xs opacity-70">{cls.room || "TBA"}</p>
+                  {cls.is_swapped && (
+                    <div 
+                      className="mt-1 bg-amber-200/50 text-amber-900 px-1.5 py-0.5 rounded text-[8px] font-bold border border-amber-300/50 cursor-help"
+                      title={`Rescheduled on ${new Date(cls.swapped_at).toLocaleDateString()} by ${cls.swapped_by || 'Admin'}`}
+                    >
+                      🔄 Rescheduled
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -569,7 +611,7 @@ function ActiveMeetingsCard({ meetings }) {
                   <div className="text-[10px] text-gray-400 font-medium">
                     By {meet.organizer_name}
                   </div>
-                  {meet.meeting_link && (
+                  {meet.meeting_link ? (
                     <a
                       href={meet.meeting_link}
                       target="_blank"
@@ -578,6 +620,10 @@ function ActiveMeetingsCard({ meetings }) {
                     >
                       Join <ExternalLink className="w-3 h-3" />
                     </a>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-400 bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-full transition-colors flex-shrink-0">
+                      No Link Provided
+                    </span>
                   )}
                 </div>
               </div>

@@ -48,7 +48,12 @@ def get_timetable():
                 "department": t.course.department.dept_name,
                 "year": t.section.year,
                 "credits": t.course.credits,
-                "type": t.course.type
+                "type": t.course.type,
+                "is_swapped": t.is_swapped,
+                "swapped_at": t.swapped_at.isoformat() if t.swapped_at else None,
+                "swapped_by": t.swapped_by.full_name if t.swapped_by else None,
+                "swap_group_id": t.swap_group_id,
+                "swapped_with_course": t.swapped_with_course
             })
 
         return jsonify(result)
@@ -111,12 +116,18 @@ def teacher_timetable(current_user):
         result = [{
             "id": e.timetable_id,
             "course": e.course.name,
+            "course_id": e.course_id,
             "section": f"{e.section.name} (Year {e.section.year})",
             "room": e.room.name,
             "day": e.day,
             "start_time": e.start_time,
             "slot": e.start_time,
-            "department": e.course.department.dept_name
+            "department": e.course.department.dept_name,
+            "is_swapped": e.is_swapped,
+            "swapped_at": e.swapped_at.isoformat() if e.swapped_at else None,
+            "swapped_by": e.swapped_by.full_name if e.swapped_by else None,
+            "swap_group_id": e.swap_group_id,
+            "swapped_with_course": e.swapped_with_course
         } for e in timetable_entries]
 
         return jsonify({
@@ -154,7 +165,12 @@ def student_timetable(current_user):
             "day": e.day,
             "start_time": e.start_time,
             "type": e.course.type,
-            "credits": e.course.credits
+            "credits": e.course.credits,
+            "is_swapped": e.is_swapped,
+            "swapped_at": e.swapped_at.isoformat() if e.swapped_at else None,
+            "swapped_by": e.swapped_by.full_name if e.swapped_by else None,
+            "swap_group_id": e.swap_group_id,
+            "swapped_with_course": e.swapped_with_course
         } for e in timetable_entries]
         
         return jsonify({

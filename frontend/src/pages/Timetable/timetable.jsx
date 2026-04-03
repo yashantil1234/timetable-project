@@ -251,6 +251,14 @@ export default function Timetable() {
                                 <div className="text-xs text-gray-500 mt-1">
                                   {classEntry.room} • Sec {classEntry.section}
                                 </div>
+                                {classEntry.is_swapped && (
+                                  <div 
+                                    className="mt-1 bg-amber-50 text-amber-600 px-1 py-0.5 rounded text-[9px] font-bold border border-amber-100 flex items-center justify-center gap-0.5 cursor-help"
+                                    title={`Action: ${classEntry.swapped_with_course ? `Swapped with ${classEntry.swapped_with_course}` : 'Rescheduled'}\nDate: ${new Date(classEntry.swapped_at).toLocaleDateString()}\nBy: ${classEntry.swapped_by || 'Admin'}`}
+                                  >
+                                    🔄 {classEntry.swapped_with_course ? 'Swapped' : 'Rescheduled'}
+                                  </div>
+                                )}
                               </div>
                             ) : (
                               <div className="text-center text-gray-400 text-sm py-4">

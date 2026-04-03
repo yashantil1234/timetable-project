@@ -5,39 +5,64 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Textarea } from '../../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
-import { Bell, Send, CheckCircle, AlertCircle, Search } from 'lucide-react';
+import { Bell, Send, CheckCircle, AlertCircle, Search, Paperclip, X, FileText, Image, FileSpreadsheet, File, Loader2, Users, Building2, BookOpen, User } from 'lucide-react';
 import ApiService from '../../services/api';
+
+const ALLOWED_EXT_LABEL = 'PDF, Word (.docx), Excel (.xlsx), PNG, JPG';
+
+function FileIcon({ fileType, className = 'w-5 h-5' }) {
+    if (!fileType) return <File className={className} />;
+    const t = fileType.toLowerCase();
+    if (t === 'pdf') return <FileText className={`${className} text-red-500`} />;
+    if (t === 'docx' || t === 'doc') return <FileText className={`${className} text-blue-500`} />;
+    if (t === 'xlsx' || t === 'xls' || t === 'csv') return <FileSpreadsheet className={`${className} text-green-500`} />;
+    if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(t)) return <Image className={`${className} text-purple-500`} />;
+    return <File className={className} />;
+}
 
 const AdminNotificationManager = () => {
     const [formData, setFormData] = useState({
         title: '',
         message: '',
-        target_audience: 'all', // all, role, user
-        target_role: 'student', // student, teacher
-        target_user_id: ''
+        target_audience: 'all', // all, role, user, department, section
+        target_role: 'student', // student, teacher, admin
+        target_user_id: '',
+        target_dept_id: '',
+        target_section_id: ''
     });
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState({ type: '', message: '' });
     const [users, setUsers] = useState([]);
+    const [targets, setTargets] = useState({ users: [], departments: [], sections: [] });
+    const [targetsLoading, setTargetsLoading] = useState(false);
+
+    // File State
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const fileInputRef = React.useRef(null);
     
     // Custom Combobox State
     const [searchQuery, setSearchQuery] = useState('');
     const [showDropdown, setShowDropdown] = useState(false);
 
     useEffect(() => {
-        const fetchUsers = async () => {
+        const fetchInitialData = async () => {
+            setTargetsLoading(true);
             try {
-                const response = await ApiService.getUsers();
-                if (Array.isArray(response)) {
-                    setUsers(response);
-                } else if (response && Array.isArray(response.users)) {
-                    setUsers(response.users);
+                // Fetch all targets for the advanced selector
+                const data = await ApiService.getNotificationTargets();
+                if (data) {
+                    setTargets(data);
+                    // Also keep the existing users list for the specific user search
+                    setUsers(data.users || []);
                 }
             } catch (err) {
-                console.error("Failed to fetch users:", err);
+                console.error("Failed to fetch notification targets:", err);
+            } finally {
+                setTargetsLoading(false);
             }
         };
-        fetchUsers();
+        fetchInitialData();
     }, []);
 
     const handleChange = (e) => {
@@ -49,43 +74,88 @@ const AdminNotificationManager = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const validateAndSetFile = (file) => {
+        if (file.size > 5 * 1024 * 1024) {
+            setStatus({ type: 'error', message: 'File too large. Maximum size is 5MB.' });
+            return;
+        }
+        const ext = file.name.split('.').pop().toLowerCase();
+        const allowed = ['pdf', 'docx', 'doc', 'xlsx', 'xls', 'png', 'jpg', 'jpeg', 'csv'];
+        if (!allowed.includes(ext)) {
+            setStatus({ type: 'error', message: `Invalid file type. Allowed: ${ALLOWED_EXT_LABEL}` });
+            return;
+        }
+        setStatus({ type: '', message: '' });
+        setSelectedFile(file);
+    };
+
+    const handleFileDrop = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files[0];
+        if (file) validateAndSetFile(file);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Prevent double submission
+        if (loading) return;
+        
         setLoading(true);
         setStatus({ type: '', message: '' });
 
         try {
-            const payload = {
-                title: formData.title,
-                message: formData.message,
-                target_audience: formData.target_audience
-            };
-
-            if (formData.target_audience === 'role') {
-                payload.target_role = formData.target_role;
-            } else if (formData.target_audience === 'user') {
-                if (!formData.target_user_id) {
-                    throw new Error("Please select a valid user from the dropdown.");
-                }
-                payload.target_user_id = formData.target_user_id;
+            // Audience Validation
+            if (formData.target_audience === 'user' && !formData.target_user_id) {
+                throw new Error("Please select a specific user.");
+            }
+            if (formData.target_audience === 'department' && !formData.target_dept_id) {
+                throw new Error("Please select a department.");
+            }
+            if (formData.target_audience === 'section' && !formData.target_section_id) {
+                throw new Error("Please select a section.");
             }
 
-            const response = await ApiService.sendNotification(payload);
+            const fd = new FormData();
+            fd.append('title', formData.title);
+            fd.append('message', formData.message);
+            fd.append('target_audience', formData.target_audience);
+
+            if (formData.target_audience === 'role') {
+                fd.append('target_role', formData.target_role);
+            } else if (formData.target_audience === 'user') {
+                fd.append('target_user_id', formData.target_user_id);
+            } else if (formData.target_audience === 'department') {
+                fd.append('target_dept_id', formData.target_dept_id);
+            } else if (formData.target_audience === 'section') {
+                fd.append('target_section_id', formData.target_section_id);
+            }
+
+            if (selectedFile) {
+                fd.append('file', selectedFile);
+            }
+
+            const response = await ApiService.sendNotificationWithFile(fd);
 
             setStatus({
                 type: 'success',
-                message: response.message || 'Notification sent successfully!'
+                message: response.message || '✅ Notification sent successfully!'
             });
 
-            // Reset form
+            // Reset form and file state
             setFormData({
                 title: '',
                 message: '',
                 target_audience: 'all',
                 target_role: 'student',
-                target_user_id: ''
+                target_user_id: '',
+                target_dept_id: '',
+                target_section_id: ''
             });
             setSearchQuery('');
+            setSelectedFile(null);
+            if (fileInputRef.current) fileInputRef.current.value = '';
 
         } catch (err) {
             console.error(err);
@@ -147,9 +217,11 @@ const AdminNotificationManager = () => {
                                         <SelectValue placeholder="Select audience" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">All Users</SelectItem>
-                                        <SelectItem value="role">Specific Role</SelectItem>
-                                        <SelectItem value="user">Specific User (Name & Username)</SelectItem>
+                                        <SelectItem value="all">Everyone</SelectItem>
+                                        <SelectItem value="role">By Role</SelectItem>
+                                        <SelectItem value="department">By Department</SelectItem>
+                                        <SelectItem value="section">By Section (Students)</SelectItem>
+                                        <SelectItem value="user">Specific Person</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -165,11 +237,84 @@ const AdminNotificationManager = () => {
                                             <SelectValue placeholder="Select role" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="student">Students</SelectItem>
-                                            <SelectItem value="teacher">Teachers</SelectItem>
-                                            <SelectItem value="admin">Admins</SelectItem>
+                                            <SelectItem value="student">All Students</SelectItem>
+                                            <SelectItem value="teacher">All Teachers</SelectItem>
+                                            <SelectItem value="admin">All Admins</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                </div>
+                            )}
+
+                            {formData.target_audience === 'department' && (
+                                <div className="space-y-2 animate-in slide-in-from-top-2 duration-200">
+                                    <Label>Select Department</Label>
+                                    {targetsLoading ? (
+                                        <div className="flex items-center gap-2 text-sm text-slate-500 p-2">
+                                            <Loader2 className="w-4 h-4 animate-spin" /> Loading...
+                                        </div>
+                                    ) : (
+                                        <Select
+                                            value={formData.target_dept_id}
+                                            onValueChange={(val) => handleSelectChange('target_dept_id', val)}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Choose a department..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {targets.departments.map(d => (
+                                                    <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                </div>
+                            )}
+
+                            {formData.target_audience === 'section' && (
+                                <div className="space-y-4 animate-in slide-in-from-top-2 duration-200">
+                                    <div className="space-y-2">
+                                        <Label>Filter by Department (optional)</Label>
+                                        <Select
+                                            value={formData.target_dept_id}
+                                            onValueChange={(val) => {
+                                                handleSelectChange('target_dept_id', val);
+                                                handleSelectChange('target_section_id', '');
+                                            }}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="All departments..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {targets.departments.map(d => (
+                                                    <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Select Section <span className="text-red-500">*</span></Label>
+                                        <Select
+                                            value={formData.target_section_id}
+                                            onValueChange={(val) => handleSelectChange('target_section_id', val)}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Choose a section..." />
+                                            </SelectTrigger>
+                                            <SelectContent className="max-h-52">
+                                                {targets.sections
+                                                    .filter(s => !formData.target_dept_id || s.dept_id === parseInt(formData.target_dept_id))
+                                                    .map(s => (
+                                                        <SelectItem key={s.id} value={String(s.id)}>
+                                                            <div className="flex flex-col text-left">
+                                                                <span className="font-medium">Year {s.year} – {s.name}</span>
+                                                                {s.dept_name && <span className="text-[10px] opacity-70 italic">{s.dept_name}</span>}
+                                                            </div>
+                                                        </SelectItem>
+                                                    ))
+                                                }
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
                             )}
 
@@ -252,12 +397,114 @@ const AdminNotificationManager = () => {
                             />
                         </div>
 
-                        <div className="flex justify-end">
-                            <Button type="submit" disabled={loading} className="w-full md:w-auto">
-                                {loading ? 'Sending...' : (
+                        {/* File Attachment */}
+                        <div className="space-y-4 border-t pt-6">
+                            <Label className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+                                <Paperclip className="w-3.5 h-3.5 text-slate-400" />
+                                Attach Document or Image
+                                <span className="text-xs text-slate-400 font-normal">(optional · max 5MB)</span>
+                            </Label>
+
+                            {selectedFile ? (
+                                <div className="space-y-3 animate-in fade-in zoom-in duration-200">
+                                    {/* Image Preview */}
+                                    {selectedFile.type.startsWith('image/') && (
+                                        <div className="relative w-full max-h-48 rounded-xl overflow-hidden border bg-slate-50 group">
+                                            <img 
+                                                src={URL.createObjectURL(selectedFile)} 
+                                                alt="Preview" 
+                                                className="w-full h-48 object-contain"
+                                            />
+                                            <div className="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors" />
+                                        </div>
+                                    )}
+
+                                    {/* File Info Card */}
+                                    <div className="flex items-center gap-3 p-3 bg-blue-50/50 border border-blue-100 rounded-xl">
+                                        <div className="p-2 bg-white rounded-lg shadow-sm border border-blue-100">
+                                            <FileIcon fileType={selectedFile.name.split('.').pop()} className="w-6 h-6" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-semibold text-slate-800 truncate" title={selectedFile.name}>
+                                                {selectedFile.name}
+                                            </p>
+                                            <p className="text-xs text-slate-500 uppercase tracking-wider">
+                                                {(selectedFile.size / 1024).toFixed(1)} KB · {selectedFile.name.split('.').pop()}
+                                            </p>
+                                        </div>
+                                        <Button 
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => {
+                                                setSelectedFile(null);
+                                                if (fileInputRef.current) fileInputRef.current.value = '';
+                                            }}
+                                            className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div
+                                    onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+                                    onDragLeave={() => setIsDragging(false)}
+                                    onDrop={handleFileDrop}
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className={`
+                                        flex flex-col items-center justify-center gap-3 p-8 rounded-2xl border-2 border-dashed 
+                                        cursor-pointer transition-all duration-300
+                                        ${isDragging 
+                                            ? 'border-blue-500 bg-blue-50/80 scale-[1.02] shadow-inner' 
+                                            : 'border-slate-200 bg-slate-50/50 hover:border-blue-400 hover:bg-blue-50/30'
+                                        }
+                                    `}
+                                >
+                                    <div className={`
+                                        w-12 h-12 rounded-2xl flex items-center justify-center transition-colors
+                                        ${isDragging ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}
+                                    `}>
+                                        <Paperclip className={isDragging ? 'w-6 h-6 animate-bounce' : 'w-6 h-6'} />
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-sm font-semibold text-slate-700">
+                                            {isDragging ? 'Drop it here!' : 'Click to select or drag & drop'}
+                                        </p>
+                                        <p className="text-xs text-slate-400 mt-1 max-w-[200px] mx-auto leading-relaxed">
+                                            {ALLOWED_EXT_LABEL} <br/> (Maximum file size 5MB)
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            <input 
+                                ref={fileInputRef} 
+                                type="file" 
+                                className="hidden"
+                                accept=".pdf,.docx,.doc,.xlsx,.xls,.png,.jpg,.jpeg,.csv"
+                                onChange={e => { if (e.target.files[0]) validateAndSetFile(e.target.files[0]); }} 
+                            />
+                        </div>
+
+                        <div className="flex justify-end pt-4">
+                            <Button 
+                                type="submit" 
+                                disabled={loading || !formData.title || !formData.message} 
+                                className={`
+                                    w-full md:w-auto min-w-[160px] h-12 gap-2 text-white shadow-lg transition-all
+                                    ${loading ? 'bg-slate-400' : 'bg-indigo-600 hover:bg-indigo-700 active:scale-95'}
+                                `}
+                            >
+                                {loading ? (
                                     <>
-                                        <Send className="w-4 h-4 mr-2" />
-                                        Send Notification
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        <span>Sending...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Send className="w-5 h-5" />
+                                        <span>Send Notification</span>
                                     </>
                                 )}
                             </Button>

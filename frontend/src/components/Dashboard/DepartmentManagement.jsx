@@ -5,14 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Building2, Plus, Search } from "lucide-react";
+import { Building2, Plus, Search, Upload } from "lucide-react";
 import ApiService from "../../services/api";
+import BulkImportModal from "./BulkImportModal";
 
 export default function DepartmentManagement() {
     const [departments, setDepartments] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
     const [newDeptName, setNewDeptName] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -79,6 +81,14 @@ export default function DepartmentManagement() {
                     <Building2 className="w-5 h-5 text-blue-600" />
                     Department Management
                     <div className="ml-auto flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                            onClick={() => setIsBulkModalOpen(true)}
+                        >
+                            <Upload className="w-4 h-4 mr-2" />
+                            Bulk Import
+                        </Button>
                         <Button
                             className="bg-blue-600 hover:bg-blue-700 text-white"
                             onClick={() => setIsAddModalOpen(true)}
@@ -165,6 +175,15 @@ export default function DepartmentManagement() {
                         </tbody>
                     </table>
                 </div>
+
+                <BulkImportModal
+                    isOpen={isBulkModalOpen}
+                    onClose={() => setIsBulkModalOpen(false)}
+                    title="Bulk Import Departments"
+                    endpoint="/upload/departments"
+                    templateInfo="dept_name"
+                    onSuccess={() => fetchDepartments()}
+                />
             </CardContent>
         </Card>
     );

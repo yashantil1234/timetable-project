@@ -14,11 +14,19 @@ class Notification(db.Model):
     title = db.Column(db.String(100), nullable=False)
     message = db.Column(db.Text, nullable=False)
     link = db.Column(db.String(255), nullable=True)  # Action link (e.g., /bookings/123)
-    
+
+    # File Attachment
+    file_url  = db.Column(db.String(500), nullable=True)   # e.g. /api/uploads/uuid_notes.pdf
+    file_name = db.Column(db.String(255), nullable=True)   # original filename shown in UI
+    file_type = db.Column(db.String(50),  nullable=True)   # pdf / docx / xlsx / png / jpg / jpeg
+
+    # Sender metadata (optional — set by admin/teacher send routes)
+    sender_name = db.Column(db.String(100), nullable=True)
+
     # Classification
     notification_type = db.Column(db.String(20), default="info")  # info/success/warning/error
     category = db.Column(db.String(50), default="system")  # system/academic/resource/booking
-    
+
     # Status
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -33,6 +41,10 @@ class Notification(db.Model):
             "title": self.title,
             "message": self.message,
             "link": self.link,
+            "file_url": self.file_url,
+            "file_name": self.file_name,
+            "file_type": self.file_type,
+            "sender_name": self.sender_name,
             "type": self.notification_type,
             "category": self.category,
             "is_read": self.is_read,

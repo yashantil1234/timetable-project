@@ -214,11 +214,27 @@ def get_credentials(user):
 
 
 def get_service(user):
-    """Build the Google Calendar API client."""
-    creds = get_credentials(user)
-    if not creds:
+    """Build the Google Calendar API client. Handles RefreshErrors."""
+    try:
+        creds = get_credentials(user)
+        if not creds:
+            return None
+        return build('calendar', 'v3', credentials=creds)
+    except Exception as e:
+        if 'invalid_grant' in str(e).lower() or 'refresherror' in str(e).lower():
+            _safe_log(f"Service build FAILED: Token revoked/expired ({e})", user_id=user.id)
+            invalidate_auth(user.id, "Access revoked. Please reconnect Google Calendar.")
         return None
-    return build('calendar', 'v3', credentials=creds)
+
+
+def invalidate_auth(user_id, error_message):
+    """Mark a user's Google Auth as failed/disconnected."""
+    auth = UserGoogleAuth.query.filter_by(user_id=user_id).first()
+    if auth:
+        auth.sync_status = 'failed'
+        auth.last_error = error_message
+        db.session.commit()
+        _safe_log("Auth record invalidated", user_id=user_id)
 
 
 # ─────────────────────────────────────────────
@@ -557,33 +573,38 @@ def background_sync_all_users():
 # Google Meet Generation
 # ─────────────────────────────────────────────
 import uuid
+import dateutil.parser
 
 def create_google_event_with_meet(user, title, description, start_time_str):
     """
-    Creates an event on the user's Google Calendar with a Google Meet link.
+    Creates an event on the user's primary or EduScheduler calendar with a Google Meet link.
     Requires user to have connected their Google Calendar via OAuth.
-    Returns the meeting link (hangoutLink) or None if not connected.
+    Returns the meeting link (hangoutLink) or None if generation fails.
     """
     service = get_service(user)
     if not service:
+        _safe_log("Google Meet Generation skipped: No active service (unauthorized/disconnected)", user_id=user.id)
         return None
         
     try:
-        # start_time_str should be ISO format. e.g. "2026-02-20T10:00:00"
-        start_dt = datetime.datetime.fromisoformat(start_time_str.replace("Z", "+00:00"))
+        # ── Robust Parsing ──
+        # dateutil.parser handles "Z" and microsecond precision better than datetime.fromisoformat
+        start_dt = dateutil.parser.isoparse(start_time_str)
         
-        # Ensure it has timezone info
+        # Ensure it has timezone info (fallback to IST or UTC)
         if start_dt.tzinfo is None:
             if IST:
                 start_dt = IST.localize(start_dt)
             else:
                 start_dt = start_dt.replace(tzinfo=datetime.timezone.utc)
                 
+        # Default duration: 1 hour
         end_dt = start_dt + datetime.timedelta(hours=1)
         
+        # ── Event & Conference Data ──
         event_body = {
             'summary': title,
-            'description': description,
+            'description': description or "Meeting created via EduScheduler",
             'start': {'dateTime': start_dt.isoformat()},
             'end': {'dateTime': end_dt.isoformat()},
             'conferenceData': {
@@ -594,16 +615,19 @@ def create_google_event_with_meet(user, title, description, start_time_str):
             }
         }
         
-        # Try finding their EduScheduler calendar
+        # Determine calendar (EduScheduler favored over primary)
         calendar_id = 'primary'
         auth_record = UserGoogleAuth.query.filter_by(user_id=user.id).first()
         if auth_record and auth_record.calendar_id:
             try:
+                # Test connectivity to the custom calendar
                 service.calendars().get(calendarId=auth_record.calendar_id).execute()
                 calendar_id = auth_record.calendar_id
             except Exception:
+                _safe_log("Custom calendar missing/inaccessible — falling back to primary", user_id=user.id)
                 pass
                 
+        # Execute insert with conferenceDataVersion=1 (required for Meet link)
         created_event = service.events().insert(
             calendarId=calendar_id, 
             body=event_body,
@@ -611,75 +635,21 @@ def create_google_event_with_meet(user, title, description, start_time_str):
         ).execute()
         
         meet_link = created_event.get('hangoutLink')
-        _safe_log(f"Created Meet link {meet_link}", user_id=user.id)
+        if meet_link:
+            _safe_log(f"Successfully generated Meet link: {meet_link}", user_id=user.id)
+        else:
+            _safe_log("API call succeeded but hangoutLink was missing — check Google account Meet permissions", user_id=user.id)
+            
         return meet_link
+        
     except Exception as e:
-        _safe_log(f"Failed to create Google Meet link: {e}", user_id=user.id)
-        return None
-
-# ─────────────────────────────────────────────
-# Google Meet Generation
-# ─────────────────────────────────────────────
-import uuid
-
-def create_google_event_with_meet(user, title, description, start_time_str):
-    """
-    Creates an event on the user's primary calendar with a Google Meet link.
-    Requires user to have connected their Google Calendar via OAuth.
-    Returns the meeting link (hangoutLink) or None if not connected.
-    """
-    service = get_service(user)
-    if not service:
-        return None
+        error_str = str(e).lower()
+        if 'invalid_grant' in error_str or '401' in error_str or '403' in error_str:
+            _safe_log(f"Google Meet link generation CRITICAL AUTH ERROR: {str(e)}", user_id=user.id)
+            invalidate_auth(user.id, "Connection lost. Please reconnect your Google account.")
+        else:
+            _safe_log(f"Google Meet link generation ERROR: {str(e)}", user_id=user.id)
         
-    try:
-        # start_time_str could be ISO format: "2026-02-20T10:00:00"
-        # Let's parse it and default to 1 hour duration
-        start_dt = datetime.datetime.fromisoformat(start_time_str.replace("Z", "+00:00"))
-        
-        # Ensure it has timezone info
-        if start_dt.tzinfo is None:
-            if IST:
-                start_dt = IST.localize(start_dt)
-            else:
-                # Fallback
-                start_dt = start_dt.replace(tzinfo=datetime.timezone.utc)
-                
-        end_dt = start_dt + datetime.timedelta(hours=1)
-        
-        event_body = {
-            'summary': title,
-            'description': description,
-            'start': {'dateTime': start_dt.isoformat()},
-            'end': {'dateTime': end_dt.isoformat()},
-            'conferenceData': {
-                'createRequest': {
-                    'requestId': str(uuid.uuid4()),
-                    'conferenceSolutionKey': {'type': 'hangoutsMeet'}
-                }
-            }
-        }
-        
-        # Primary calendar is best for custom meetings, or we can use EduScheduler calendar
-        # Let's use the created one if available, otherwise primary
-        calendar_id = 'primary'
-        auth_record = UserGoogleAuth.query.filter_by(user_id=user.id).first()
-        if auth_record and auth_record.calendar_id:
-            try:
-                service.calendars().get(calendarId=auth_record.calendar_id).execute()
-                calendar_id = auth_record.calendar_id
-            except HttpError:
-                pass
-                
-        created_event = service.events().insert(
-            calendarId=calendar_id, 
-            body=event_body,
-            conferenceDataVersion=1
-        ).execute()
-        
-        meet_link = created_event.get('hangoutLink')
-        _safe_log(f"Created Meet link {meet_link}", user_id=user.id)
-        return meet_link
-    except Exception as e:
-        _safe_log(f"Failed to create Google Meet link: {e}", user_id=user.id)
+        import traceback
+        traceback.print_exc()
         return None

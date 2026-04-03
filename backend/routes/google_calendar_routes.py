@@ -54,7 +54,14 @@ def get_status(current_user):
     auth = UserGoogleAuth.query.filter_by(user_id=current_user.id).first()
     if not auth:
         return jsonify({"is_connected": False}), 200
-    return jsonify(auth.to_dict()), 200
+    
+    data = auth.to_dict()
+    # ── Critical Check ──
+    # If the last sync failed with an auth error, we shouldn't claim to be connected
+    if auth.sync_status == 'failed' and auth.last_error and ('access revoked' in auth.last_error.lower() or 'connection lost' in auth.last_error.lower()):
+        data['is_connected'] = False
+        
+    return jsonify(data), 200
 
 
 @google_calendar_bp.route('/calendar/sync', methods=['POST', 'OPTIONS'])

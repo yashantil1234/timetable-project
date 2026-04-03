@@ -3,7 +3,8 @@ import api from "../../services/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Plus, Users, Search, Filter } from "lucide-react";
+import { Plus, Users, Search, Filter, Edit, Trash2, Mail, GraduationCap } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 import TeacherForm from "../../components/Teachers/TeacherForm";
 import TeacherCard from "../../components/Teachers/TeacherCard";
@@ -36,7 +37,6 @@ export default function Teachers() {
       setTeachers(teacherList);
       setDepartments(deptList);
       setIsLoading(false);
-      console.log('[Teachers] Data loading complete, isLoading set to false');
     } catch (error) {
       console.error('[Teachers] Error loading data:', error);
       console.error('[Teachers] Error details:', error.message, error.stack);
@@ -66,6 +66,26 @@ export default function Teachers() {
   const handleEdit = (teacher) => {
     setEditingTeacher(teacher);
     setShowForm(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this teacher?")) return;
+    try {
+        await api.deleteFaculty(id);
+        loadData();
+    } catch (error) {
+        alert("Failed to delete teacher");
+    }
+  };
+
+  const getDepartmentColor = (dept) => {
+    const colors = {
+        "Computer Science": "bg-blue-100 text-blue-700 border-blue-200",
+        "Mathematics": "bg-purple-100 text-purple-700 border-purple-200",
+        "Physics": "bg-emerald-100 text-emerald-700 border-emerald-200",
+        "Engineering": "bg-amber-100 text-amber-700 border-amber-200",
+    };
+    return colors[dept] || "bg-gray-100 text-gray-700 border-gray-200";
   };
 
   const filteredTeachers = teachers.filter(teacher => {
@@ -141,38 +161,86 @@ export default function Teachers() {
           />
         )}
 
-        {/* Teachers Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {isLoading ? (
-            Array(6).fill(0).map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="p-6">
-                  <div className="space-y-3">
-                    <div className="h-6 bg-gray-200 rounded"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                    <div className="h-4 bg-gray-200 rounded"></div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          ) : filteredTeachers.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-              <Users className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No teachers found</h3>
-              <p className="text-gray-500">
-                {searchTerm ? 'Try adjusting your search criteria' : 'Add your first teacher to get started'}
-              </p>
+        {/* Teachers List Table */}
+        <Card className="shadow-xl border-0 overflow-hidden bg-white/90 backdrop-blur-md">
+            <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="bg-gray-50/50 border-b border-gray-100">
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Teacher</th>
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Department</th>
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Email</th>
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                        {isLoading ? (
+                            Array(5).fill(0).map((_, i) => (
+                                <tr key={i} className="animate-pulse">
+                                    <td colSpan="4" className="px-6 py-4">
+                                        <div className="h-10 bg-gray-100 rounded w-full"></div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : filteredTeachers.length === 0 ? (
+                            <tr>
+                                <td colSpan="4" className="px-6 py-12 text-center text-gray-400">
+                                    <Users className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                    <p className="text-lg font-medium">No teachers found matching your criteria</p>
+                                </td>
+                            </tr>
+                        ) : (
+                            filteredTeachers.map((teacher) => (
+                                <tr key={teacher.id} className="group hover:bg-blue-50/30 transition-colors duration-200">
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-green-100 to-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-lg">
+                                                {teacher.name?.charAt(0) || 'T'}
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-gray-900 leading-tight">{teacher.name}</p>
+                                                <p className="text-xs text-gray-500 font-medium">Faculty ID: {teacher.id || teacher.faculty_id}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <Badge variant="outline" className={`${getDepartmentColor(teacher.dept_name)} font-medium px-2.5 py-0.5 rounded-full`}>
+                                            {teacher.dept_name || 'N/A'}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                            <Mail className="w-4 h-4 text-gray-400" />
+                                            <span className="max-w-[200px] truncate">{teacher.email || 'No email provided'}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                onClick={() => handleEdit(teacher)}
+                                                className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-100/50"
+                                            >
+                                                <Edit className="w-4 h-4" />
+                                            </Button>
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                onClick={() => handleDelete(teacher.id || teacher.faculty_id)}
+                                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-100/50"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
             </div>
-          ) : (
-            filteredTeachers.map((teacher) => (
-              <TeacherCard
-                key={teacher.id}
-                teacher={teacher}
-                onEdit={handleEdit}
-              />
-            ))
-          )}
-        </div>
+        </Card>
       </div>
     </div>
   );

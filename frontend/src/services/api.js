@@ -80,7 +80,10 @@ class ApiService {
 
         // Handle other 4xx errors (400, 422, etc.)
         if (response.status >= 400) {
-          throw new Error(responseData.error || responseData.message || `Request failed with status ${response.status}`);
+          const error = new Error(responseData.error || responseData.message || `Request failed with status ${response.status}`);
+          error.data = responseData;
+          error.status = response.status;
+          throw error;
         }
       }
 
@@ -299,9 +302,10 @@ class ApiService {
     });
   }
 
-  async adminApproveSwap(requestId) {
+  async adminApproveSwap(requestId, forceSwap = false) {
     return this.makeRequest(`/admin/swap-requests/${requestId}/approve`, {
-      method: 'POST'
+      method: 'POST',
+      body: JSON.stringify({ force_swap: forceSwap })
     });
   }
 
@@ -1015,14 +1019,14 @@ class ApiService {
   // ==================== ADMIN TIMETABLE MANAGEMENT ====================
 
   async adminUpdateTimetable(id, data) {
-    return this.makeRequest('/api/admin/timetable/' + id, {
+    return this.makeRequest('/admin/timetable/' + id, {
       method: 'PUT',
       body: JSON.stringify(data)
     });
   }
 
   async adminDeleteTimetable(id) {
-    return this.makeRequest('/api/admin/timetable/' + id, { method: 'DELETE' });
+    return this.makeRequest('/admin/timetable/' + id, { method: 'DELETE' });
   }
 
   async getMeetings() {
@@ -1081,6 +1085,30 @@ class ApiService {
 
     async getNotificationTargets() {
         return this.makeRequest('/api/admin/notifications/targets');
+    }
+
+    /**
+     * Send notification with optional file attachment.
+     * @param {FormData} formData - must contain: title, message, target_audience, file (optional)
+     */
+    async sendNotificationWithFile(formData) {
+        // makeRequest already handles FormData correctly (no Content-Type override)
+        return this.makeRequest('/api/admin/notifications/send-with-file', {
+            method: 'POST',
+            body: formData,
+        });
+    }
+
+    /**
+     * Generic bulk import method for CSV files.
+     * @param {string} endpoint - The upload endpoint (e.g., '/upload/courses')
+     * @param {FormData} formData - FormData containing the 'file' field
+     */
+    async bulkImport(endpoint, formData) {
+        return this.makeRequest(`/api${endpoint}`, {
+            method: 'POST',
+            body: formData,
+        });
     }
 }
 

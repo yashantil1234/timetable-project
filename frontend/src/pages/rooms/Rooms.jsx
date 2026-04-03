@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useCallback } from "react";
 import api from "../../services/api";
 import { Button } from "@/components/ui/button";
-import { Plus, Search } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Plus, Search, Edit, Trash2, Building, Users, Info } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 import RoomCard from "../../components/rooms/RoomCard";
 import RoomForm from "../../components/rooms/RoomForm";
 import RoomFilters from "../../components/rooms/RoomFilters";
+import BulkImportModal from "../../components/Dashboard/BulkImportModal";
 
 export default function Rooms() {
   const [rooms, setRooms] = useState([]);
@@ -17,6 +20,7 @@ export default function Rooms() {
   const [filterType, setFilterType] = useState("all");
   const [filterBuilding, setFilterBuilding] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
+  const [showBulkModal, setShowBulkModal] = useState(false);
 
   useEffect(() => {
     loadRooms();
@@ -121,6 +125,22 @@ export default function Rooms() {
     setShowForm(true);
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this room?")) return;
+    try {
+        await api.deleteRoom(id);
+        loadRooms();
+    } catch (error) {
+        alert("Failed to delete room");
+    }
+  };
+
+  const getStatusColor = (isActive) => {
+    return isActive 
+        ? "bg-amber-100 text-amber-700 border-amber-200" 
+        : "bg-emerald-100 text-emerald-700 border-emerald-200";
+  };
+
   const uniqueBuildings = [...new Set(rooms.map(room => room.building))];
 
   return (
@@ -133,13 +153,23 @@ export default function Rooms() {
             </h1>
             <p className="text-lg text-gray-600">Manage classrooms and facilities</p>
           </div>
-          <Button 
-            onClick={() => setShowForm(true)}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Add Room
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => setShowBulkModal(true)}
+              variant="outline"
+              className="border-blue-300 text-blue-700 hover:bg-blue-50"
+            >
+              <Plus className="w-5 h-5 mr-2 rotate-45" />
+              Bulk Import
+            </Button>
+            <Button 
+              onClick={() => setShowForm(true)}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Add Room
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6 mb-8">
@@ -174,27 +204,91 @@ export default function Rooms() {
           />
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {isLoading ? (
-            Array(6).fill(0).map((_, i) => (
-              <div key={i} className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-blue-200">
-                <div className="animate-pulse space-y-4">
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                </div>
-              </div>
-            ))
-          ) : (
-            filteredRooms.map((room) => (
-              <RoomCard
-                key={room.id}
-                room={room}
-                onEdit={handleEdit}
-              />
-            ))
-          )}
-        </div>
+        {/* Rooms List Table */}
+        <Card className="shadow-xl border-0 overflow-hidden bg-white/90 backdrop-blur-md">
+            <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="bg-gray-50/50 border-b border-gray-100">
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Room</th>
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Building</th>
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Type</th>
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">Capacity</th>
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">Status</th>
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                        {isLoading ? (
+                            Array(5).fill(0).map((_, i) => (
+                                <tr key={i} className="animate-pulse">
+                                    <td colSpan="6" className="px-6 py-4">
+                                        <div className="h-10 bg-gray-100 rounded w-full"></div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : filteredRooms.length === 0 ? (
+                            <tr>
+                                <td colSpan="6" className="px-6 py-12 text-center text-gray-400">
+                                    <Info className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                    <p className="text-lg font-medium">No rooms found matching your criteria</p>
+                                </td>
+                            </tr>
+                        ) : (
+                            filteredRooms.map((room) => (
+                                <tr key={room.id} className="group hover:bg-blue-50/30 transition-colors duration-200">
+                                    <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                                        {room.number || room.name}
+                                    </td>
+                                    <td className="px-6 py-4 text-sm">
+                                        <div className="flex items-center gap-2 text-gray-600">
+                                            <Building className="w-4 h-4 text-blue-400" />
+                                            {room.building || 'Main Campus'}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm">
+                                        <Badge variant="outline" className={`${room.type?.includes('Lab') ? 'bg-indigo-50 text-indigo-700 border-indigo-100' : 'bg-blue-50 text-blue-700 border-blue-100'} font-medium`}>
+                                            {room.type}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-center">
+                                        <div className="inline-flex items-center gap-1 text-gray-600">
+                                            <Users className="w-4 h-4" />
+                                            {room.capacity}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-center">
+                                        <Badge className={`${getStatusColor(room.is_active)} font-medium`}>
+                                            {room.is_active ? "Occupied" : "Free"}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                onClick={() => handleEdit(room)}
+                                                className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-100/50"
+                                            >
+                                                <Edit className="w-4 h-4" />
+                                            </Button>
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                onClick={() => handleDelete(room.id)}
+                                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-100/50"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </Card>
 
         {!isLoading && filteredRooms.length === 0 && (
           <div className="text-center py-12">
@@ -217,6 +311,15 @@ export default function Rooms() {
             </Button>
           </div>
         )}
+
+        <BulkImportModal
+          isOpen={showBulkModal}
+          onClose={() => setShowBulkModal(false)}
+          title="Bulk Import Rooms"
+          endpoint="/upload/rooms"
+          templateInfo="name, capacity, [resources]"
+          onSuccess={() => loadRooms()}
+        />
       </div>
     </div>
   );

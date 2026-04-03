@@ -47,8 +47,8 @@ export default function AdminTimetableEditor() {
         setEditData({
             day: entry.day || '',
             start_time: entry.start_time || '',
-            course_name: entry.course_name || '',
-            faculty_name: entry.faculty_name || '',
+            course_name: entry.course || entry.course_name || '',
+            faculty_name: entry.faculty || entry.faculty_name || '',
             room: entry.room || '',
         });
     };
@@ -88,9 +88,11 @@ export default function AdminTimetableEditor() {
 
     const filtered = timetable.filter(entry => {
         const matchDay = !filters.day || entry.day === filters.day;
+        const courseName = entry.course || entry.course_name || '';
+        const facultyName = entry.faculty || entry.faculty_name || '';
         const matchDept = !filters.dept ||
-            (entry.course_name || '').toLowerCase().includes(filters.dept.toLowerCase()) ||
-            (entry.faculty_name || '').toLowerCase().includes(filters.dept.toLowerCase()) ||
+            courseName.toLowerCase().includes(filters.dept.toLowerCase()) ||
+            facultyName.toLowerCase().includes(filters.dept.toLowerCase()) ||
             (entry.section || '').toLowerCase().includes(filters.dept.toLowerCase());
         return matchDay && matchDept;
     });
@@ -267,11 +269,19 @@ export default function AdminTimetableEditor() {
                                                 </div>
                                                 <div className="min-w-0">
                                                     <p className="font-semibold text-gray-900 text-sm truncate">
-                                                        {entry.course_name || 'Unknown Course'}
+                                                        {entry.course || entry.course_name || 'Unknown Course'}
                                                     </p>
                                                     <p className="text-xs text-gray-500 truncate">
-                                                        {entry.start_time} · {entry.faculty_name || 'Staff'} · {entry.room || 'TBD'}
+                                                        {entry.start_time} · {entry.faculty || entry.faculty_name || 'Staff'} · {entry.room || 'TBD'}
                                                         {entry.section && <span className="ml-2 bg-gray-100 px-1.5 py-0.5 rounded">§{entry.section}</span>}
+                                                        {entry.is_swapped && (
+                                                            <span 
+                                                                className="ml-2 bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full text-[10px] font-bold border border-amber-200 inline-flex items-center gap-1 cursor-help"
+                                                                title={`Action: ${entry.swapped_with_course ? `Swapped with ${entry.swapped_with_course}` : 'Rescheduled'}\nDate: ${new Date(entry.swapped_at).toLocaleDateString()}\nBy: ${entry.swapped_by || 'Admin'}`}
+                                                            >
+                                                                🔄 {entry.swapped_with_course ? 'Swapped' : 'Rescheduled'}
+                                                            </span>
+                                                        )}
                                                     </p>
                                                 </div>
                                             </div>

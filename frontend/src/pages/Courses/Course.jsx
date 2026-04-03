@@ -5,10 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, BookOpen, Search, Filter } from "lucide-react";
+import { Plus, BookOpen, Search, Filter, Edit, Trash2, Layers, Clock } from "lucide-react";
 
 import CourseForm from "../../components/courses/CourseForm";
 import CourseCard from "../../components/courses/CourseCard";
+import BulkImportModal from "../../components/Dashboard/BulkImportModal";
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
@@ -19,6 +20,7 @@ export default function Courses() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
+  const [showBulkModal, setShowBulkModal] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -58,6 +60,26 @@ export default function Courses() {
     loadData();
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this course?")) return;
+    try {
+        await api.deleteCourse(id);
+        loadData();
+    } catch (error) {
+        alert("Failed to delete course");
+    }
+  };
+
+  const getDepartmentColor = (dept) => {
+    const colors = {
+        "Computer Science": "bg-blue-100 text-blue-700 border-blue-200",
+        "Mathematics": "bg-purple-100 text-purple-700 border-purple-200",
+        "Physics": "bg-emerald-100 text-emerald-700 border-emerald-200",
+        "Engineering": "bg-amber-100 text-amber-700 border-amber-200",
+    };
+    return colors[dept] || "bg-gray-100 text-gray-700 border-gray-200";
+  };
+
   const handleEdit = (course) => {
     setEditingCourse(course);
     setShowForm(true);
@@ -86,13 +108,23 @@ export default function Courses() {
             </h1>
             <p className="text-gray-600 mt-1">Manage your college courses and curriculum</p>
           </div>
-          <Button
-            onClick={() => setShowForm(true)}
-            className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-lg hover:scale-105 transition-all duration-300"
-          >
-            <Plus className="w-4 h-4" />
-            Add New Course
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => setShowBulkModal(true)}
+              variant="outline"
+              className="gap-2 border-blue-200 text-blue-600 hover:bg-blue-50"
+            >
+              <Filter className="w-4 h-4 rotate-90" />
+              Bulk Import
+            </Button>
+            <Button
+              onClick={() => setShowForm(true)}
+              className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-lg hover:scale-105 transition-all duration-300"
+            >
+              <Plus className="w-4 h-4" />
+              Add New Course
+            </Button>
+          </div>
         </div>
 
         {/* Search and Filters */}
@@ -137,41 +169,103 @@ export default function Courses() {
           />
         )}
 
-        {/* Courses Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {isLoading ? (
-            Array(6).fill(0).map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardHeader>
-                  <div className="h-6 bg-gray-200 rounded"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 rounded"></div>
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          ) : filteredCourses.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-              <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No courses found</h3>
-              <p className="text-gray-500">
-                {searchTerm ? 'Try adjusting your search criteria' : 'Add your first course to get started'}
-              </p>
+        {/* Courses List Table */}
+        <Card className="shadow-xl border-0 overflow-hidden bg-white/90 backdrop-blur-md">
+            <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="bg-gray-50/50 border-b border-gray-100">
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Course</th>
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Type</th>
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">Credits</th>
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Year/Sem</th>
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Department</th>
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                        {isLoading ? (
+                            Array(5).fill(0).map((_, i) => (
+                                <tr key={i} className="animate-pulse">
+                                    <td colSpan="6" className="px-6 py-4">
+                                        <div className="h-10 bg-gray-100 rounded w-full"></div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : filteredCourses.length === 0 ? (
+                            <tr>
+                                <td colSpan="6" className="px-6 py-12 text-center text-gray-400">
+                                    <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                    <p className="text-lg font-medium">No courses found matching your criteria</p>
+                                </td>
+                            </tr>
+                        ) : (
+                            filteredCourses.map((course) => (
+                                <tr key={course.id || course.course_id} className="group hover:bg-blue-50/30 transition-colors duration-200">
+                                    <td className="px-6 py-4 text-sm">
+                                        <div className="flex flex-col">
+                                            <span className="font-bold text-gray-900">{course.name}</span>
+                                            <span className="text-xs text-blue-600 font-medium">{course.code || 'NO-CODE'}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm">
+                                        <Badge variant="outline" className={`${course.type?.toLowerCase() === 'theory' ? 'bg-orange-50 text-orange-700 border-orange-100' : 'bg-blue-50 text-blue-700 border-blue-100'} font-medium`}>
+                                            {course.type || 'N/A'}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-center">
+                                        <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 font-bold">
+                                            {course.credits || '?'}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm">
+                                        <div className="flex items-center gap-1.5 text-gray-600 font-medium">
+                                            <Layers className="w-3.5 h-3.5 text-indigo-400" />
+                                            Y{course.year} - S{course.semester}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm">
+                                        <Badge variant="outline" className={`${getDepartmentColor(course.dept_name || course.department)} font-medium px-2.5 py-0.5 rounded-full`}>
+                                            {course.dept_name || course.department || 'N/A'}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                onClick={() => handleEdit(course)}
+                                                className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-100/50"
+                                            >
+                                                <Edit className="w-4 h-4" />
+                                            </Button>
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                onClick={() => handleDelete(course.id || course.course_id)}
+                                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-100/50"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
             </div>
-          ) : (
-            (Array.isArray(filteredCourses) ? filteredCourses : []).map((course, index) => (
-              <CourseCard
-                key={course.id || course.course_id || `course-${index}`}
-                course={course}
-                onEdit={handleEdit}
-              />
-            ))
-          )}
-        </div>
+        </Card>
+
+        {/* Bulk Import Modal */}
+        <BulkImportModal
+          isOpen={showBulkModal}
+          onClose={() => setShowBulkModal(false)}
+          title="Bulk Import Courses"
+          endpoint="/upload/courses"
+          templateInfo="name, type, credits, year, semester, dept_name, hours_per_week, [faculty_name]"
+          onSuccess={() => loadData()}
+        />
       </div>
     </div>
   );

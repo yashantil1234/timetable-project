@@ -13,7 +13,8 @@ notification_bp = Blueprint('notification', __name__)
 
 # ========== SHARED SERVICE FUNCTION ==========
 
-def create_notification(user_id, title, message, category='system', type='info', link=None):
+def create_notification(user_id, title, message, category='system', type='info', link=None,
+                        file_url=None, file_name=None, file_type=None, sender_name=None):
     """
     Internal service to create a notification.
     Checks user preferences before creating.
@@ -25,17 +26,16 @@ def create_notification(user_id, title, message, category='system', type='info',
             prefs = NotificationPreference(user_id=user_id)
             db.session.add(prefs)
             db.session.commit()
-        
+
         # Check if enabled
-        # Mapping category to preference field
         is_enabled = True
         if category == 'system' and not prefs.system_alerts: is_enabled = False
         if category == 'academic' and not prefs.academic_updates: is_enabled = False
         if category == 'resource' and not prefs.resource_updates: is_enabled = False
-        
+
         if not is_enabled:
             return None
-        
+
         # In-App Notification
         if prefs.app_enabled:
             notification = Notification(
@@ -44,7 +44,11 @@ def create_notification(user_id, title, message, category='system', type='info',
                 message=message,
                 category=category,
                 notification_type=type,
-                link=link
+                link=link,
+                file_url=file_url,
+                file_name=file_name,
+                file_type=file_type,
+                sender_name=sender_name
             )
             db.session.add(notification)
             db.session.commit()
@@ -275,3 +279,119 @@ def get_notification_targets(current_user):
         import traceback
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
+
+# ==================== FILE NOTIFICATION ROUTE ====================
+
+ALLOWED_EXTENSIONS = {'pdf', 'docx', 'xlsx', 'png', 'jpg', 'jpeg'}
+
+def _allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@notification_bp.route("/admin/notifications/send-with-file", methods=["POST", "OPTIONS"])
+@token_required
+def send_notification_with_file(current_user):
+    """Send a notification with an optional file attachment (multipart/form-data)"""
+    if current_user.role not in ['admin', 'teacher']:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    import os, uuid
+    from werkzeug.utils import secure_filename
+    from flask import current_app
+    from models.department import Department
+    from models.section import Section
+
+    try:
+        # ── Extract text fields from form data ──
+        title           = request.form.get('title', '').strip()
+        message         = request.form.get('message', '').strip()
+        target_audience = request.form.get('target_audience', 'all')
+        target_role     = request.form.get('target_role')
+        target_user_id  = request.form.get('target_user_id')
+        target_dept_id  = request.form.get('target_dept_id')
+        target_section_id = request.form.get('target_section_id')
+
+        if not title or not message:
+            return jsonify({'error': 'Title and message are required'}), 400
+
+        # ── Handle file upload ──
+        file_url  = None
+        file_name = None
+        file_type = None
+
+        uploaded_file = request.files.get('file')
+        if uploaded_file and uploaded_file.filename:
+            original_name = uploaded_file.filename
+            
+            # Re-validate file type on backend
+            if not _allowed_file(original_name):
+                return jsonify({'error': f'File type not allowed. Allowed: {", ".join(ALLOWED_EXTENSIONS)}'}), 400
+
+            # CRITICAL: Backend file size check (5MB limit)
+            # Read header to avoid processing massive files if possible, 
+            # though Flask/WSGI usually handles content-length.
+            uploaded_file.seek(0, os.SEEK_END)
+            file_size = uploaded_file.tell()
+            uploaded_file.seek(0) # Reset pointer
+            
+            if file_size > 5 * 1024 * 1024:
+                return jsonify({'error': 'File too large. Maximum size is 5MB.'}), 400
+
+            ext          = original_name.rsplit('.', 1)[1].lower()
+            safe_name    = secure_filename(original_name)
+            unique_name  = f"{uuid.uuid4().hex}_{safe_name}"  # prevent overwrites
+            upload_folder = current_app.config.get('UPLOAD_FOLDER', 'uploads')
+            os.makedirs(upload_folder, exist_ok=True)
+            save_path = os.path.join(upload_folder, unique_name)
+            uploaded_file.save(save_path)
+
+            file_url  = f"/api/uploads/{unique_name}"
+            file_name = original_name          # shown in UI
+            file_type = ext
+
+        # ── Resolve target users (same logic as existing send route) ──
+        users_to_notify = []
+        if target_audience == 'user' and target_user_id:
+            user = User.query.get(int(target_user_id))
+            if user:
+                users_to_notify.append(user)
+        elif target_audience == 'role' and target_role:
+            users_to_notify = User.query.filter_by(role=target_role, is_active=True).all()
+        elif target_audience == 'department' and target_dept_id:
+            users_to_notify = User.query.filter_by(dept_id=int(target_dept_id), is_active=True).all()
+        elif target_audience == 'section' and target_section_id:
+            users_to_notify = User.query.filter_by(
+                section_id=int(target_section_id), role='student', is_active=True
+            ).all()
+        elif target_audience == 'all':
+            users_to_notify = User.query.filter_by(is_active=True).all()
+
+        sender_name = current_user.full_name or current_user.username
+
+        count = 0
+        for user in users_to_notify:
+            create_notification(
+                user_id=user.id,
+                title=title,
+                message=message,
+                category='system',
+                type='file' if file_url else 'info',
+                file_url=file_url,
+                file_name=file_name,
+                file_type=file_type,
+                sender_name=sender_name
+            )
+            count += 1
+
+        return jsonify({
+            'message': f'Notification sent to {count} users',
+            'count': count,
+            'has_file': file_url is not None,
+            'file_name': file_name
+        }), 200
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500

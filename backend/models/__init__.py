@@ -18,6 +18,7 @@ from .meeting import Meeting, FacultyMeetingParticipation
 from .assessment import Assessment
 from .grade import Grade
 from .student_performance import StudentPerformance
+from .assignment import Assignment
 from .resource import Resource
 from .booking import ResourceBooking
 from .notification import Notification, NotificationPreference
@@ -30,7 +31,7 @@ __all__ = [
     'RoomOccupancy', 'CourseAllocation', 'Timetable', 'SwapRequest',
     'FacultyUnavailability', 'LeaveRequest', 'ChatbotConversation', 'SystemAnnouncement',
     'Attendance', 'FacultyWorkload', 'Meeting', 'FacultyMeetingParticipation',
-    'Assessment', 'Grade', 'StudentPerformance',
+    'Assessment', 'Grade', 'StudentPerformance', 'Assignment',
     'Resource', 'ResourceBooking',
     'Notification', 'NotificationPreference',
     'UserGoogleAuth', 'CalendarEventMap'

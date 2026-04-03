@@ -3,6 +3,7 @@ Admin routes - All admin-only endpoints
 """
 
 from datetime import datetime
+import uuid
 from flask import Blueprint, request, jsonify, make_response
 from extensions import db
 from models import (
@@ -776,20 +777,94 @@ def admin_approve_swap(current_user, request_id):
     if swap_request.status != 'pending':
         return jsonify({"error": f"This request has already been {swap_request.status}."}), 400
 
-    timetable_entry = swap_request.original_timetable_entry
-    
-    conflict_reason = check_for_conflict(timetable_entry, swap_request.proposed_day, swap_request.proposed_start_time)
-    if conflict_reason:
-        return jsonify({"error": f"Approval failed. Conflict found: {conflict_reason}"}), 409
+    data = request.json or {}
+    force_swap = data.get('force_swap', False)
 
+    timetable_entry = swap_request.original_timetable_entry
+    old_day = timetable_entry.day
+    old_start_time = timetable_entry.start_time
+
+    # 1. Check for conflict
+    conflict_reason, conflicting_entry = check_for_conflict(timetable_entry, swap_request.proposed_day, swap_request.proposed_start_time)
+    
+    if conflict_reason:
+        # Check if it's a "swappable" conflict
+        can_swap = (conflicting_entry.faculty_id == timetable_entry.faculty_id or 
+                    conflicting_entry.section_id == timetable_entry.section_id)
+        
+        if not force_swap:
+            if can_swap:
+                return jsonify({
+                    "error": f"Conflict found: {conflict_reason}",
+                    "suggest_swap": True,
+                    "conflicting_class": conflicting_entry.course.name
+                }), 409
+            else:
+                return jsonify({"error": f"Approval failed. Conflict found: {conflict_reason}"}), 409
+
+        # 2. Perform Swap (Double-move)
+        if not can_swap:
+            return jsonify({"error": f"Cannot force swap with a class of different faculty/section."}), 400
+
+        # Validate that the conflicting entry can move to the old slot.
+        # IMPORTANT: We must exclude BOTH swap entries, because timetable_entry is still
+        # sitting in old_day/old_start_time in the DB (it hasn't moved yet).
+        # Without excluding it, the check would wrongly see it as a blocking conflict.
+        secondary_conflict, _ = check_for_conflict(
+            conflicting_entry, old_day, old_start_time,
+            exclude_ids=[timetable_entry.timetable_id]  # Exclude the original entry
+        )
+        if secondary_conflict:
+            return jsonify({"error": f"Swap failed: The conflicting class '{conflicting_entry.course.name}' cannot move to the original slot due to another conflict: {secondary_conflict}"}), 409
+
+        try:
+            # Generate a unique ID for this swap pair
+            swap_group_id = str(uuid.uuid4())
+            
+            # Record what they swapped with
+            original_course_name = timetable_entry.course.name
+            conflicting_course_name = conflicting_entry.course.name
+
+            # Update Requested Entry
+            timetable_entry.day = swap_request.proposed_day
+            timetable_entry.start_time = swap_request.proposed_start_time
+            timetable_entry.is_swapped = True
+            timetable_entry.swapped_at = datetime.utcnow()
+            timetable_entry.swapped_by_id = current_user.id
+            timetable_entry.swap_group_id = swap_group_id
+            timetable_entry.swapped_with_course = conflicting_course_name
+
+            # Update Conflicting Entry
+            conflicting_entry.day = old_day
+            conflicting_entry.start_time = old_start_time
+            conflicting_entry.is_swapped = True
+            conflicting_entry.swapped_at = datetime.utcnow()
+            conflicting_entry.swapped_by_id = current_user.id
+            conflicting_entry.swap_group_id = swap_group_id
+            conflicting_entry.swapped_with_course = original_course_name
+
+            swap_request.status = 'approved'
+            swap_request.admin_notes = f"Swap approved (exchanged with {conflicting_course_name}) by {current_user.username}."
+            
+            db.session.commit()
+            return jsonify({"message": f"Swap successful! Exchanged '{original_course_name}' with '{conflicting_course_name}'."})
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": f"Database transaction failed: {str(e)}"}), 500
+
+    # 3. Normal Reschedule (No conflict)
     timetable_entry.day = swap_request.proposed_day
     timetable_entry.start_time = swap_request.proposed_start_time
+    timetable_entry.is_swapped = True
+    timetable_entry.swapped_at = datetime.utcnow()
+    timetable_entry.swapped_by_id = current_user.id
+    timetable_entry.swap_group_id = None # Single move doesn't need group ID
+    timetable_entry.swapped_with_course = None
     
     swap_request.status = 'approved'
     swap_request.admin_notes = f"Approved by {current_user.username}."
     
     db.session.commit()
-    
     return jsonify({"message": "Swap request approved and timetable updated."})
 
 

@@ -3,7 +3,8 @@ import api from "../../services/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Plus, Users, Search, Filter } from "lucide-react";
+import { Plus, Users, Search, Filter, Edit, Trash2, GraduationCap, Mail } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 import StudentForm from "../../components/Students/StudentForm";
 import StudentCard from "../../components/Students/StudentCard";
@@ -52,8 +53,13 @@ export default function Students() {
 
     const handleSubmit = async (studentData) => {
         try {
-            await api.addStudent(studentData);
-            alert("Student added successfully!");
+            if (editingStudent) {
+                await api.updateUser(editingStudent.id, studentData);
+                alert("Student updated successfully!");
+            } else {
+                await api.addStudent(studentData);
+                alert("Student added successfully!");
+            }
             setShowForm(false);
             setEditingStudent(null);
             loadData();
@@ -61,6 +67,31 @@ export default function Students() {
             console.error('Error submitting student:', error);
             alert(`Error: ${error.message || 'Failed to save student'}`);
         }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this student?")) return;
+        try {
+            await api.deleteUser(id); // Students are users
+            loadData();
+        } catch (error) {
+            alert("Failed to delete student");
+        }
+    };
+
+    const handleEdit = (student) => {
+        setEditingStudent(student);
+        setShowForm(true);
+    };
+
+    const getDepartmentColor = (dept) => {
+        const colors = {
+            "Computer Science": "bg-blue-100 text-blue-700 border-blue-200",
+            "Mathematics": "bg-purple-100 text-purple-700 border-purple-200",
+            "Physics": "bg-emerald-100 text-emerald-700 border-emerald-200",
+            "Engineering": "bg-amber-100 text-amber-700 border-amber-200",
+        };
+        return colors[dept] || "bg-gray-100 text-gray-700 border-gray-200";
     };
 
     const filteredStudents = students.filter(student => {
@@ -157,37 +188,95 @@ export default function Students() {
                     />
                 )}
 
-                {/* Students Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {isLoading ? (
-                        Array(6).fill(0).map((_, i) => (
-                            <Card key={i} className="animate-pulse">
-                                <CardContent className="p-6">
-                                    <div className="space-y-3">
-                                        <div className="h-6 bg-gray-200 rounded"></div>
-                                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                                        <div className="h-4 bg-gray-200 rounded"></div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))
-                    ) : filteredStudents.length === 0 ? (
-                        <div className="col-span-full text-center py-12">
-                            <Users className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                            <h3 className="text-xl font-semibold text-gray-600 mb-2">No students found</h3>
-                            <p className="text-gray-500">
-                                {searchTerm ? 'Try adjusting your search criteria' : 'Add your first student to get started'}
-                            </p>
-                        </div>
-                    ) : (
-                        filteredStudents.map((student) => (
-                            <StudentCard
-                                key={student.id}
-                                student={student}
-                            />
-                        ))
-                    )}
-                </div>
+                {/* Students List Table */}
+                <Card className="shadow-xl border-0 overflow-hidden bg-white/90 backdrop-blur-md">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-gray-50/50 border-b border-gray-100">
+                                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Student</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Department</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Year/Section</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Contact</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {isLoading ? (
+                                    Array(5).fill(0).map((_, i) => (
+                                        <tr key={i} className="animate-pulse">
+                                            <td colSpan="5" className="px-6 py-4">
+                                                <div className="h-10 bg-gray-100 rounded w-full"></div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : filteredStudents.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="5" className="px-6 py-12 text-center text-gray-400">
+                                            <Users className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                            <p className="text-lg font-medium">No students found matching your criteria</p>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    filteredStudents.map((student) => (
+                                        <tr key={student.id} className="group hover:bg-blue-50/30 transition-colors duration-200">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-100 to-indigo-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                                                        {student.full_name?.charAt(0) || 'S'}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-semibold text-gray-900 leading-tight">{student.full_name}</p>
+                                                        <p className="text-xs text-blue-600 font-medium">@{student.username}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <Badge variant="outline" className={`${getDepartmentColor(student.dept_name)} font-medium px-2.5 py-0.5 rounded-full`}>
+                                                    {student.dept_name || 'N/A'}
+                                                </Badge>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                    <GraduationCap className="w-4 h-4 text-indigo-400" />
+                                                    <span className="font-medium">
+                                                        Year {student.year || '?'}{student.section_name && ` - Sec ${student.section_name}`}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                    <Mail className="w-4 h-4 text-gray-400" />
+                                                    <span className="max-w-[150px] truncate">{student.email || 'No email'}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="sm" 
+                                                        onClick={() => handleEdit(student)}
+                                                        className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-100/50"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                    </Button>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="sm" 
+                                                        onClick={() => handleDelete(student.id)}
+                                                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-100/50"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </Card>
             </div>
         </div>
     );

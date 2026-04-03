@@ -104,6 +104,7 @@ def get_sections():
             "id": s.id,
             "name": s.name,
             "year": s.year,
+            "dept_id": s.dept_id,
             "dept_name": s.department.dept_name,
             "student_count": len(s.users)
         } for s in sections])

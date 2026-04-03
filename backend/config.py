@@ -4,7 +4,12 @@ class Config:
     """Base configuration class"""
     SECRET_KEY = os.environ.get("SECRET_KEY", "TimetableSecretKey2025")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    
+
+    # File Upload
+    UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'uploads')
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB
+    ALLOWED_EXTENSIONS = {'pdf', 'docx', 'xlsx', 'png', 'jpg', 'jpeg'}
+
     # CORS configuration - support environment variable for production
     cors_origins_env = os.environ.get("CORS_ORIGINS", "")
     if cors_origins_env:
